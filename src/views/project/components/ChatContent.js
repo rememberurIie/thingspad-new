@@ -7,7 +7,8 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import useSSE from '../../../hook/useSSE';
 
-const ChatContent = ({ selectedGroup, currentUserId }) => {
+const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
+  
   const [messages, setMessages] = useState([]);
   const [groupData, setGroupData] = useState(null);
   const [userMap, setUserMap] = useState({});
@@ -18,40 +19,51 @@ const ChatContent = ({ selectedGroup, currentUserId }) => {
 
 
   useSSE(
-    selectedGroup?.id ? 'http://192.168.1.32:3000/api/chat/getGroupData' : null,
-    (data) => {
-      switch (data.type) {
-        case 'users':
-          const map = {};
-          data.payload.forEach((u) => {
-            map[u.id] = u.fullName; 
-          });
-          setUserMap(map);
-          break;
-        case 'groupData':
+  projectId ? 'http://192.168.1.32:3000/api/project/getProjectData' : null,
+  (data) => {
+    switch (data.type) {
+      case 'users':
+        const map = {};
+        data.payload.forEach((u) => {
+          map[u.id] = u.fullName; 
+        });
+        setUserMap(map);
+        break;
+
+      case 'groupData':
+        // ✅ ถ้ามี selectedRoom, กรองเฉพาะ group ที่ตรงกัน
+        if (data.groupId === selectedRoom?.id) {
           setGroupData(data.payload);
-          break;
-        case 'messages':
+        }
+        break;
+
+      case 'messages':
+        // ✅ เฉพาะ messages ของ selectedRoom
+        if (data.groupId === selectedRoom?.id) {
           setMessages(
             data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
           );
-          break;
-        default:
-          console.warn('Unknown SSE type:', data.type);
-      }
-    },
-    selectedGroup?.id ? { groupId: selectedGroup.id } : null
-  );
+        }
+        break;
+
+      default:
+        console.warn('Unknown SSE type:', data.type);
+    }
+  },
+  projectId && selectedRoom?.id ? { projectId, selectedRoomId: selectedRoom.id } : null
+
+);
+
 
 
   const handleSend = async () => {
     if (!input.trim()) return;
     try {
-      await fetch("http://192.168.1.32:3000/api/chat/sendMessage", {
+      await fetch("http://192.168.1.32:3000/api/project/sendMessage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          groupId: selectedGroup.id,
+          groupId: selectedRoom.id,
           senderId: currentUserId, // Replace this dynamically
           text: input,
         }),
@@ -78,7 +90,7 @@ const ChatContent = ({ selectedGroup, currentUserId }) => {
   }, [messages]);
 
 
-  if (!selectedGroup) {
+  if (!selectedRoom) {
     return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', }}>
         <CardContent>
@@ -95,7 +107,7 @@ const ChatContent = ({ selectedGroup, currentUserId }) => {
         <Box display="flex" alignItems="center" mb={2}>
           <Avatar>{groupData?.name?.charAt(0)}</Avatar>
           <Box ml={2}>
-            <Typography variant="h6">{groupData?.name || selectedGroup.name}</Typography>
+            <Typography variant="h6">{groupData?.name || selectedRoom.name}</Typography>
           </Box>
         </Box>
         <Divider />

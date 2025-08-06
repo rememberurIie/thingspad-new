@@ -62,6 +62,14 @@ const Router = [
         ),
       },
       {
+        path: '/project/:projectId',
+        element: (
+          <ProtectedRoute>
+            <Project />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '*',
         element: <Navigate to="/auth/404" />,
       },

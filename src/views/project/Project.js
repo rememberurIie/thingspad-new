@@ -11,6 +11,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 // Components
 import ChatList from './components/ChatList';
@@ -22,8 +23,9 @@ const Project = () => {
 
   //user from redux
   const user = useSelector(state => state.auth.user);
+  const { projectId } = useParams();
 
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
   
@@ -34,9 +36,9 @@ const Project = () => {
   const drawer = (
     <Box sx={{ width: drawerWidth, height: '85vh', /*p: 2*/ }}>
       <ChatList onSelect={(group) => {
-        setSelectedGroup(group);
+        setSelectedRoom(group);
         if (isMobile) setMobileOpen(false);
-      }} uid={user?.uid} />
+      }} projectId={projectId} />
     </Box>
   );
 
@@ -91,7 +93,7 @@ const Project = () => {
               flexDirection: 'column',
             }}
           >
-            <ChatContent selectedGroup={selectedGroup} currentUserId={user?.uid} />
+            <ChatContent selectedRoom={selectedRoom} projectId={projectId} currentUserId={user?.uid} />
           </Box>
         </Box>
       </Box>

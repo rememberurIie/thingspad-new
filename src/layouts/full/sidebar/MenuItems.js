@@ -1,4 +1,4 @@
-
+//menuitems.js
 import { uniqueId } from 'lodash';
 
 import {
@@ -102,23 +102,6 @@ const Menuitems = [
     icon: IconAperture,
     href: '/project',
   },
-
-  // {
-  //   navlabel: true,
-  //   subheader: 'Auth',
-  // },
-  // {
-  //   id: uniqueId(),
-  //   title: 'Login',
-  //   icon: IconLogin,
-  //   href: '/auth/login',
-  // },
-  // {
-  //   id: uniqueId(),
-  //   title: 'Register',
-  //   icon: IconUserCircle,
-  //   href: '/auth/register',
-  // },
   
 ]
 
