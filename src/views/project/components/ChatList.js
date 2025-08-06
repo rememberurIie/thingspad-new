@@ -1,44 +1,82 @@
-// components/ChatList.js
-
-import React from 'react';
+// ChatList.js
+import React, { useEffect, useState } from 'react';
 import {
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider
+  Card, CardContent, Typography, Avatar,
+  List, ListItem, ListItemAvatar, ListItemText, Divider
 } from '@mui/material';
 
-const users = [
-  { id: 1, name: 'Maria Hernandez', status: 'away', avatar: '/avatar1.png', message: 'Vehesarit ru wul iv duhule.' },
-  { id: 2, name: 'James Johnson', status: 'online', avatar: '/avatar2.png', message: 'Puogf a wul zapyip gej...' },
-  { id: 3, name: 'David Smith', status: 'busy', avatar: '/avatar3.png', message: 'Sejzori nifuczore ubo...' },
-];
+const ChatList = ({ onSelect, uid }) => {
+  const [groups, setGroups] = useState([]);
 
-const ChatList = ({ onSelect }) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchGroups = async () => {
+      try {
+        const response = await fetch('http://192.168.1.32:3000/api/getGroupList', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid: uid }), // แก้ไขภายหลังให้ dynamic
+          signal,
+        });
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No reader");
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          let messageEnd = buffer.indexOf('\n\n');
+          while (messageEnd !== -1) {
+            const message = buffer.slice(0, messageEnd);
+            buffer = buffer.slice(messageEnd + 2);
+
+            if (message.startsWith("data: ")) {
+              const data = JSON.parse(message.substring(6));
+              setGroups(data);
+            }
+
+            messageEnd = buffer.indexOf('\n\n');
+          }
+        }
+
+      } catch (error) {
+        if (!signal.aborted) {
+          console.error("Error fetching group list:", error);
+        }
+      }
+    };
+
+    fetchGroups();
+    return () => controller.abort();
+  }, []);
+
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto' }}>
+    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', backgroundColor: '#ecf4fc'}}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Recent Chats
+          Rooms
         </Typography>
         <List>
-          {users.map((user, idx) => (
-            <React.Fragment key={user.id}>
-              <ListItem button onClick={() => onSelect(user)}>
+          {groups.map((group, idx) => (
+            <React.Fragment key={group.id}>
+              <ListItem button onClick={() => onSelect(group)}>
                 <ListItemAvatar>
-                  <Avatar src={user.avatar} />
+                  <Avatar>{group.name.charAt(0)}</Avatar>
                 </ListItemAvatar>
                 <ListItemText
-                  primary={user.name}
-                  secondary={user.message}
+                  primary={group.name}
+                  secondary={`สมาชิก ${group.members?.length || 0} คน`}
                 />
               </ListItem>
-              {idx !== users.length - 1 && <Divider />}
+              {idx !== groups.length - 1 && <Divider />}
             </React.Fragment>
           ))}
         </List>

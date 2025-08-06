@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import {
   Box,
   AppBar,
@@ -7,20 +7,25 @@ import {
   Stack,
   IconButton,
   Badge,
-  Button,
   Menu,
   MenuItem,
   Typography,
   Tooltip
-} from '@mui/material'
+} from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import PropTypes from 'prop-types'
+import MenuIcon from '@mui/icons-material/Menu';
+import { IconBellRinging, IconMenu } from '@tabler/icons-react';
+import Profile from './Profile';
+import PropTypes from 'prop-types';
 
-// components
-import Profile from './Profile'
-import { IconBellRinging, IconMenu } from '@tabler/icons-react'
-
-const Header = (props) => {
+const Header = ({
+  toggleSidebar,
+  toggleMobileSidebar,
+  toggleSidebarMinimized,
+  isSidebarMinimized,
+  fullName,
+  username
+}) => {
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
     background: theme.palette.background.paper,
@@ -29,29 +34,29 @@ const Header = (props) => {
     [theme.breakpoints.up('lg')]: {
       minHeight: '70px',
     },
-  }))
+  }));
+
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
     color: theme.palette.text.secondary,
-  }))
+  }));
 
-  // notification dd
-  const [anchorEl, setAnchorEl] = useState(null)
-
-  const [menuPosition, setMenuPosition] = useState(null)
+  // notification menu state
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuPosition, setMenuPosition] = useState(null);
 
   const handleClick = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect() // Get exact position
+    const rect = event.currentTarget.getBoundingClientRect();
     setMenuPosition({
-      top: rect.bottom + window.scrollY, // Position menu below the icon
-      left: rect.left + window.scrollX, // Align with icon
-    })
-    setAnchorEl(event.currentTarget)
-  }
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+    });
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   return (
     <AppBarStyled position='sticky' color='default'>
@@ -59,43 +64,28 @@ const Header = (props) => {
         <IconButton
           color='inherit'
           aria-label='menu'
-          onClick={props.toggleMobileSidebar}
-          sx={{
-            display: {
-              lg: 'none',
-              xs: 'inline',
-            },
-          }}>
+          onClick={toggleMobileSidebar}
+          sx={{ display: { lg: 'none', xs: 'inline' } }}
+        >
           <IconMenu width='20' height='20' />
         </IconButton>
 
-        {/* ✅ ปุ่ม Minimize อยู่ใน Header */}
-        <Box
-          sx={{
-            display: {
-              lg: 'inline',
-              xs: 'none'
-            },
-            ml: 2,
-          }}
-        >
-          <Tooltip title={props.isSidebarMinimized ? "Expand" : "Minimize"}>
-            <IconButton
-              onClick={props.toggleSidebarMinimized}
-              size="small"
-            >
-              {props.isSidebarMinimized ? <MenuIcon /> : <ChevronLeftIcon />}
+        <Box sx={{ display: { lg: 'inline', xs: 'none' }, ml: 2 }}>
+          <Tooltip title={isSidebarMinimized ? "Expand" : "Minimize"}>
+            <IconButton onClick={toggleSidebarMinimized} size="small">
+              {isSidebarMinimized ? <MenuIcon /> : <ChevronLeftIcon />}
             </IconButton>
           </Tooltip>
         </Box>
 
         <Box>
           <IconButton
-            aria-label='show 4 new mails'
+            aria-label='show notifications'
             color='inherit'
             aria-controls='notification-menu'
             aria-haspopup='true'
-            onClick={handleClick}>
+            onClick={handleClick}
+          >
             <Badge variant='dot' color='primary'>
               <IconBellRinging size='21' stroke='1.5' />
             </Badge>
@@ -106,21 +96,18 @@ const Header = (props) => {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleClose}
-            anchorReference='anchorPosition' // Use custom positioning
-            anchorPosition={
-              menuPosition
-                ? { top: menuPosition.top, left: menuPosition.left }
-                : undefined
-            }
+            anchorReference='anchorPosition'
+            anchorPosition={menuPosition ? { top: menuPosition.top, left: menuPosition.left } : undefined}
             slotProps={{
               paper: {
                 sx: {
-                  mt: 1, // Ensures the menu appears slightly below the bell icon
-                  boxShadow: 9, // Optional: Improves visibility with a shadow
-                  minWidth: '200px', // Adjust width to ensure proper alignment
+                  mt: 1,
+                  boxShadow: 9,
+                  minWidth: '200px',
                 },
               },
-            }}>
+            }}
+          >
             <MenuItem onClick={handleClose}>
               <Typography variant='body1'>Item 1</Typography>
             </MenuItem>
@@ -129,17 +116,28 @@ const Header = (props) => {
             </MenuItem>
           </Menu>
         </Box>
+
         <Box flexGrow={1} />
+
         <Stack spacing={1} direction='row' alignItems='center'>
+          <Stack direction="column" spacing={0} alignItems="flex-end">
+            <Typography variant="body1">{fullName}</Typography>
+            <Typography variant="body2" color="text.secondary">@{username}</Typography>
+          </Stack>
           <Profile />
         </Stack>
       </ToolbarStyled>
     </AppBarStyled>
-  )
-}
+  );
+};
 
 Header.propTypes = {
-  sx: PropTypes.object,
-}
+  toggleSidebar: PropTypes.func.isRequired,
+  toggleMobileSidebar: PropTypes.func.isRequired,
+  toggleSidebarMinimized: PropTypes.func.isRequired,
+  isSidebarMinimized: PropTypes.bool.isRequired,
+  fullName: PropTypes.string,
+  username: PropTypes.string,
+};
 
-export default Header
+export default Header;

@@ -10,18 +10,33 @@ import {
   ListItemIcon,
   ListItemText, Typography
 } from '@mui/material';
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../session/authSlice";
+
 
 import { IconDashboard, IconMail, IconUser } from '@tabler/icons-react';
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 
 const Profile = () => {
+
   const [anchorEl2, setAnchorEl2] = useState(null);
+
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
+
   const handleClose2 = () => {
     setAnchorEl2(null);
+  };
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/auth/login');
   };
 
   return (
@@ -96,7 +111,7 @@ const Profile = () => {
           </Link>
         </MenuItem>
         <Box mt={1} py={1} px={2}>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button onClick={handleLogout} variant="outlined" color="primary" fullWidth>
             Logout
           </Button>
         </Box>

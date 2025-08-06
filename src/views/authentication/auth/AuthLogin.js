@@ -1,73 +1,141 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    Box,
-    Typography,
-    FormGroup,
-    FormControlLabel,
-    Button,
-    Stack,
-    Checkbox
+  Box,
+  Typography,
+  FormGroup,
+  FormControlLabel,
+  Button,
+  Stack,
+  Checkbox,
+  Alert
 } from '@mui/material';
-import { Link } from 'react-router';
+import { useDispatch } from 'react-redux';
+import { useNavigate, Link } from 'react-router-dom';
 
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
+import { loginSuccess } from '../../../session/authSlice';
 
-const AuthLogin = ({ title, subtitle, subtext }) => (
+const AuthLogin = ({ title, subtitle, subtext }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('http://192.168.1.32:3000/api/account/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Invalid email or password');
+      }
+
+      const userInfo = await res.json();
+      dispatch(loginSuccess(userInfo));
+      sessionStorage.setItem('user', JSON.stringify(userInfo));
+
+      navigate('/');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
     <>
-        {title ? (
-            <Typography fontWeight="700" variant="h2" mb={1}>
-                {title}
-            </Typography>
-        ) : null}
+      {title && (
+        <Typography fontWeight="700" variant="h2" mb={1}>
+          {title}
+        </Typography>
+      )}
 
-        {subtext}
+      {subtext}
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <form onSubmit={handleLogin}>
         <Stack>
-            <Box>
-                <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='username' mb="5px">Username</Typography>
-                <CustomTextField id="username" variant="outlined" fullWidth />
-            </Box>
-            <Box mt="25px">
-                <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='password' mb="5px" >Password</Typography>
-                <CustomTextField id="password" type="password" variant="outlined" fullWidth />
-            </Box>
-            <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
-                <FormGroup>
-                    <FormControlLabel
-                        control={<Checkbox defaultChecked />}
-                        label="Remeber this Device"
-                    />
-                </FormGroup>
-                <Typography
-                    component={Link}
-                    to="/"
-                    fontWeight="500"
-                    sx={{
-                        textDecoration: 'none',
-                        color: 'primary.main',
-                    }}
-                >
-                    Forgot Password ?
-                </Typography>
-            </Stack>
-        </Stack>
-        <Box>
-            <Button
-                color="primary"
-                variant="contained"
-                size="large"
-                fullWidth
-                component={Link}
-                to="/"
-                type="submit"
+          <Box>
+            <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor="email" mb="5px">
+              Email
+            </Typography>
+            <CustomTextField
+              id="email"
+              type="email"
+              variant="outlined"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </Box>
+
+          <Box mt="25px">
+            <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor="password" mb="5px">
+              Password
+            </Typography>
+            <CustomTextField
+              id="password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </Box>
+
+          <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="Remember this Device" />
+            </FormGroup>
+            <Typography
+              component={Link}
+              to="/forgot-password"
+              fontWeight="500"
+              sx={{
+                textDecoration: 'none',
+                color: 'primary.main',
+              }}
             >
-                Sign In
-            </Button>
+              Forgot Password?
+            </Typography>
+          </Stack>
+        </Stack>
+
+        <Box>
+          <Button
+            color="primary"
+            variant="contained"
+            size="large"
+            fullWidth
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Button>
         </Box>
-        {subtitle}
+      </form>
+
+      {subtitle}
     </>
-);
+  );
+};
 
 export default AuthLogin;

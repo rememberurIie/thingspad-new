@@ -1,100 +1,153 @@
-import React, { useState } from 'react';
+// ChatContent.js
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Box,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
-  IconButton
+  Card, CardContent, Typography, Avatar, Box, Divider,
+  List, ListItem, ListItemText, Paper, TextField, IconButton
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import useSSE from '../../../hook/useSSE';
 
-const ChatContent = ({ selectedUser }) => {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'self', text: 'Feubiej mat we beswo rilzu.', time: '1 hour ago' },
-    { id: 2, sender: 'self', text: 'Natabe isigidis udo nuvnot ecawre tipi jan bek zeipa bosojauz.', time: '31 minutes ago' },
-    { id: 3, sender: 'Maria Hernandez', text: 'Ka penidag pizid hofku cidihol.', time: '7 minutes ago' },
-    { id: 4, sender: 'self', text: 'Vehesarit ru wul iv duhule.', time: '2 minutes ago' },
-  ]);
+const ChatContent = ({ selectedGroup, currentUserId }) => {
+  const [messages, setMessages] = useState([]);
+  const [groupData, setGroupData] = useState(null);
+  const [userMap, setUserMap] = useState({});
   const [input, setInput] = useState('');
 
-  const handleSend = () => {
+  const bottomRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+
+  useSSE(
+    selectedGroup?.id ? 'http://192.168.1.32:3000/api/chat/getGroupData' : null,
+    (data) => {
+      switch (data.type) {
+        case 'users':
+          const map = {};
+          data.payload.forEach((u) => {
+            map[u.id] = u.fullName; 
+          });
+          setUserMap(map);
+          break;
+        case 'groupData':
+          setGroupData(data.payload);
+          break;
+        case 'messages':
+          setMessages(
+            data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
+          );
+          break;
+        default:
+          console.warn('Unknown SSE type:', data.type);
+      }
+    },
+    selectedGroup?.id ? { groupId: selectedGroup.id } : null
+  );
+
+
+  const handleSend = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { id: Date.now(), sender: 'self', text: input, time: 'Just now' }]);
-    setInput('');
+    try {
+      await fetch("http://192.168.1.32:3000/api/chat/sendMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId: selectedGroup.id,
+          senderId: currentUserId, // Replace this dynamically
+          text: input,
+        }),
+      });
+      setInput('');
+      scrollToBottom();
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
 
-  if (!selectedUser) {
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+
+  if (!selectedGroup) {
     return (
-      <Card variant="outlined" sx={{ height: '100%' }}>
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', }}>
         <CardContent>
-          <Typography variant="h6">Select a user to start chatting</Typography>
+          <Typography variant="h6">Select room to start chat!</Typography>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px', }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
-          <Avatar src={selectedUser.avatar} />
+          <Avatar>{groupData?.name?.charAt(0)}</Avatar>
           <Box ml={2}>
-            <Typography variant="h6">{selectedUser.name}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {selectedUser.status}
-            </Typography>
+            <Typography variant="h6">{groupData?.name || selectedGroup.name}</Typography>
           </Box>
         </Box>
         <Divider />
 
         {/* Messages */}
-        <Box sx={{ flex: 1, overflowY: 'auto', mt: 2 }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', mt: 2, }} ref={messagesContainerRef}>
           <List>
             {messages.map((msg) => (
               <ListItem
                 key={msg.id}
-                sx={{
-                  justifyContent: msg.sender === 'self' ? 'flex-end' : 'flex-start',
-                }}
+                sx={{ justifyContent: msg.senderId === currentUserId ? 'flex-end' : 'flex-start', flexDirection: 'column', alignItems: msg.senderId === currentUserId ? 'flex-end' : 'flex-start' }}
               >
+                {/* ชื่อผู้ส่ง อยู่ด้านบน นอกกรอบ */}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    mb: 0.3,
+                    color: 'text.secondary',
+                    fontWeight: 'bold',
+                    userSelect: 'none',
+                  }}
+                >
+                  {userMap[msg.senderId] || msg.senderId}
+                </Typography>
+
+                {/* ข้อความในกรอบ */}
                 <Paper
                   elevation={1}
                   sx={{
-                    p: 1.5,
+                    px: "10px",
+                    py: "4px",
                     maxWidth: '70%',
-                    bgcolor: msg.sender === 'self' ? 'primary.light' : 'grey.100',
+                    borderRadius: '10px',
+                    bgcolor: msg.senderId === currentUserId ? 'primary.light' : 'grey.100',
                   }}
                 >
                   <ListItemText
                     primary={msg.text}
-                    secondary={msg.time}
+                    secondary={null}  // ลบ secondary ออก
                   />
                 </Paper>
               </ListItem>
             ))}
+            <div ref={bottomRef} />
           </List>
         </Box>
 
-        {/* Message input */}
-        <Box
-          sx={{
-            display: 'flex',
-            mt: 2,
-            pt: 1,
-            borderTop: '1px solid #e0e0e0',
-          }}
-        >
+        {/* Input */}
+        <Box sx={{ display: 'flex', mt: 2, pt: 3, borderTop: '1px solid #e0e0e0' }}>
           <TextField
             fullWidth
-            placeholder="Type a message"
+            placeholder="Type message..."
             variant="outlined"
             size="small"
             value={input}

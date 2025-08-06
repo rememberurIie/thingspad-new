@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { styled, Container, Box } from '@mui/material';
 
-
+import { useSelector } from 'react-redux';
+import { store } from "../../session/store";
 
 import Header from './header/Header';
 import Sidebar from './sidebar/Sidebar';
@@ -26,14 +27,17 @@ const PageWrapper = styled('div')(() => ({
 
 const FullLayout = () => {
 
+  const user = useSelector(state => state.auth.user);
+
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
-   // ✅ เพิ่มตัวนี้
+   // minimized sidebar
   const [isSidebarMinimized, setSidebarMinimized] = useState(true);
+  
 
-  // ✅ toggle ฟังก์ชัน
+  // toggle ฟังก์ชัน minimized sidebar
   const toggleSidebarMinimized = () => {
     setSidebarMinimized((prev) => !prev);
   };
@@ -66,7 +70,14 @@ const FullLayout = () => {
         {/* ------------------------------------------- */}
         {/* Header */}
         {/* ------------------------------------------- */}
-        <Header toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} toggleMobileSidebar={() => setMobileSidebarOpen(true)} toggleSidebarMinimized={toggleSidebarMinimized} />
+        <Header 
+          toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} 
+          toggleMobileSidebar={() => setMobileSidebarOpen(true)} 
+          toggleSidebarMinimized={toggleSidebarMinimized} 
+          isSidebarMinimized={isSidebarMinimized}
+          fullName={user?.fullName || "Guest"}
+          username={user?.username || ""}
+        />
         {/* ------------------------------------------- */}
         {/* PageContent */}
         {/* ------------------------------------------- */}

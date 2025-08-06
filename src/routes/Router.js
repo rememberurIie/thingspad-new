@@ -1,5 +1,7 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
+import ProtectedRoute from '../session/protectedRoute';
+import PublicRoute from '../session/publicRoute';
 
 /* ***Layouts**** */
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
@@ -23,28 +25,80 @@ const Router = [
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to="/dashboard" /> },
-      { path: '/dashboard', exact: true, element: <Dashboard /> },
-
-      { path: '/chat/dm', exact: true, element: <DirectMessage /> },
-      { path: '/chat/role', exact: true, element: <ChatbyRole /> },
-
-      { path: '/project', exact: true, element: <Project /> },
-
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      {
+        path: '/',
+        element: <Navigate to="/dashboard" />,
+      },
+      {
+        path: '/dashboard',
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/chat/dm',
+        element: (
+          <ProtectedRoute>
+            <DirectMessage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/chat/role',
+        element: (
+          <ProtectedRoute>
+            <ChatbyRole />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/project',
+        element: (
+          <ProtectedRoute>
+            <Project />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '*',
+        element: <Navigate to="/auth/404" />,
+      },
     ],
   },
   {
     path: '/auth',
     element: <BlankLayout />,
     children: [
-      { path: '404', element: <Error /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '/auth/login', element: <Login /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      {
+        path: '404',
+        element: <Error />,
+      },
+      {
+        path: 'register',
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: 'login',
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: '*',
+        element: <Navigate to="/auth/404" />,
+      },
     ],
   },
 ];
+
 
 const router = createBrowserRouter(Router);
 
