@@ -7,6 +7,8 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import useSSE from '../../../hook/useSSE';
 
+import { useTranslation } from 'react-i18next';
+
 const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
   const [messages, setMessages] = useState([]);
@@ -16,6 +18,8 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
   const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
+
+  const { t } = useTranslation();
 
 
   useSSE(
@@ -92,7 +96,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', }}>
         <CardContent>
-          <Typography variant="h6">Select room to start chat!</Typography>
+          <Typography variant="h6">{t('project.room_select')}</Typography>
         </CardContent>
       </Card>
     );

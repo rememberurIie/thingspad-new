@@ -1,0 +1,40 @@
+{
+  "menu": {
+    "home": "หน้าแรก",
+    "myTask": "งานของฉัน",
+    "chats": "แชท",
+    "directChat": "แชทตรง",
+    "chatByRole": "แชทตามบทบาท",
+    "projects": "โครงการ"
+  },
+  "project": {
+    "rooms": "ห้องแชท",
+    "room_select": "กรุณาเลือกห้องเพื่อเริ่มแชท!"
+  },
+  "login": {
+    "description": "กรุณาล็อกอินก่อน",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "mem_device": "จดจำอุปกรณ์นี้",
+    "forgot_pass": "ลืมรหัสผ่าน?",
+    "signin_button": "เข้าสู่ระบบ",
+    "signin_button_loading": "กำลังเข้าสู่ระบบ...",
+    "register_ask": "ผู้ใช้ใหม่ใช่ไหม?",
+    "register": "สร้างบัญชีใหม่",
+    "invalid_user": "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+  },
+  "register": {
+    "description": "สรร้างบัญชีของคุณ",
+    "name": "ชื่อ-นามสกุล",
+    "email": "อีเมล",
+    "username": "ชื่อผู้ใช้งาน",
+    "password": "รหัสผ่าน",
+    "confirm_password": "ยืนยันรหัสผ่าน",
+    "signup_button": "ลงทะเบียน",
+    "signup_button_loading": "กำลังลงทะเบียน...?",
+    "have_account_ask": "มีบัญชีอยู่แล้ว?",
+    "signin_link": "เข้าสู่ระบบ",
+    "error_duplicate_user": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    "error_pasword_not_match": "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+  }
+}

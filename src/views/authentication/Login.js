@@ -14,12 +14,17 @@ import AuthLogin from './auth/AuthLogin';
 // ⬇️ ใช้ Context สำหรับ toggle
 import { ColorModeContext } from 'src/theme/ColorModeContext';
 
+import { useTranslation } from 'react-i18next';
+import LanguageSwitch from '../../language/LanguageSwitch';
+
 const Login2 = () => {
   const theme = useTheme();
   const { isDarkMode, toggle } = useContext(ColorModeContext);
 
+  const { t } = useTranslation();
+
   return (
-    <PageContainer title="Login" description="this is Login page">
+    <PageContainer title="Login" description={t('login.description')}>
       <Box
         sx={{
           position: 'relative',
@@ -54,12 +59,15 @@ const Login2 = () => {
                 background: theme.palette.background.paper,
               }}
             >
+
+
               {/* ปุ่ม Toggle มุมขวาบนของ Card */}
-              <Tooltip title={`Switch to ${isDarkMode ? 'Light' : 'Dark'} mode`}>
+              <Tooltip>
+                <LanguageSwitch sx={{ position: 'absolute', top: 8, right: 8 }} />
                 <IconButton
                   aria-label="toggle color mode"
                   onClick={toggle}
-                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                  sx={{ position: 'absolute', top: 8, left: 8 }}
                 >
                   {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
@@ -72,13 +80,13 @@ const Login2 = () => {
               <AuthLogin
                 subtext={
                   <Typography variant="subtitle1" textAlign="center" mb={1}>
-                    Please Login First
+                    {t('login.description')}
                   </Typography>
                 }
                 subtitle={
                   <Stack direction="row" spacing={1} justifyContent="center" mt={3}>
                     <Typography color="textSecondary" variant="h6" fontWeight="500">
-                      New to Modernize?
+                      {t('login.register_ask')}
                     </Typography>
                     <Typography
                       component={Link}
@@ -86,7 +94,7 @@ const Login2 = () => {
                       fontWeight="500"
                       sx={{ textDecoration: 'none', color: 'primary.main' }}
                     >
-                      Create an account
+                      {t('login.register')}
                     </Typography>
                   </Stack>
                 }

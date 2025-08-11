@@ -1,0 +1,40 @@
+{
+  "menu": {
+    "home": "Home",
+    "myTask": "My Task",
+    "chats": "Chats",
+    "directChat": "Direct Chat",
+    "chatByRole": "Chat by Role",
+    "projects": "Projects"
+  },
+  "project": {
+    "rooms": "Chat Rooms",
+    "room_select": "Select room to start chat!"
+  },
+  "login": {
+    "description": "Please Login First",
+    "email": "Email",
+    "password": "Password",
+    "mem_device": "Remember this Device",
+    "forgot_pass": "Forgot Password?",
+    "signin_button": "Sign In",
+    "signin_button_loading": "Signing In...",
+    "register_ask": "New User?",
+    "register": "Create an account",
+    "invalid_user": "Invalid email or password"
+  },
+  "register": {
+    "description": "Create your account",
+    "name": "Full name",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "signup_button": "Sign up",
+    "signup_button_loading": "Signing up...",
+    "have_account_ask": "Already have an account?",
+    "signin_link": "Sign in",
+    "error_duplicate_user": "Email already in use",
+    "error_pasword_not_match": "Passwords do not match"
+  }
+}

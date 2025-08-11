@@ -10,9 +10,14 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { ColorModeContext } from 'src/theme/ColorModeContext';
 
+import { useTranslation } from 'react-i18next';
+import LanguageSwitch from '../../language/LanguageSwitch';
+
 const Register2 = () => {
   const theme = useTheme();
   const { isDarkMode, toggle } = useContext(ColorModeContext);
+
+  const { t } = useTranslation();
 
   return (
     <PageContainer title="Register" description="this is Register page">
@@ -52,10 +57,11 @@ const Register2 = () => {
             >
               {/* ปุ่ม Toggle มุมขวาบนของ Card */}
               <Tooltip title={`Switch to ${isDarkMode ? 'Light' : 'Dark'} mode`}>
+                <LanguageSwitch sx={{ position: 'absolute', top: 8, right: 8 }} />
                 <IconButton
                   aria-label="toggle color mode"
                   onClick={toggle}
-                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                  sx={{ position: 'absolute', top: 8, left: 8 }}
                 >
                   {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
@@ -68,13 +74,13 @@ const Register2 = () => {
               <AuthRegister
                 subtext={
                   <Typography variant="subtitle1" textAlign="center" mb={1}>
-                    Create your account
+                    {t('register.description')}
                   </Typography>
                 }
                 subtitle={
                   <Stack direction="row" justifyContent="center" spacing={1} mt={3}>
                     <Typography color="textSecondary" variant="h6" fontWeight="400">
-                      Already have an Account?
+                      {t('register.have_account_ask')}
                     </Typography>
                     <Typography
                       component={Link}
@@ -82,7 +88,7 @@ const Register2 = () => {
                       fontWeight="500"
                       sx={{ textDecoration: 'none', color: 'primary.main' }}
                     >
-                      Sign In
+                      {t('register.signin_link')}
                     </Typography>
                   </Stack>
                 }

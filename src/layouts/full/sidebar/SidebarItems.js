@@ -14,10 +14,16 @@ import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useTheme } from "@mui/material/styles";
 
+import { useTranslation } from 'react-i18next';
+
 
 const renderMenuItems = (items, pathDirect, isMinimized) => {
+
+  const { t } = useTranslation();
+
   return items.map((item) => {
     const Icon = item.icon ? item.icon : IconPoint;
+
     const itemIcon = <Icon stroke={1.5} size="1.3rem" />;
 
     if (item.subheader) {
@@ -27,7 +33,7 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
           key={item.subheader}
         >
           {!isMinimized ? (
-            <Menu subHeading={item.subheader} />
+            <Menu subHeading={t(item.subheader)} /> // subheader multilanguage
           ) : (
             <Divider sx={{ borderColor: "#ccc", mx: 4, my: 2 }} />
           )}
@@ -50,7 +56,7 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
         badgeTextColor="#1b84ff"
         disabled={item.disabled}
       >
-        {!isMinimized && item.title}
+        {!isMinimized && t(item.title)} {/*title multilanguage*/}
       </MenuItem>
     );
   });
@@ -65,6 +71,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   const user = useSelector(state => state.auth.user);
 
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (hasFetched.current) return; // ✅ ไม่โหลดซ้ำถ้าเคยโหลดแล้ว
@@ -138,7 +145,7 @@ const SidebarItems = ({ isMinimized }) => {
   // รวมเมนูหลักและเมนูโปรเจกต์
   const combinedMenu = [
     ...Menuitems,
-    { subheader: "Projects" },
+    { subheader: t('menu.projects', 'Projects') }, ,
     ...projectMenuItems,
   ];
 

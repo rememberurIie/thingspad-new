@@ -18,6 +18,8 @@ import { useTheme } from "@mui/material/styles";
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import { loginSuccess } from '../../../session/authSlice';
 
+import { useTranslation } from 'react-i18next';
+
 const AuthLogin = ({ title, subtitle, subtext }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +29,8 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
+
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,7 +55,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
       navigate('/');
     } catch (err) {
       console.error('Login error:', err);
-      setError('Invalid email or password');
+      setError("login.invalid_user");
     } finally {
       setLoading(false);
     }
@@ -68,8 +72,8 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
       {subtext}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+        <Alert severity="error" sx={{ my: 2, '& .MuiAlert-message': { pt: 1.2 }}}>
+          {t(error)} 
         </Alert>
       )}
 
@@ -77,7 +81,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
         <Stack>
           <Box>
             <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor="email" mb="5px">
-              Email
+              {t('login.email')}
             </Typography>
             <CustomTextField
               id="email"
@@ -121,7 +125,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
           <Box mt="25px">
             <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor="password" mb="5px">
-              Password
+              {t('login.password')}
             </Typography>
             <CustomTextField
               id="password"
@@ -136,7 +140,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
           <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
             <FormGroup>
-              <FormControlLabel control={<Checkbox defaultChecked={false} />} label="Remember this Device" />
+              <FormControlLabel control={<Checkbox defaultChecked={false} />} label={t('login.mem_device')} />
             </FormGroup>
             <Typography
               component={Link}
@@ -147,7 +151,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
                 color: 'primary.main',
               }}
             >
-              Forgot Password?
+              {t('login.forgot_pass')}
             </Typography>
           </Stack>
         </Stack>
@@ -161,7 +165,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? t('login.signin_button_loading') : t('login.signin_button')}
           </Button>
         </Box>
       </form>

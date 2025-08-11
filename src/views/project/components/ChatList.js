@@ -4,8 +4,12 @@ import {
   List, ListItem, ListItemAvatar, ListItemText, Divider
 } from '@mui/material';
 
+import { useTranslation } from 'react-i18next';
+
+
 const ChatList = ({ onSelect, projectId }) => {
-  
+
+  const { t } = useTranslation();
   const [rooms, setRooms] = useState([]);
   
   useEffect(() => {
@@ -90,7 +94,7 @@ const ChatList = ({ onSelect, projectId }) => {
     <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px'}}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Rooms
+          {t('project.rooms')}
         </Typography>
         <List>
           {rooms.map((group, idx) => (

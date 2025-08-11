@@ -24,6 +24,8 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 
 import { ColorModeContext } from '../../../theme/ColorModeContext';
 
+import LanguageSwitch from '../../../language/LanguageSwitch';
+
 const Header = ({
   toggleSidebar,
   toggleMobileSidebar,
@@ -81,7 +83,7 @@ const Header = ({
         </IconButton>
 
         <Box sx={{ display: { lg: 'inline', xs: 'none' }, }}>
-          <Tooltip title={isSidebarMinimized ? "Expand" : "Minimize"}>
+          <Tooltip>
             <IconButton onClick={toggleSidebarMinimized} size="small">
               {isSidebarMinimized ? <MenuIcon /> : <ChevronLeftIcon />}
             </IconButton>
@@ -130,8 +132,15 @@ const Header = ({
         <Box flexGrow={1} />
 
         <Stack spacing={1.5} direction='row' alignItems='center'>
+
+          <Tooltip >
+            <span>
+              <LanguageSwitch sx={{ ml: 1 }} />
+            </span>
+          </Tooltip>
+
           {/* ปุ่มสลับโหมด */}
-          <Tooltip title={`Switch to ${isDarkMode ? 'Light' : 'Dark'} mode`}>
+          <Tooltip>
             <IconButton
               aria-label='toggle color mode'
               color='inherit'
@@ -141,6 +150,7 @@ const Header = ({
               {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
+
 
           <Stack direction="column" spacing={0} alignItems="flex-end">
             <Typography variant="body1" color={theme.palette.grey[600]}>{fullName}</Typography>

@@ -5,8 +5,14 @@ import { Link } from 'react-router';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import { Stack } from '@mui/system';
 
-const AuthRegister = ({ title, subtitle, subtext }) => (
-    <>
+import { useTranslation } from 'react-i18next';
+
+const AuthRegister = ({ title, subtitle, subtext }) => {
+
+  const { t } = useTranslation();
+  
+  return(
+  <>
         {title ? (
             <Typography fontWeight="700" variant="h2" mb={1}>
                 {title}
@@ -18,7 +24,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => (
         <Box>
             <Stack mb={3}>
                 <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='name' mb="5px">Name</Typography>
+                    fontWeight={600} component="label" htmlFor='name' mb="5px">{t('register.name')}</Typography>
                 <CustomTextField id="name" variant="outlined" fullWidth 
                 sx={(theme) => {
                 const bg = theme.palette.grey[100];        // surface color for the field
@@ -52,7 +58,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => (
               />
 
                 <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='email' mb="5px" mt="25px">Email Address</Typography>
+                    fontWeight={600} component="label" htmlFor='email' mb="5px" mt="25px">{t('register.email')}</Typography>
                 <CustomTextField id="email" variant="outlined" fullWidth
                 sx={(theme) => {
                 const bg = theme.palette.grey[100];        // surface color for the field
@@ -86,7 +92,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => (
               />
 
                 <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='username' mb="5px" mt="25px">Username</Typography>
+                    fontWeight={600} component="label" htmlFor='username' mb="5px" mt="25px">{t('register.username')}</Typography>
                 <CustomTextField id="username" variant="outlined" fullWidth
                 sx={(theme) => {
                 const bg = theme.palette.grey[100];        // surface color for the field
@@ -120,15 +126,17 @@ const AuthRegister = ({ title, subtitle, subtext }) => (
               />
 
                 <Typography variant="subtitle1"
-                    fontWeight={600} component="label" htmlFor='password' mb="5px" mt="25px">Password</Typography>
+                    fontWeight={600} component="label" htmlFor='password' mb="5px" mt="25px">{t('register.pasword')}</Typography>
                 <CustomTextField id="password" variant="outlined" fullWidth />
             </Stack>
             <Button color="primary" variant="contained" size="large" fullWidth component={Link} to="/auth/login">
-                Sign Up
+                {t('register.signup_button')}
             </Button>
         </Box>
         {subtitle}
     </>
-);
+  );
+};
+
 
 export default AuthRegister;
