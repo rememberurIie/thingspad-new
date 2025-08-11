@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, NavLink } from "react-router-dom";
 import { Box, Divider } from "@mui/material";
 import {
@@ -11,6 +11,9 @@ import { IconPoint } from "@tabler/icons-react";
 import Menuitems from "./MenuItems";
 import logoicn from "../../../assets/images/logos/dark1-logo.svg";
 import { Link as RouterLink } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { useTheme } from "@mui/material/styles";
+
 
 const renderMenuItems = (items, pathDirect, isMinimized) => {
   return items.map((item) => {
@@ -54,35 +57,39 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
 };
 
 const SidebarItems = ({ isMinimized }) => {
+  const hasFetched = useRef(false);  // ✅ flag ว่าโหลดไปแล้วหรือยัง
+  const [projects, setProjects] = useState([]);
   const location = useLocation();
   const pathDirect = location.pathname;
+  const theme = useTheme();
 
-  const [projects, setProjects] = useState([]);
+  const user = useSelector(state => state.auth.user);
+
 
   useEffect(() => {
+    if (hasFetched.current) return; // ✅ ไม่โหลดซ้ำถ้าเคยโหลดแล้ว
+    hasFetched.current = true;
+
     const controller = new AbortController();
 
-    const fetchSSE = async () => {
+    const fetchProjects = async () => {
       try {
         const response = await fetch(
-          "http://192.168.1.32:3000/api/project/getProjectList",
+          "http://192.168.1.41:3000/api/project/getProjectList",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ uid: "Smxw91lXjdgMOgyo0p3cuyWjFKK2" }),
+            body: JSON.stringify({ uid: user.uid }),
             signal: controller.signal,
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
-
         let buffer = "";
 
         while (true) {
@@ -90,9 +97,7 @@ const SidebarItems = ({ isMinimized }) => {
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
-
-          // แบ่งข้อมูล stream เป็น block ตาม \n\n ของ SSE
-          let parts = buffer.split("\n\n");
+          const parts = buffer.split("\n\n");
 
           for (let i = 0; i < parts.length - 1; i++) {
             const part = parts[i];
@@ -100,14 +105,14 @@ const SidebarItems = ({ isMinimized }) => {
               const jsonStr = part.replace("data: ", "").trim();
               try {
                 const parsedData = JSON.parse(jsonStr);
-                setProjects(parsedData);
+                setProjects(parsedData);  // ✅ ตั้งค่าข้อมูลโปรเจกต์
               } catch (err) {
                 console.error("JSON parse error:", err);
               }
             }
           }
 
-          buffer = parts[parts.length - 1]; // เก็บเศษที่ยังไม่สมบูรณ์ไว้
+          buffer = parts[parts.length - 1];
         }
       } catch (error) {
         if (error.name === "AbortError") {
@@ -118,11 +123,8 @@ const SidebarItems = ({ isMinimized }) => {
       }
     };
 
-    fetchSSE();
-
-    return () => {
-      controller.abort();
-    };
+    fetchProjects();
+    return () => controller.abort();
   }, []);
 
   // สร้างเมนูโปรเจกต์จากข้อมูล projects state
@@ -147,6 +149,7 @@ const SidebarItems = ({ isMinimized }) => {
         showProfile={false}
         themeColor={"#5D87FF"}
         themeSecondaryColor={"#49BEFF1a"}
+        textColor={theme.palette.grey[600]}
       >
         <Box sx={{ margin: "0 -24px" }}>
           <Logo img={logoicn} component={NavLink} to="/">

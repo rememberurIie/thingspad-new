@@ -12,7 +12,7 @@ const useProjectsApi = (uid) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://192.168.1.32:3000/api/project/getProjectList', {
+        const response = await fetch('http://192.168.1.41:3000/api/project/getProjectList', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

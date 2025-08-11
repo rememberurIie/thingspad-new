@@ -91,17 +91,7 @@ const Menuitems = [
     title: 'Chat by role',
     icon: IconTable,
     href: '/chat/role',
-  },
-  {
-    navlabel: true,
-    subheader: 'Project',
-  },
-  {
-    id: uniqueId(),
-    title: 'Project 1',
-    icon: IconAperture,
-    href: '/project',
-  },
+  }
   
 ]
 

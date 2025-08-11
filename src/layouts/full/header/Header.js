@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Box,
   AppBar,
@@ -17,6 +17,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { IconBellRinging, IconMenu } from '@tabler/icons-react';
 import Profile from './Profile';
 import PropTypes from 'prop-types';
+import { useTheme } from "@mui/material/styles";
+
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+
+import { ColorModeContext } from '../../../theme/ColorModeContext';
 
 const Header = ({
   toggleSidebar,
@@ -26,6 +32,7 @@ const Header = ({
   fullName,
   username
 }) => {
+  const { isDarkMode, toggle } = useContext(ColorModeContext);
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
     background: theme.palette.background.paper,
@@ -44,6 +51,9 @@ const Header = ({
   // notification menu state
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuPosition, setMenuPosition] = useState(null);
+
+  const theme = useTheme();
+
 
   const handleClick = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -70,7 +80,7 @@ const Header = ({
           <IconMenu width='20' height='20' />
         </IconButton>
 
-        <Box sx={{ display: { lg: 'inline', xs: 'none' }, ml: 2 }}>
+        <Box sx={{ display: { lg: 'inline', xs: 'none' }, }}>
           <Tooltip title={isSidebarMinimized ? "Expand" : "Minimize"}>
             <IconButton onClick={toggleSidebarMinimized} size="small">
               {isSidebarMinimized ? <MenuIcon /> : <ChevronLeftIcon />}
@@ -119,10 +129,22 @@ const Header = ({
 
         <Box flexGrow={1} />
 
-        <Stack spacing={1} direction='row' alignItems='center'>
+        <Stack spacing={1.5} direction='row' alignItems='center'>
+          {/* ปุ่มสลับโหมด */}
+          <Tooltip title={`Switch to ${isDarkMode ? 'Light' : 'Dark'} mode`}>
+            <IconButton
+              aria-label='toggle color mode'
+              color='inherit'
+              onClick={toggle}
+              size='small'
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
+
           <Stack direction="column" spacing={0} alignItems="flex-end">
-            <Typography variant="body1">{fullName}</Typography>
-            <Typography variant="body2" color="text.secondary">@{username}</Typography>
+            <Typography variant="body1" color={theme.palette.grey[600]}>{fullName}</Typography>
+            <Typography variant="body2" color={theme.palette.grey[500]}>@{username}</Typography>
           </Stack>
           <Profile />
         </Stack>

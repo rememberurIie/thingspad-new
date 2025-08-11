@@ -4,10 +4,14 @@ import Scrollbar from "../../../components/custom-scroll/Scrollbar";
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useState } from 'react';
+import { useTheme } from "@mui/material/styles";
+
 
 
 const Sidebar = (props) => {
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
+  const theme = useTheme();
+  
 
   // ✅ ใช้ props แทน local state
   const isMinimized = props.isSidebarMinimized;
@@ -28,7 +32,7 @@ const Sidebar = (props) => {
               sx: {
                 width: sidebarWidth,
                 boxSizing: 'border-box',
-                top: '15px',
+                paddingTop: '15px',
                 overflowX: 'hidden',
                 transition: 'width 0.3s',
               },
@@ -54,6 +58,7 @@ const Sidebar = (props) => {
         paper: {
           sx: {
             boxShadow: (theme) => theme.shadows[8],
+            backgroundColor: (theme) => theme.palette.grey[800]
           },
         }
       }}

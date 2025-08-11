@@ -13,13 +13,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../session/authSlice";
-
-
+import { useTheme } from "@mui/material/styles";
 import { IconDashboard, IconMail, IconUser } from '@tabler/icons-react';
-
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 
+
 const Profile = () => {
+
+    const theme = useTheme();
+
 
   const [anchorEl2, setAnchorEl2] = useState(null);
 

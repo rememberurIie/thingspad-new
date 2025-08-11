@@ -8,7 +8,7 @@ import SendIcon from '@mui/icons-material/Send';
 import useSSE from '../../../hook/useSSE';
 
 const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
-  
+
   const [messages, setMessages] = useState([]);
   const [groupData, setGroupData] = useState(null);
   const [userMap, setUserMap] = useState({});
@@ -19,47 +19,45 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
 
   useSSE(
-  projectId ? 'http://192.168.1.32:3000/api/project/getProjectData' : null,
-  (data) => {
-    switch (data.type) {
-      case 'users':
-        const map = {};
-        data.payload.forEach((u) => {
-          map[u.id] = u.fullName; 
-        });
-        setUserMap(map);
-        break;
+    projectId ? 'http://192.168.1.41:3000/api/project/getProjectData' : null,
+    (data) => {
+      switch (data.type) {
+        case 'users':
+          const map = {};
+          data.payload.forEach((u) => {
+            map[u.id] = u.fullName;
+          });
+          setUserMap(map);
+          break;
 
-      case 'groupData':
-        // ✅ ถ้ามี selectedRoom, กรองเฉพาะ group ที่ตรงกัน
-        if (data.groupId === selectedRoom?.id) {
-          setGroupData(data.payload);
-        }
-        break;
+        case 'groupData':
+          // ✅ ถ้ามี selectedRoom, กรองเฉพาะ group ที่ตรงกัน
+          if (data.groupId === selectedRoom?.id) {
+            setGroupData(data.payload);
+          }
+          break;
 
-      case 'messages':
-        // ✅ เฉพาะ messages ของ selectedRoom
-        if (data.groupId === selectedRoom?.id) {
-          setMessages(
-            data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
-          );
-        }
-        break;
+        case 'messages':
+          // ✅ เฉพาะ messages ของ selectedRoom
+          if (data.groupId === selectedRoom?.id) {
+            setMessages(
+              data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
+            );
+          }
+          break;
 
-      default:
-        console.warn('Unknown SSE type:', data.type);
-    }
-  },
-  projectId && selectedRoom?.id ? { projectId, selectedRoomId: selectedRoom.id } : null
+        default:
+          console.warn('Unknown SSE type:', data.type);
+      }
+    },
+    projectId && selectedRoom?.id ? { projectId, selectedRoomId: selectedRoom.id } : null
 
-);
-
-
+  );
 
   const handleSend = async () => {
     if (!input.trim()) return;
     try {
-      await fetch("http://192.168.1.32:3000/api/project/sendMessage", {
+      await fetch("http://192.168.1.41:3000/api/project/sendMessage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -113,7 +111,22 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
         <Divider />
 
         {/* Messages */}
-        <Box sx={{ flex: 1, overflowY: 'auto', mt: 2, }} ref={messagesContainerRef}>
+        <Box sx={{
+          flex: 1, overflowY: 'auto', mt: 2, '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: (theme) => theme.palette.background.default,
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: (theme) => theme.palette.grey[400],
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: (theme) => theme.palette.grey[500],
+          },
+        }} ref={messagesContainerRef}>
           <List>
             {messages.map((msg) => (
               <ListItem

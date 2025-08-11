@@ -5,8 +5,9 @@ import {
 } from '@mui/material';
 
 const ChatList = ({ onSelect, projectId }) => {
+  
   const [rooms, setRooms] = useState([]);
-
+  
   useEffect(() => {
     if (!projectId) return;
 
@@ -15,7 +16,7 @@ const ChatList = ({ onSelect, projectId }) => {
 
     const fetchGroups = async () => {
       try {
-        const response = await fetch('http://192.168.1.32:3000/api/project/getProjectData', {  // เปลี่ยนเป็น SSE API ที่ส่ง stream
+        const response = await fetch('http://192.168.1.41:3000/api/project/getProjectData', {  // เปลี่ยนเป็น SSE API ที่ส่ง stream
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ projectId }),
@@ -86,7 +87,7 @@ const ChatList = ({ onSelect, projectId }) => {
   }, [projectId]);
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', backgroundColor: '#ecf4fc' }}>
+    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px'}}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Rooms

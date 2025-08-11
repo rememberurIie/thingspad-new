@@ -12,6 +12,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { useTheme } from "@mui/material/styles";
+
 
 // Components
 import ChatList from './components/ChatList';
@@ -21,6 +23,8 @@ const drawerWidth = 300;
 
 const Project = () => {
 
+  const theme = useTheme();
+  
   //user from redux
   const user = useSelector(state => state.auth.user);
   const { projectId } = useParams();

@@ -12,6 +12,9 @@ import {
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 
+import { useTheme } from "@mui/material/styles";
+
+
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import { loginSuccess } from '../../../session/authSlice';
 
@@ -23,6 +26,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,7 +34,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/account/login', {
+      const res = await fetch('http://192.168.1.41:3000/api/account/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -83,6 +87,35 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              sx={(theme) => {
+                const bg = theme.palette.grey[100];        // surface color for the field
+                const fg = theme.palette.text.primary;
+
+                return {
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'transparent',
+                  },
+                  '& input': {
+                    WebkitTextFillColor: 'inherit',
+                    color: 'inherit',
+                    caretColor: fg,
+                  },
+
+                  // ✅ kill Chrome autofill blue/yellow and match theme
+                  '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus': {
+                    WebkitBoxShadow: `0 0 0 1000px ${bg} inset`,
+                    boxShadow: `0 0 0 1000px ${bg} inset`,
+                    WebkitTextFillColor: fg,
+                    caretColor: fg,
+                    transition: 'background-color 9999s ease-out 0s', // old Chrome hack
+                  },
+
+                  // optional: keep outline color consistent on focus
+                  '& .MuiOutlinedInput-root.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                };
+              }}
             />
           </Box>
 
@@ -103,7 +136,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
           <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
             <FormGroup>
-              <FormControlLabel control={<Checkbox defaultChecked />} label="Remember this Device" />
+              <FormControlLabel control={<Checkbox defaultChecked={false} />} label="Remember this Device" />
             </FormGroup>
             <Typography
               component={Link}
