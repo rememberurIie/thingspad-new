@@ -183,7 +183,7 @@ const basedarkTheme = createTheme({
       800: '#000000',  // Very dark grey
     },
     background: {
-      default: '#121212',
+      default: '#1E1E1E',
       paper: '#1E1E1E',
     },
     text: {

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import {
   Box,
+  Divider,
   AppBar,
   Toolbar,
   styled,
@@ -21,10 +22,15 @@ import { useTheme } from "@mui/material/styles";
 
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 import { ColorModeContext } from '../../../theme/ColorModeContext';
-
 import LanguageSwitch from '../../../language/LanguageSwitch';
+
+
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../session/authSlice";
 
 const Header = ({
   toggleSidebar,
@@ -56,7 +62,6 @@ const Header = ({
 
   const theme = useTheme();
 
-
   const handleClick = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     setMenuPosition({
@@ -68,6 +73,14 @@ const Header = ({
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/auth/login');
   };
 
   return (
@@ -131,16 +144,16 @@ const Header = ({
 
         <Box flexGrow={1} />
 
-        <Stack spacing={1.5} direction='row' alignItems='center'>
+        <Stack direction='row' alignItems='center'>
 
-          <Tooltip >
+          <Tooltip>
             <span>
-              <LanguageSwitch sx={{ ml: 1 }} />
+              <LanguageSwitch sx={{mx: 0.5, display: { xs: 'none', lg: 'flex' } }} />
             </span>
           </Tooltip>
 
           {/* ปุ่มสลับโหมด */}
-          <Tooltip>
+          <Tooltip sx={{mx: 0.5, display: { xs: 'none', lg: 'flex' } }}>
             <IconButton
               aria-label='toggle color mode'
               color='inherit'
@@ -151,12 +164,29 @@ const Header = ({
             </IconButton>
           </Tooltip>
 
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ mx: 0.5 ,height: 40, orderRightWidth: 2, alignSelf: 'center', display: { xs: 'none', lg: 'flex' } }}
+          />
 
-          <Stack direction="column" spacing={0} alignItems="flex-end">
+          <Stack direction="column" spacing={0} alignItems="flex-end" sx={{ pl: '9px', display: { xs: 'none', lg: 'flex' } }}>
             <Typography variant="body1" color={theme.palette.grey[600]}>{fullName}</Typography>
             <Typography variant="body2" color={theme.palette.grey[500]}>@{username}</Typography>
           </Stack>
-          <Profile />
+          <Profile fullName={fullName} username={username} handleLogout={handleLogout} sx={{ px: '-10px'}} />
+
+          <Tooltip sx={{display: { xs: 'none', lg: 'flex' } }}>
+            <IconButton
+              aria-label='logout'
+              color='inherit'
+              size='small'
+              onClick={handleLogout}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
+
         </Stack>
       </ToolbarStyled>
     </AppBarStyled>

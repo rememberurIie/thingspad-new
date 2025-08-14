@@ -3,13 +3,17 @@
     "home": "หน้าแรก",
     "myTask": "งานของฉัน",
     "chats": "แชท",
-    "directChat": "แชทตรง",
+    "directChat": "แชทส่วนตัว",
     "chatByRole": "แชทตามบทบาท",
     "projects": "โครงการ"
   },
+  "header": {
+    "profile": "โปรไฟล์ผู้ใช้"
+  },
   "project": {
     "rooms": "ห้องแชท",
-    "room_select": "กรุณาเลือกห้องเพื่อเริ่มแชท!"
+    "room_select": "กรุณาเลือกห้องเพื่อเริ่มแชท!",
+    "members": "สมาชิก"
   },
   "login": {
     "description": "กรุณาล็อกอินก่อน",

@@ -34,7 +34,7 @@ const FullLayout = () => {
   // const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
    // minimized sidebar
-  const [isSidebarMinimized, setSidebarMinimized] = useState(true);
+  const [isSidebarMinimized, setSidebarMinimized] = useState(false);
   
 
   // toggle ฟังก์ชัน minimized sidebar

@@ -3,35 +3,42 @@ import {
   Card, CardContent, Typography, Avatar,
   List, ListItem, ListItemAvatar, ListItemText, Divider
 } from '@mui/material';
-
 import { useTranslation } from 'react-i18next';
 
-
 const ChatList = ({ onSelect, projectId }) => {
-
   const { t } = useTranslation();
   const [rooms, setRooms] = useState([]);
-  
+
+  // Get comparable timestamp (seconds) from various shapes
+  const getCreatedAt = (room) => {
+    const ca = room?.createdAt;
+    if (!ca) return Infinity;
+    if (typeof ca === 'number') return ca;                       // plain epoch seconds
+    if (typeof ca === 'string') return Date.parse(ca) / 1000;    // ISO string
+    if (typeof ca?._seconds === 'number') return ca._seconds;    // Firestore TS from API
+    if (typeof ca?.seconds === 'number') return ca.seconds;      // Firestore TS from SDK
+    return Infinity;
+  };
+
   useEffect(() => {
     if (!projectId) return;
 
     const controller = new AbortController();
     const signal = controller.signal;
 
-    const fetchGroups = async () => {
+    const run = async () => {
       try {
-        const response = await fetch('http://192.168.1.41:3000/api/project/getProjectData', {  // เปลี่ยนเป็น SSE API ที่ส่ง stream
+        const res = await fetch('http://localhost:3000/api/project/getProjectData', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ projectId }),
           signal,
         });
+        if (!res.body) throw new Error('No response body');
 
-        if (!response.body) throw new Error("No response body");
-
-        const reader = response.body.getReader();
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = "";
+        let buffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
@@ -39,75 +46,65 @@ const ChatList = ({ onSelect, projectId }) => {
 
           buffer += decoder.decode(value, { stream: true });
 
-          let messageEnd = buffer.indexOf('\n\n');
-          while (messageEnd !== -1) {
-            const message = buffer.slice(0, messageEnd);
-            buffer = buffer.slice(messageEnd + 2);
+          let end = buffer.indexOf('\n\n');
+          while (end !== -1) {
+            const chunk = buffer.slice(0, end);
+            buffer = buffer.slice(end + 2);
 
-            if (message.startsWith("data: ")) {
+            if (chunk.startsWith('data: ')) {
               try {
-                const parsedData = JSON.parse(message.substring(6));
-                // SSE ข้อมูลส่งมาแบบ { type: "...", groupId?, payload: ... }
+                const evt = JSON.parse(chunk.substring(6));
 
-                // เราจะสนใจเฉพาะข้อมูล type === "groupData"
-                if (parsedData.type === "groupData") {
-                  // payload คือข้อมูลกลุ่มเดียว => เราต้องอัพเดตรายการ rooms
-                  setRooms((prevRooms) => {
-                    // ถ้ากลุ่มนี้มีใน prevRooms อยู่แล้ว ให้ update
-                    const existsIndex = prevRooms.findIndex(r => r.id === parsedData.groupId);
+                // Expect: { type: 'groupData', groupId, payload }
+                if (evt?.type === 'groupData' && evt?.groupId && evt?.payload) {
+                  setRooms((prev) => {
+                    const idx = prev.findIndex(r => r.id === evt.groupId);
+                    const nextRoom = { id: evt.groupId, ...evt.payload };
 
-                    if (existsIndex !== -1) {
-                      const newRooms = [...prevRooms];
-                      newRooms[existsIndex] = { id: parsedData.groupId, ...parsedData.payload };
-                      return newRooms;
+                    let next;
+                    if (idx !== -1) {
+                      next = [...prev];
+                      next[idx] = nextRoom;
                     } else {
-                      // เพิ่มกลุ่มใหม่เข้า array
-                      return [...prevRooms, { id: parsedData.groupId, ...parsedData.payload }];
+                      next = [...prev, nextRoom];
                     }
+
+                    next.sort((a, b) => getCreatedAt(a) - getCreatedAt(b)); // oldest first
+                    return next;
                   });
                 }
-
-                // ถ้าต้องการจัดการ type อื่น เช่น users, messages ก็ทำได้ที่นี่
-                // else if (parsedData.type === "users") { ... }
-              } catch (err) {
-                console.error("JSON parse error:", err);
+              } catch (e) {
+                console.error('JSON parse error:', e);
               }
             }
 
-            messageEnd = buffer.indexOf('\n\n');
+            end = buffer.indexOf('\n\n');
           }
         }
-      } catch (error) {
-        if (!signal.aborted) {
-          console.error("Error fetching group list:", error);
-        }
+      } catch (err) {
+        if (!signal.aborted) console.error('Error fetching group list:', err);
       }
     };
 
-    fetchGroups();
-
+    run();
     return () => controller.abort();
-
   }, [projectId]);
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px'}}>
+    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           {t('project.rooms')}
         </Typography>
+
         <List>
           {rooms.map((group, idx) => (
             <React.Fragment key={group.id}>
-              <ListItem button onClick={() => onSelect(group)}>
-                <ListItemAvatar>
-                  <Avatar>{group.name ? group.name.charAt(0) : '?'}</Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={group.name || 'No Name'}
-                />
+              <ListItem button onClick={() => onSelect?.(group)}>
+                <Typography variant="h5" sx={{pr: 1}}>#</Typography>
+                <ListItemText primary={group?.name || 'No Name'} />
               </ListItem>
-              {idx !== rooms.length - 1 && <Divider />}
+              {idx !== rooms.length - 1 && <Divider component="li" />}
             </React.Fragment>
           ))}
         </List>

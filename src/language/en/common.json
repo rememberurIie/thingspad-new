@@ -7,9 +7,13 @@
     "chatByRole": "Chat by Role",
     "projects": "Projects"
   },
+    "header": {
+    "profile": "User Profile"
+  },
   "project": {
     "rooms": "Chat Rooms",
-    "room_select": "Select room to start chat!"
+    "room_select": "Select room to start chat!",
+    "members": "Members"
   },
   "login": {
     "description": "Please Login First",

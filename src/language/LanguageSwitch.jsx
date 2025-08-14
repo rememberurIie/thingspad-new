@@ -18,6 +18,7 @@ export default function LanguageSwitch({ size = 'small', ...props }) {
     >
       <ToggleButton value="th">TH</ToggleButton>
       <ToggleButton value="en">EN</ToggleButton>
+      
     </ToggleButtonGroup>
   );
 }
