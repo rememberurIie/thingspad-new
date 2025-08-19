@@ -87,7 +87,7 @@ const Header = ({
     <AppBarStyled position='sticky' color='default'>
       <ToolbarStyled>
         <IconButton
-          color='inherit'
+
           aria-label='menu'
           onClick={toggleMobileSidebar}
           sx={{ display: { lg: 'none', xs: 'inline' } }}
@@ -106,7 +106,6 @@ const Header = ({
         <Box>
           <IconButton
             aria-label='show notifications'
-            color='inherit'
             aria-controls='notification-menu'
             aria-haspopup='true'
             onClick={handleClick}
@@ -152,11 +151,10 @@ const Header = ({
             </span>
           </Tooltip>
 
-          {/* ปุ่มสลับโหมด */}
+          {/* ปุ่มสลับโหมดสี */}
           <Tooltip sx={{mx: 0.5, display: { xs: 'none', lg: 'flex' } }}>
             <IconButton
               aria-label='toggle color mode'
-              color='inherit'
               onClick={toggle}
               size='small'
             >
@@ -179,7 +177,6 @@ const Header = ({
           <Tooltip sx={{display: { xs: 'none', lg: 'flex' } }}>
             <IconButton
               aria-label='logout'
-              color='inherit'
               size='small'
               onClick={handleLogout}
             >

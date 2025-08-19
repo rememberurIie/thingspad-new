@@ -82,7 +82,7 @@ const SidebarItems = ({ isMinimized }) => {
     const fetchProjects = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/project/getProjectList",
+          "http://192.168.1.38:3000/api/project/getProjectList",
           {
             method: "POST",
             headers: {

@@ -1,51 +1,55 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState,} from 'react';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
-  List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip
+  List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
+  CircularProgress
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
+import { useSelector } from 'react-redux';
 
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 
-import useSSE from '../../../hook/useSSE';
+import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
-const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
+
+const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
+
   const [messages, setMessages] = useState([]);
-  const [groupData, setGroupData] = useState(null);
-  const [userMap, setUserMap] = useState({});
   const [input, setInput] = useState('');
 
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
   const [previewURL, setPreviewURL] = useState('');
 
+  const [loading, setLoading] = useState(false);
+
+  const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
 
   useSSE(
-    projectId ? 'http://192.168.1.38:3000/api/project/getProjectData' : null,
+    selectedDmId ? 'http://192.168.1.38:3000/api/dm/getMessage' : null,
     (data) => {
       switch (data.type) {
-        case 'users': {
-          const map = {};
-          data.payload.forEach((u) => { map[u.id] = u.fullName; });
-          setUserMap(map);
-          break;
-        }
-        case 'groupData': {
-          if (data.groupId === selectedRoom?.id) setGroupData(data.payload);
-          break;
-        }
         case 'messages': {
-          if (data.groupId === selectedRoom?.id) {
+          if (data.dmId === selectedDmId) {
             setMessages(
-              data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
+              data.payload.sort((a, b) => {
+                const getSec = (msg) =>
+                  msg.createdAt?.seconds ??
+                  msg.createdAt?._seconds ??
+                  (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
+                return getSec(a) - getSec(b);
+              })
             );
           }
           break;
@@ -54,9 +58,9 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
           console.warn('Unknown SSE type:', data.type);
       }
     },
-    projectId && selectedRoom?.id ? { projectId, selectedRoomId: selectedRoom.id } : null
+    currentUserId && selectedDmId ? { directMessageId: selectedDmId } : null
   );
-
+  
   const clearFile = () => {
     if (previewURL) URL.revokeObjectURL(previewURL);
     setFile(null);
@@ -94,11 +98,11 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.38:3000/api/project/sendMessage';
+      const endpoint = 'http://192.168.1.38:3000/api/dm/sendMessage';
 
       if (file) {
         const form = new FormData();
-        form.append('groupId', selectedRoom.id);
+        form.append('directMessageId', selectedDmId);
         form.append('senderId', currentUserId);
         form.append('text', input || '');
         form.append('file', file);
@@ -109,7 +113,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            groupId: selectedRoom.id,
+            directMessageId: selectedDmId,
             senderId: currentUserId,
             text: input,
           }),
@@ -118,28 +122,44 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
       setInput('');
       clearFile();
-      // scrollToBottom();
+      scrollToBottom();
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   };
 
-  // const scrollToBottom = () => {
-  //   if (messagesContainerRef.current) {
-  //     messagesContainerRef.current.scrollTo({
-  //       top: messagesContainerRef.current.scrollHeight,
-  //       behavior: 'smooth',
-  //     });
-  //   }
-  // };
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  };
 
-  // useEffect(() => { scrollToBottom(); }, [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
-  if (!selectedRoom) {
+  useEffect(() => {
+    if (selectedDmId) setLoading(true);
+  }, [selectedDmId]);
+
+  useEffect(() => {
+    if (messages.length > 0) setLoading(false);
+  }, [messages]);
+
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
+      </Card>
+    );
+  }
+
+  if (!selectedDmId) {
     return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
         <CardContent>
-          <Typography variant="h6">{t('project.room_select')}</Typography>
+          <Typography variant="h6">{t('dm.chat_header')}</Typography>
         </CardContent>
       </Card>
     );
@@ -152,7 +172,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     if (att.contentType?.startsWith('image/')) {
       return (
         <Box mt={0.5}>
-          <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8 }} />
+          <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', borderRadius: 8 }} />
         </Box>
       );
     }
@@ -181,25 +201,37 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
-          <Typography variant="h5" sx={{pl: 1}}>#</Typography>
-          <Box ml={1}><Typography variant="h6">{groupData?.name || selectedRoom.name}</Typography></Box>
+          <Avatar sx={{ width: 40, height: 40, fontSize: 15}}>
+            {otherFullName
+              ? otherFullName.slice(0, 2).toUpperCase()
+              : "??"}
+          </Avatar>
+          <Box ml={1.5}>
+            <Typography variant="h6">
+              {otherFullName || ""}
+            </Typography>
+          </Box>
         </Box>
         <Divider />
 
         {/* Messages */}
-        <Box sx={{
-          flex: 1,
-          overflowY: 'auto',
-          mt: 2,
-          display: 'flex',
-          flexDirection: 'column-reverse', // This makes the scroll start at the bottom
-          '&::-webkit-scrollbar': { width: '6px' },
-          '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
-          '&::-webkit-scrollbar-thumb': { backgroundColor: (t) => t.palette.grey[400], borderRadius: '3px' },
-          '&::-webkit-scrollbar-thumb:hover': { backgroundColor: (t) => t.palette.grey[500] },
-        }} ref={messagesContainerRef}>
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            mt: 2,
+            display: 'flex',
+            flexDirection: 'column-reverse', // <-- This makes the chat start from the bottom
+            '&::-webkit-scrollbar': { width: '6px' },
+            '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: (t) => t.palette.grey[400], borderRadius: '3px' },
+            '&::-webkit-scrollbar-thumb:hover': { backgroundColor: (t) => t.palette.grey[500] },
+          }}
+          ref={messagesContainerRef}
+        >
           <List>
             {messages.map((msg, idx) => {
+              // Date separator logic
               const prevMsg = messages[idx - 1];
               const showDate =
                 !prevMsg ||
@@ -217,7 +249,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                   {showDate && (
                     <ListItem sx={{ justifyContent: 'center', py: 1 }}>
                       <Divider sx={{ flex: 1, mr: 2 }} />
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary'}}>
                         {new Date(
                           (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
                         ).toLocaleDateString(i18n.language === 'th' ? 'th' : 'en', {
@@ -238,7 +270,6 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                     }}
                   >
                     <Avatar
-                      src={userMap[msg.senderId]?.avatarUrl}
                       sx={{
                         width: 40,
                         height: 40,
@@ -247,16 +278,14 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                         mt: 0.5,
                       }}
                     >
-                      {(userMap[msg.senderId]?.fullName || userMap[msg.senderId] || msg.senderId)
-                        .slice(0, 2)
-                        .toUpperCase()}
+                      {(msg.fullName || '??').slice(0, 2).toUpperCase()}
                     </Avatar>
                     <Box sx={{ ml: 1, flex: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {userMap[msg.senderId]?.fullName || userMap[msg.senderId] || msg.senderId}
+                          {msg.displayName || (msg.senderId === currentUserId ? msg.fullName : otherFullName) || msg.senderId}
                         </Typography>
-                         <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2, fontSize: '11px' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2 , fontSize: '11px' }}>
                           {msg.createdAt &&
                             new Date(
                               (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
@@ -285,6 +314,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                 </React.Fragment>
               );
             })}
+            <div ref={bottomRef} />
           </List>
         </Box>
 
@@ -296,7 +326,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
           gap: 1,
           borderTop: `1px solid ${theme.palette.divider}`,
         })}
->
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -337,7 +367,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
             ) : null)}
 
             <Typography variant="body2" color={fileError ? 'error' : 'text.secondary'}>
-              {fileError || `${file?.name || ''} ${file ? `• ${(file.size/1024).toFixed(0)} KB` : ''}`}
+              {fileError || `${file?.name || ''} ${file ? `• ${(file.size / 1024).toFixed(0)} KB` : ''}`}
             </Typography>
 
             {file && (
@@ -352,4 +382,4 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   );
 };
 
-export default ChatContent;
+export default DirectMessageChat;

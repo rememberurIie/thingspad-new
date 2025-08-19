@@ -28,7 +28,7 @@ const ChatList = ({ onSelect, projectId }) => {
 
     const run = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/project/getProjectData', {
+        const res = await fetch('http://192.168.1.38:3000/api/project/getProjectData', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ projectId }),

@@ -10,6 +10,12 @@
     "header": {
     "profile": "User Profile"
   },
+  "dm": {
+    "list_header": "Chats",
+    "chat_header": "Please select a DM to start chatting!",
+    "find_user": "Select Users"
+    
+  },
   "project": {
     "rooms": "Chat Rooms",
     "room_select": "Select room to start chat!",

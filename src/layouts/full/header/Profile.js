@@ -83,9 +83,10 @@ const Profile = ({
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         sx={(theme) => ({
           '& .MuiMenu-paper': {
+            backgroundColor: (theme) => theme.palette.grey[50],
             width: '300px',
             display: { xs: 'flex', lg: 'none' },
-            boxShadow: `0 0 10px 1px ${theme.palette.action.disabledBackground}`, // blue glow + soft shadow
+            boxShadow: `0 0 20px 1px #42424233`, // blue glow + soft shadow
             borderRadius: 3,
           }})}
       >

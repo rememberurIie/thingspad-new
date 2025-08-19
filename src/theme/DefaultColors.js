@@ -49,6 +49,7 @@ const baselightTheme = createTheme({
       A200: '#557fb9',
     },
     grey: {
+      50: '#ffffffff',
       100: '#F9F9F9',  // Lighter, neutral grey
       200: '#E5E5E5',  // Neutral grey
       300: '#D1D1D1',  // Neutral grey
@@ -57,6 +58,7 @@ const baselightTheme = createTheme({
       600: '#555555',  // Darker neutral grey
       700: '#333333',  // Darker neutral grey
       800: '#222222',  // Very dark neutral grey
+      900: '#151515ff',  // Very dark neutral grey
     },
     text: {
       primary: '#2A3547',
@@ -173,6 +175,7 @@ const basedarkTheme = createTheme({
       A200: '#7a6ee6',
     },
     grey: {
+      50: '#000000ff',
       100: '#222222',  // Neutral dark grey
       200: '#2A2A2A',  // Darker neutral grey
       300: '#333333',  // Dark neutral grey
@@ -180,7 +183,8 @@ const basedarkTheme = createTheme({
       500: '#c5c5c5ff',
       600: '#EAEFF4',
       700: '#F2F6FA',
-      800: '#000000',  // Very dark grey
+      800: '#ffffffff',
+      900: '#ffffffff',  // Very dark grey
     },
     background: {
       default: '#1E1E1E',

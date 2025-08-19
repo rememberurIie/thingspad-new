@@ -8,12 +8,13 @@ import {
   Toolbar,
   Typography
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+
+import ChatIcon from '@mui/icons-material/Chat';
 import GroupIcon from '@mui/icons-material/Group';
+
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useTheme } from "@mui/material/styles";
 
 import ChatList from './components/ChatList';
 import ChatContent from './components/ChatContent';
@@ -69,7 +70,7 @@ const Project = () => {
                 edge="start"
                 onClick={handleDrawerToggleLeft}
               >
-                <MenuIcon />
+                <ChatIcon />
               </IconButton>
               
               <IconButton

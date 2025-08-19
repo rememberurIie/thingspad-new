@@ -22,7 +22,7 @@ const ChatMember = ({ onSelect, projectId }) => {
 
     const fetchUsersViaSSE = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/project/getProjectData', {
+        const res = await fetch('http://192.168.1.38:3000/api/project/getProjectData', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ projectId }),
@@ -108,19 +108,27 @@ const ChatMember = ({ onSelect, projectId }) => {
 
         <List>
           {members.map((u) => {
-            const initial =
-              (u.fullName?.trim()?.[0]) ||
-              (u.username?.trim()?.[0]) ||
-              '?';
+            // Get first 2 chars from fullName, fallback to username, fallback to ??
+            const initials =
+              (u.fullName?.trim().slice(0, 2)) ||
+              (u.username?.trim().slice(0, 2)) ||
+              '??';
 
             return (
               <ListItem key={u.id} button onClick={() => onSelect?.(u)}>
                 <ListItemAvatar>
-                  {u.avatarUrl ? (
-                    <Avatar src={u.avatarUrl} alt={u.fullName || u.username || 'User'} />
-                  ) : (
-                    <Avatar>{initial.toUpperCase()}</Avatar>
-                  )}
+                  <Avatar src={u.avatarUrl} alt={initials.toUpperCase()}>
+                    {(!u.avatarUrl || u.avatarUrl === '') && (
+                      <Typography
+                        sx={{
+                          fontSize: 15, // Adjust this value as needed
+                          letterSpacing: 1,
+                        }}
+                      >
+                        {initials.toUpperCase()}
+                      </Typography>
+                    )}
+                  </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={u.fullName || u.username || 'Unknown'}

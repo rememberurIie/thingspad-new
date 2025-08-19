@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { styled, Container, Box } from '@mui/material';
+import { styled, Container, Box, useMediaQuery } from '@mui/material';
 
 import { useSelector } from 'react-redux';
 import { store } from "../../session/store";
@@ -31,7 +31,7 @@ const FullLayout = () => {
 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  // const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
+  const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
    // minimized sidebar
   const [isSidebarMinimized, setSidebarMinimized] = useState(false);
@@ -81,10 +81,11 @@ const FullLayout = () => {
         {/* ------------------------------------------- */}
         {/* PageContent */}
         {/* ------------------------------------------- */}
-        <Container maxWidth={false} sx={{
-          paddingTop: "20px",
-
-        }}
+        
+        <Container maxWidth={false} 
+          sx={{
+            paddingTop: lgUp ? "4px" : "0px",
+          }}
         >
           {/* ------------------------------------------- */}
           {/* Page Route */}

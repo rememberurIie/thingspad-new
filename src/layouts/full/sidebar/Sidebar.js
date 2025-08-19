@@ -57,8 +57,8 @@ const Sidebar = (props) => {
       slotProps={{
         paper: {
           sx: {
-            boxShadow: (theme) => theme.shadows[8],
-            backgroundColor: (theme) => theme.palette.grey[800]
+            // boxShadow: (theme) => theme.shadows[8],
+            backgroundColor: (theme) => theme.palette.grey[50]
           },
         }
       }}
