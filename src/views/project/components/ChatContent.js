@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
-  List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip
+  List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
+  CircularProgress // <-- Add this import
 } from '@mui/material';
 
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -23,10 +24,21 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   const [fileError, setFileError] = useState('');
   const [previewURL, setPreviewURL] = useState('');
 
+  const [loading, setLoading] = useState(false); // <-- Add loading state
+
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    if (selectedRoom) setLoading(true);
+  }, [selectedRoom]);
+
+  useEffect(() => {
+    // Always exit loading when messages are loaded, even if empty
+    setLoading(false);
+  }, [messages]);
 
   useSSE(
     projectId ? 'http://192.168.1.38:3000/api/project/getProjectData' : null,
@@ -134,6 +146,14 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   // };
 
   // useEffect(() => { scrollToBottom(); }, [messages]);
+
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size="30px" sx={{ color: 'grey.500' }} />
+      </Card>
+    );
+  }
 
   if (!selectedRoom) {
     return (

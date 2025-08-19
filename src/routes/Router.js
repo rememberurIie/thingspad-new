@@ -19,11 +19,23 @@ const Register = lazy(() => import('../views/authentication/Register'));
 const Login = lazy(() => import('../views/authentication/Login'));
 const Error = lazy(() => import('../views/authentication/Error'));
 
+// *****context*****
+import { ChatListProvider } from '../contexts/ChatListContext';
+import { ProjectListProvider } from '../contexts/ProjectListContext';
+import { DirectMessageListProvider } from '../contexts/DirectMessageListContext';
 
 const Router = [
   {
     path: '/',
-    element: <FullLayout />,
+    element: (
+      <ChatListProvider>
+        <ProjectListProvider>
+          <DirectMessageListProvider>
+            <FullLayout />
+          </DirectMessageListProvider>
+        </ProjectListProvider>
+      </ChatListProvider>
+    ),
     children: [
       {
         path: '/',

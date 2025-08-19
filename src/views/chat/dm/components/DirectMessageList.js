@@ -8,10 +8,12 @@ import {
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
 
+import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext'; // Adjust the import path as needed
+
 
 const DirectMessageList = ({ onSelect, userId }) => {
   const { t } = useTranslation();
-  const [dms, setDms] = useState([]);
+  const { dms, setDms } = useDirectMessageList();
   const [anchorEl, setAnchorEl] = useState(null);
   const [people, setPeople] = useState([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
@@ -22,19 +24,26 @@ const DirectMessageList = ({ onSelect, userId }) => {
     userId ? 'http://192.168.1.38:3000/api/dm/getDMList' : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
-        // Sort by latestMessage.createdAt (descending)
-        const sorted = [...data.payload].sort((a, b) => {
-          const aSec = a.latestMessage?.createdAt?._seconds ?? 0;
-          const bSec = b.latestMessage?.createdAt?._seconds ?? 0;
-          return bSec - aSec;
+        setDms(prev => {
+          // Convert prev to a map for fast lookup
+          const prevMap = new Map(prev.map(dm => [dm.id, dm]));
+          // Merge or add new DMs
+          data.payload.forEach(dm => {
+            const id = dm.dmId;
+            prevMap.set(id, { id, name: dm.username, ...dm });
+          });
+          // Convert back to array and sort
+          const merged = Array.from(prevMap.values()).sort((a, b) => {
+            const aSec = a.latestMessage?.createdAt?._seconds ?? 0;
+            const bSec = b.latestMessage?.createdAt?._seconds ?? 0;
+            return bSec - aSec;
+          });
+          // Only update if different
+          if (JSON.stringify(prev) !== JSON.stringify(merged)) {
+            return merged;
+          }
+          return prev;
         });
-        setDms(
-          sorted.map(dm => ({
-            id: dm.dmId,
-            name: dm.username,
-            ...dm,
-          }))
-        );
       }
     },
     userId ? { userId } : null
@@ -186,7 +195,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
                       if (isYou) {
                         return (
                           <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            you: "{msg.text}"
+                            you: {msg.text}
                           </span>
                         );
                       }

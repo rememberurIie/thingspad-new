@@ -144,8 +144,9 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   }, [selectedDmId]);
 
   useEffect(() => {
-    if (messages.length > 0) setLoading(false);
-  }, [messages]);
+      // Always exit loading when messages are loaded, even if empty
+      setLoading(false);
+    }, [messages]);
 
   if (loading) {
     return (

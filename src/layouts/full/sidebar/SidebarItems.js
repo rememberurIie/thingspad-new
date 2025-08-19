@@ -13,9 +13,9 @@ import logoicn from "../../../assets/images/logos/dark1-logo.svg";
 import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useTheme } from "@mui/material/styles";
-
 import { useTranslation } from 'react-i18next';
-
+import useSSE from "../../../hook/useSSE";
+import { useProjectList } from '../../../contexts/ProjectListContext';
 
 const renderMenuItems = (items, pathDirect, isMinimized) => {
 
@@ -63,8 +63,8 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
 };
 
 const SidebarItems = ({ isMinimized }) => {
-  const hasFetched = useRef(false);  // ✅ flag ว่าโหลดไปแล้วหรือยัง
-  const [projects, setProjects] = useState([]);
+  // const [projects, setProjects] = useState([]); // REMOVE
+  const { projects, setProjects } = useProjectList(); // USE CONTEXT
   const location = useLocation();
   const pathDirect = location.pathname;
   const theme = useTheme();
@@ -73,66 +73,20 @@ const SidebarItems = ({ isMinimized }) => {
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (hasFetched.current) return; // ✅ ไม่โหลดซ้ำถ้าเคยโหลดแล้ว
-    hasFetched.current = true;
-
-    const controller = new AbortController();
-
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch(
-          "http://192.168.1.38:3000/api/project/getProjectList",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ uid: user.uid }),
-            signal: controller.signal,
-          }
-        );
-
-        if (!response.ok) throw new Error("Network response was not ok");
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split("\n\n");
-
-          for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (part.startsWith("data: ")) {
-              const jsonStr = part.replace("data: ", "").trim();
-              try {
-                const parsedData = JSON.parse(jsonStr);
-                setProjects(parsedData);  // ✅ ตั้งค่าข้อมูลโปรเจกต์
-              } catch (err) {
-                console.error("JSON parse error:", err);
-              }
-            }
-          }
-
-          buffer = parts[parts.length - 1];
+  // Use SSE hook to fetch projects
+  useSSE(
+    "http://192.168.1.38:3000/api/project/getProjectList",
+    (data) => {
+      setProjects(prev => {
+        // Only update if different
+        if (JSON.stringify(prev) !== JSON.stringify(data)) {
+          return data;
         }
-      } catch (error) {
-        if (error.name === "AbortError") {
-          console.log("Fetch aborted");
-        } else {
-          console.error("Fetch error:", error);
-        }
-      }
-    };
-
-    fetchProjects();
-    return () => controller.abort();
-  }, []);
+        return prev;
+      });
+    },
+    { uid: user.uid }
+  );
 
   // สร้างเมนูโปรเจกต์จากข้อมูล projects state
   const projectMenuItems = projects.map((project) => ({
