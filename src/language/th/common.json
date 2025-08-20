@@ -44,6 +44,7 @@
     "have_account_ask": "มีบัญชีอยู่แล้ว?",
     "signin_link": "เข้าสู่ระบบ",
     "error_duplicate_user": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
-    "error_pasword_not_match": "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+    "error_pasword_not_match": "อีเมลหรือรหัสผ่านไม่ถูกต้อง.",
+    "success": "ลงทะเบียนสำเร็จ!"
   }
 }

@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
 import {
   Card, CardContent, Typography,
-  List, ListItem, ListItemText, Divider
+  List, ListItem, ListItemText, Divider, CircularProgress // เพิ่ม CircularProgress
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles'; // Add this import
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../hook/useSSE';
-
-import { useChatList } from '../../../contexts/ChatListContext'; // create similar to ProjectListContext
-
+import { useChatList } from '../../../contexts/ChatListContext';
 
 const ChatList = ({ onSelect, projectId }) => {
   const { t } = useTranslation();
   const { rooms, setRooms } = useChatList();
+  const theme = useTheme(); // Add this line
+  const [selectedId, setSelectedId] = useState(null); // Track selected room
+  const [loading, setLoading] = useState(true); // เพิ่ม state loading
+
+  // Auto-select the first room in the list
+  React.useEffect(() => {
+    if (rooms.length > 0 && !selectedId) {
+      setSelectedId(rooms[0].id);
+      onSelect?.(rooms[0]);
+    }
+  }, [rooms, selectedId, onSelect]);
+
+  // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
+  React.useEffect(() => {
+    if (rooms.length > 0) setLoading(false);
+  }, [rooms]);
 
   // Get comparable timestamp (seconds) from various shapes
   const getCreatedAt = (room) => {
@@ -50,6 +65,15 @@ const ChatList = ({ onSelect, projectId }) => {
     projectId ? { projectId } : undefined
   );
 
+  // ถ้ายัง loading ให้โชว์ spinner
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
+      </Card>
+    );
+  }
+
   return (
     <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
@@ -60,11 +84,22 @@ const ChatList = ({ onSelect, projectId }) => {
         <List>
           {rooms.map((group, idx) => (
             <React.Fragment key={group.id}>
-              <ListItem button onClick={() => onSelect?.(group)}>
+              <ListItem
+                button
+                onClick={() => {
+                  setSelectedId(group.id);
+                  onSelect?.(group);
+                }}
+                selected={selectedId === group.id}
+                sx={{
+                  bgcolor: selectedId === group.id ? theme.palette.action.hover : 'inherit',
+                  borderRadius: 2,
+                  transition: 'background 0.2s'
+                }}
+              >
                 <Typography variant="h5" sx={{pr: 1}}>#</Typography>
                 <ListItemText primary={group?.name || 'No Name'} />
               </ListItem>
-              {idx !== rooms.length - 1 && <Divider component="li" />}
             </React.Fragment>
           ))}
         </List>

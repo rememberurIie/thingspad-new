@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete'; // Add this import
 
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   const [previewURL, setPreviewURL] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [hoveredMsgId, setHoveredMsgId] = useState(null); // 1. Track hovered message
 
   const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -128,6 +130,25 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
     }
   };
 
+  // Add this function for delete (implement your own logic)
+  const handleDeleteMessage = async (msgId) => {
+    try {
+      await fetch('http://192.168.1.38:3000/api/dm/deleteMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          directMessageId: selectedDmId,
+          messageId: msgId,
+        }),
+      });
+      // ลบข้อความออกจาก state ทันที (หรือรอ SSE อัปเดต)
+      setMessages(msgs => msgs.filter(m => m.id !== msgId));
+    } catch (err) {
+      alert('Delete failed');
+      console.error(err);
+    }
+  };
+
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
@@ -190,12 +211,29 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
     return (
       <Box mt={0.5}>
         <Typography variant="body2">
-          <a href={att.url} target="_blank" rel="noreferrer">{att.name || 'Download file'}</a>
+          <a
+            href={att.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
+          >
+            {att.name || 'Download file'}
+          </a>
           {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
         </Typography>
       </Box>
     );
   };
+
+  function linkify(text) {
+    if (!text) return '';
+    // Use inline style for color
+    return text.replace(
+      /(https?:\/\/[^\s]+)/g,
+      (url) =>
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: ${theme.palette.secondary.dark}; font-weight: 500;">${url}</a>`
+    );
+  }
 
   return (
     <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
@@ -221,6 +259,8 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
             flex: 1,
             overflowY: 'auto',
             mt: 2,
+            ml: "-9px",
+            pr: 1,
             display: 'flex',
             flexDirection: 'column-reverse', // <-- This makes the chat start from the bottom
             '&::-webkit-scrollbar': { width: '6px' },
@@ -248,7 +288,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
               return (
                 <React.Fragment key={msg.id}>
                   {showDate && (
-                    <ListItem sx={{ justifyContent: 'center', py: 1 }}>
+                    <ListItem sx={{ justifyContent: 'center', py: 0 }}>
                       <Divider sx={{ flex: 1, mr: 2 }} />
                       <Typography variant="caption" sx={{ color: 'text.secondary'}}>
                         {new Date(
@@ -265,10 +305,17 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
                   <ListItem
                     alignItems="flex-start"
                     sx={{
-                      pl: 0,
                       alignItems: 'flex-start',
-                      mb: 0.5,
+                      position: 'relative',
+                      bgcolor: hoveredMsgId === msg.id ? theme.palette.action.hover : 'inherit',
+                      transition: 'background 0.2s',
+                      '&:hover': {
+                        bgcolor: theme.palette.action.hover,
+                      },
+                      borderRadius: 2, // Optional: keep rounded corners
                     }}
+                    onMouseEnter={() => setHoveredMsgId(msg.id)}
+                    onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
                       sx={{
@@ -277,6 +324,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
                         fontSize: 15,
                         mr: 1.2,
                         mt: 0.5,
+                        ml: 0, // Remove any left margin
                       }}
                     >
                       {(msg.fullName || '??').slice(0, 2).toUpperCase()}
@@ -306,11 +354,28 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
                           wordBreak: 'break-word',
                           mb: 1,
                         }}
-                      >
-                        {msg.text}
-                      </Typography>
+                        component="span"
+                        dangerouslySetInnerHTML={{ __html: linkify(msg.text) }}
+                      />
                       {renderAttachment(msg)}
                     </Box>
+                    {/* 3. Show delete button on hover and only for your own messages */}
+                    {hoveredMsgId === msg.id && msg.senderId === currentUserId && (
+                      <IconButton
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          color: theme.palette.error.main,
+                          bgcolor: theme.palette.background.paper,
+                          '&:hover': { bgcolor: theme.palette.error.light }
+                        }}
+                        onClick={() => handleDeleteMessage(msg.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </ListItem>
                 </React.Fragment>
               );

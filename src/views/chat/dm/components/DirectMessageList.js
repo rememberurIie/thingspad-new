@@ -7,43 +7,45 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
+import { useTheme } from '@mui/material/styles';
 
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext'; // Adjust the import path as needed
 
 
 const DirectMessageList = ({ onSelect, userId }) => {
+  const theme = useTheme(); // <-- get theme
   const { t } = useTranslation();
   const { dms, setDms } = useDirectMessageList();
   const [anchorEl, setAnchorEl] = useState(null);
   const [people, setPeople] = useState([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
   const [search, setSearch] = useState('');
+  const [dmSearch, setDmSearch] = useState(''); // Add this above the DM list rendering
+  const [selectedId, setSelectedId] = useState(null);
+  const [loading, setLoading] = useState(true); // เพิ่ม state loading
 
   // --- SSE for DM List ---
   useSSE(
     userId ? 'http://192.168.1.38:3000/api/dm/getDMList' : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
+        // แทนที่ทั้ง array เลย ไม่ต้อง merge
+        const merged = data.payload.map(dm => ({
+          id: dm.dmId,
+          name: dm.username,
+          ...dm,
+        })).sort((a, b) => {
+          const aSec = a.latestMessage?.createdAt?._seconds ?? 0;
+          const bSec = b.latestMessage?.createdAt?._seconds ?? 0;
+          return bSec - aSec;
+        });
         setDms(prev => {
-          // Convert prev to a map for fast lookup
-          const prevMap = new Map(prev.map(dm => [dm.id, dm]));
-          // Merge or add new DMs
-          data.payload.forEach(dm => {
-            const id = dm.dmId;
-            prevMap.set(id, { id, name: dm.username, ...dm });
-          });
-          // Convert back to array and sort
-          const merged = Array.from(prevMap.values()).sort((a, b) => {
-            const aSec = a.latestMessage?.createdAt?._seconds ?? 0;
-            const bSec = b.latestMessage?.createdAt?._seconds ?? 0;
-            return bSec - aSec;
-          });
-          // Only update if different
           if (JSON.stringify(prev) !== JSON.stringify(merged)) {
             return merged;
           }
           return prev;
         });
+        setLoading(false);
       }
     },
     userId ? { userId } : null
@@ -102,6 +104,35 @@ const DirectMessageList = ({ onSelect, userId }) => {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+
+  // Filter DMs by search
+  const filteredDms = dms.filter(dm =>
+    (dm.fullName || dm.name || dm.username || '')
+      .toLowerCase()
+      .includes(dmSearch.toLowerCase())
+  );
+
+  // Auto-select the first DM in the filtered list
+  React.useEffect(() => {
+    if (filteredDms.length > 0 && !selectedId) {
+      setSelectedId(filteredDms[0].id);
+      onSelect?.(filteredDms[0]);
+    }
+  }, [filteredDms, selectedId, onSelect]);
+
+  // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
+    React.useEffect(() => {
+      if (filteredDms.length > 0) setLoading(false);
+    }, [filteredDms]);
+
+  // ถ้ายัง loading ให้โชว์ spinner
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
+      </Card>
+    );
+  }
 
   return (
     <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
@@ -163,11 +194,34 @@ const DirectMessageList = ({ onSelect, userId }) => {
           )}
         </Menu>
 
+        <TextField
+          fullWidth
+          size="small"
+          placeholder={t('Search chat...')}
+          value={dmSearch}
+          onChange={e => setDmSearch(e.target.value)}
+          sx={{ my: 1}}
+        />
+
         <List>
-          {dms.map((user, idx) => (
+          {filteredDms.map((user, idx) => (
             <React.Fragment key={user.id}>
-              <ListItem sx={{ pl: 0 }} button onClick={() => onSelect?.(user)}>
-                <Avatar sx={{ width: 40, height: 40, fontSize: 15}}>
+              <ListItem
+                sx={{
+                  pl: 0,
+                  bgcolor: selectedId === user.id ? theme.palette.action.hover : 'inherit', // Use hover color for selected
+                  borderRadius: 2,
+                  transition: 'background 0.2s',
+                  pl: 1.5
+                }}
+                button
+                selected={selectedId === user.id}
+                onClick={() => {
+                  setSelectedId(user.id);
+                  onSelect?.(user);
+                }}
+              >
+                <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
                   {user?.fullName
                     ? user.fullName.slice(0, 2).toUpperCase()
                     : "??"}
@@ -180,7 +234,6 @@ const DirectMessageList = ({ onSelect, userId }) => {
                       const msg = user.latestMessage;
                       if (!msg) return null;
                       const isYou = msg.senderId === userId;
-                      // If has attachment, show type
                       if (msg.attachment) {
                         let typeLabel = 'attachment';
                         if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
@@ -191,7 +244,6 @@ const DirectMessageList = ({ onSelect, userId }) => {
                           </span>
                         );
                       }
-                      // If you sent the message
                       if (isYou) {
                         return (
                           <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -199,7 +251,6 @@ const DirectMessageList = ({ onSelect, userId }) => {
                           </span>
                         );
                       }
-                      // Otherwise, just show the message
                       return (
                         <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {msg.text}
@@ -209,7 +260,6 @@ const DirectMessageList = ({ onSelect, userId }) => {
                   }
                 />
               </ListItem>
-              {idx !== dms.length - 1 && <Divider component="li" />}
             </React.Fragment>
           ))}
         </List>

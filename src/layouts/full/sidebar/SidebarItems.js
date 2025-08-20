@@ -75,17 +75,16 @@ const SidebarItems = ({ isMinimized }) => {
 
   // Use SSE hook to fetch projects
   useSSE(
-    "http://192.168.1.38:3000/api/project/getProjectList",
+    user ? "http://192.168.1.38:3000/api/project/getProjectList" : null,
     (data) => {
       setProjects(prev => {
-        // Only update if different
         if (JSON.stringify(prev) !== JSON.stringify(data)) {
           return data;
         }
         return prev;
       });
     },
-    { uid: user.uid }
+    user ? { uid: user.uid } : undefined
   );
 
   // สร้างเมนูโปรเจกต์จากข้อมูล projects state

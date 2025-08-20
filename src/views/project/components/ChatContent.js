@@ -4,10 +4,12 @@ import {
   List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
   CircularProgress // <-- Add this import
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles'; // <-- Add this import
 
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import useSSE from '../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +17,8 @@ import { useTranslation } from 'react-i18next';
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
+  const theme = useTheme(); // <-- Add this line
+
   const [messages, setMessages] = useState([]);
   const [groupData, setGroupData] = useState(null);
   const [userMap, setUserMap] = useState({});
@@ -25,6 +29,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   const [previewURL, setPreviewURL] = useState('');
 
   const [loading, setLoading] = useState(false); // <-- Add loading state
+  const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -136,6 +141,24 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     }
   };
 
+  const handleDeleteMessage = async (msgId) => {
+    try {
+      await fetch('http://192.168.1.38:3000/api/project/deleteMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: selectedRoom.id,
+          messageId: msgId,
+        }),
+      });
+      // ลบข้อความออกจาก state ทันที (หรือรอ SSE อัปเดต)
+      setMessages(msgs => msgs.filter(m => m.id !== msgId));
+    } catch (err) {
+      alert('Delete failed');
+      console.error(err);
+    }
+  };
+
   // const scrollToBottom = () => {
   //   if (messagesContainerRef.current) {
   //     messagesContainerRef.current.scrollTo({
@@ -189,12 +212,29 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     return (
       <Box mt={0.5}>
         <Typography variant="body2">
-          <a href={att.url} target="_blank" rel="noreferrer">{att.name || 'Download file'}</a>
+          <a
+            href={att.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
+          >
+            {att.name || 'Download file'}
+          </a>
           {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
         </Typography>
       </Box>
     );
   };
+
+  function linkify(text) {
+  if (!text) return '';
+  // Use inline style for color
+  return text.replace(
+    /(https?:\/\/[^\s]+)/g,
+    (url) =>
+      `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: ${theme.palette.secondary.dark}; font-weight: 500;">${url}</a>`
+  );
+}
 
   return (
     <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
@@ -208,10 +248,12 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
         {/* Messages */}
         <Box sx={{
-          flex: 1,
-          overflowY: 'auto',
-          mt: 2,
-          display: 'flex',
+           flex: 1,
+            overflowY: 'auto',
+            mt: 2,
+            ml: "-8px",
+            pr: 1,
+            display: 'flex',
           flexDirection: 'column-reverse', // This makes the scroll start at the bottom
           '&::-webkit-scrollbar': { width: '6px' },
           '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
@@ -235,7 +277,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
               return (
                 <React.Fragment key={msg.id}>
                   {showDate && (
-                    <ListItem sx={{ justifyContent: 'center', py: 1 }}>
+                    <ListItem sx={{ justifyContent: 'center', py: 0 }}>
                       <Divider sx={{ flex: 1, mr: 2 }} />
                       <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
                         {new Date(
@@ -252,10 +294,18 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                   <ListItem
                     alignItems="flex-start"
                     sx={{
-                      pl: 0,
+                      borderRadius: 2,
                       alignItems: 'flex-start',
                       mb: 0.5,
+                      position: 'relative',
+                      bgcolor: hoveredMsgId === msg.id ? 'action.hover' : 'inherit',
+                      transition: 'background 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                      },
                     }}
+                    onMouseEnter={() => setHoveredMsgId(msg.id)}
+                    onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
                       src={userMap[msg.senderId]?.avatarUrl}
@@ -296,11 +346,28 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                           wordBreak: 'break-word',
                           mb: 1,
                         }}
-                      >
-                        {msg.text}
-                      </Typography>
-                      {renderAttachment(msg)}
+                        component="span"
+                        dangerouslySetInnerHTML={{ __html: linkify(msg.text) }}
+                      />
+                    {renderAttachment(msg)}
                     </Box>
+                    {/* Show delete button only on hover and only for your own messages */}
+                    {hoveredMsgId === msg.id && msg.senderId === currentUserId && (
+                      <IconButton
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          color: 'error.main',
+                          bgcolor: 'background.paper',
+                          '&:hover': { bgcolor: 'error.light' }
+                        }}
+                        onClick={() => handleDeleteMessage(msg.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </ListItem>
                 </React.Fragment>
               );
