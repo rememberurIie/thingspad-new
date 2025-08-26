@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import {
   Card, CardContent, Typography, Avatar,
-  List, ListItem, ListItemAvatar, ListItemText
+  List, ListItem, ListItemAvatar, ListItemText,  Box, IconButton, TextField, Button 
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../hook/useSSE';
+
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 
 const ChatMember = ({ onSelect, projectId }) => {
   const { t } = useTranslation();
@@ -17,7 +20,7 @@ const ChatMember = ({ onSelect, projectId }) => {
 
   // Use SSE for users and user events
   useSSE(
-    projectId ? 'http://192.168.1.38:3000/api/project/getProjectData' : null,
+    projectId ? 'http://192.168.1.34:3000/api/project/getProjectData' : null,
     (evt) => {
       if (evt.type === 'users' && Array.isArray(evt.payload)) {
         setMembers(
@@ -56,9 +59,26 @@ const ChatMember = ({ onSelect, projectId }) => {
   return (
     <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          {t('project.members') || 'Users'}
-        </Typography>
+
+        <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
+          <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
+            {t('project.members') || 'Users'}
+          </Typography>
+          <IconButton
+            color="inherit"
+            // onClick={handleOpenMenuAddUser}
+            sx={{ mr: '-10px', mt: '-5px'}}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            // onClick={handleOpenMenuAddUser}
+            sx={{ mr: '-10px', mt: '-5px'}}
+          >
+            <AddIcon />
+          </IconButton>
+        </Box>
 
         <List>
           {members.map((u) => {
@@ -68,7 +88,19 @@ const ChatMember = ({ onSelect, projectId }) => {
               '??';
 
             return (
-              <ListItem key={u.id} button onClick={() => onSelect?.(u)}>
+              <ListItem
+                key={u.id}
+                button
+                onClick={() => onSelect?.(u)}
+                sx={{
+                  borderRadius: 2,
+                  transition: 'background 0.2s',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                    borderRadius: 2, // keep border radius on hover
+                  },
+                }}
+              >
                 <ListItemAvatar>
                   <Avatar src={u.avatarUrl} alt={initials.toUpperCase()}>
                     {(!u.avatarUrl || u.avatarUrl === '') && (

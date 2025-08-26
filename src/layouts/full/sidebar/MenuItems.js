@@ -29,9 +29,9 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'menu.chatByRole',
+    title: 'menu.groupChat',
     icon: IconTable,
-    href: '/chat/role',
+    href: '/chat/group',
   }
 ];
 

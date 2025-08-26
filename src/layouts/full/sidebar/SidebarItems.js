@@ -75,7 +75,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   // Use SSE hook to fetch projects
   useSSE(
-    user ? "http://192.168.1.38:3000/api/project/getProjectList" : null,
+    user ? "http://192.168.1.34:3000/api/project/getProjectList" : null,
     (data) => {
       setProjects(prev => {
         if (JSON.stringify(prev) !== JSON.stringify(data)) {

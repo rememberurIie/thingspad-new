@@ -26,7 +26,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for DM List ---
   useSSE(
-    userId ? 'http://192.168.1.38:3000/api/dm/getDMList' : null,
+    userId ? 'http://192.168.1.34:3000/api/dm/getDMList' : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -50,14 +50,13 @@ const DirectMessageList = ({ onSelect, userId }) => {
     },
     userId ? { userId } : null
   );
-  // -----------------------
 
   // Fetch people to create DM with
   const handleOpenMenu = async (event) => {
     setAnchorEl(event.currentTarget);
     setLoadingPeople(true);
     try {
-      const res = await fetch('http://192.168.1.38:3000/api/dm/getUserToCreateDM', {
+      const res = await fetch('http://192.168.1.34:3000/api/dm/getUserToCreateDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
@@ -79,7 +78,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   const handleSelectPerson = async (person) => {
     handleCloseMenu();
     try {
-      const res = await fetch('http://192.168.1.38:3000/api/dm/createDM', {
+      const res = await fetch('http://192.168.1.34:3000/api/dm/createDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,7 +165,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
               autoFocus
               fullWidth
               size="small"
-              placeholder={t('Search user...')}
+              placeholder={t('dm.search_user_box')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               sx={{ mb: 1 }}
@@ -197,7 +196,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
         <TextField
           fullWidth
           size="small"
-          placeholder={t('Search chat...')}
+          placeholder={t('dm.search_chat_box')}
           value={dmSearch}
           onChange={e => setDmSearch(e.target.value)}
           sx={{ my: 1}}
@@ -208,7 +207,6 @@ const DirectMessageList = ({ onSelect, userId }) => {
             <React.Fragment key={user.id}>
               <ListItem
                 sx={{
-                  pl: 0,
                   bgcolor: selectedId === user.id ? theme.palette.action.hover : 'inherit', // Use hover color for selected
                   borderRadius: 2,
                   transition: 'background 0.2s',

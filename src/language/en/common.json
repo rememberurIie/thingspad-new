@@ -4,7 +4,7 @@
     "myTask": "My Task",
     "chats": "Chats",
     "directChat": "Direct Chat",
-    "chatByRole": "Chat by Role",
+    "groupChat": "Group Chat",
     "projects": "Projects"
   },
     "header": {
@@ -13,13 +13,44 @@
   "dm": {
     "list_header": "Chats",
     "chat_header": "Please select a DM to start chatting!",
-    "find_user": "Select Users"
-    
+    "find_user": "Select Users",
+    "search_user_box": "Search User",
+    "search_chat_box": "Search Chat"
+  },
+  "group": {
+    "list_header": "Chats",
+    "chat_header": "Please select a group to start chatting!",
+    "find_user": "Select Users",
+    "search_user_box": "Search User",
+    "search_chat_box": "Search Chat",
+    "popup_list_header" : "Create Group",
+    "popup_list_description" : "Name the group and add members<br><br/>(Minimum 3 people including you)",
+    "popup_list_group_name" : "Group Name",
+    "popup_list_you" : "You",
+    "popup_list_submit_button" : "Create Group",
+    "chat_menu_editname" : "Edit Group Name",
+    "chat_menu_leave" : "Leave Group",
+    "popup_chat_edit_header" : "Edit Group Name",
+    "popup_chat_edit_groupname" : "Group Name",
+    "popup_chat_edit_saving" : "Saving...",
+    "popup_chat_edit_save" : "Save",
+    "popup_chat_leave_header" : "Leave Group",
+    "popup_chat_leave_description" : "Are you sure you want to leave this group?",
+    "popup_chat_leave_submitting" : "Leaving...",
+    "popup_chat_leave_submit" : "Leave",
+    "popup_chat_leave_cancel" : "Cancel",
+    "popup_member_header" : "Group Members",
+    "popup_member_searchbox" : "Search user...",
+    "popup_member_add" : "Add",
+    "popup_member_adding" : "Adding...",
+    "popup_member_nouser" : "No user to add."
   },
   "project": {
     "rooms": "Chat Rooms",
     "room_select": "Select room to start chat!",
-    "members": "Members"
+    "members": "Members",
+    "newroom_name": "New Room Name",
+    "newroom_create": "Create"
   },
   "login": {
     "description": "Please Login First",

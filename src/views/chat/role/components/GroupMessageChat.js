@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState,} from 'react';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
   List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
-  CircularProgress
+  CircularProgress, Button, Menu, MenuItem
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -12,6 +12,8 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete'; // Add this import
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckIcon from '@mui/icons-material/Check';
 
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +21,7 @@ import { useTranslation } from 'react-i18next';
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
-const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
+const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUserId }) => {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -29,7 +31,16 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   const [previewURL, setPreviewURL] = useState('');
 
   const [loading, setLoading] = useState(false);
-  const [hoveredMsgId, setHoveredMsgId] = useState(null); // 1. Track hovered message
+  const [hoveredMsgId, setHoveredMsgId] = useState(null);
+
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [showEditName, setShowEditName] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editNameLoading, setEditNameLoading] = useState(false);
+  const [editNameError, setEditNameError] = useState('');
+  const [showLeave, setShowLeave] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState(false);
+  const [leaveError, setLeaveError] = useState('');
 
   const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -38,12 +49,19 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 
+  const [groupName, setGroupName] = useState(groupNameProp || '');
+
+  // Sync with prop if parent changes groupName
+  useEffect(() => {
+    setGroupName(groupNameProp || '');
+  }, [groupNameProp]);
+
   useSSE(
-    selectedDmId ? 'http://192.168.1.34:3000/api/dm/getMessage' : null,
+    selectedGroupId ? 'http://192.168.1.34:3000/api/group/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
-          if (data.dmId === selectedDmId) {
+          if (data.groupId === selectedGroupId) {
             setMessages(
               data.payload.sort((a, b) => {
                 const getSec = (msg) =>
@@ -60,7 +78,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
           console.warn('Unknown SSE type:', data.type);
       }
     },
-    currentUserId && selectedDmId ? { directMessageId: selectedDmId } : null
+    currentUserId && selectedGroupId ? { groupId: selectedGroupId } : null
   );
   
   const clearFile = () => {
@@ -100,11 +118,11 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.34:3000/api/dm/sendMessage';
+      const endpoint = 'http://192.168.1.34:3000/api/group/sendMessage';
 
       if (file) {
         const form = new FormData();
-        form.append('directMessageId', selectedDmId);
+        form.append('groupId', selectedGroupId);
         form.append('senderId', currentUserId);
         form.append('text', input || '');
         form.append('file', file);
@@ -115,7 +133,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            directMessageId: selectedDmId,
+            groupId: selectedGroupId,
             senderId: currentUserId,
             text: input,
           }),
@@ -133,11 +151,11 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   // Add this function for delete (implement your own logic)
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.34:3000/api/dm/deleteMessage', {
+      await fetch('http://192.168.1.34:3000/api/group/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          directMessageId: selectedDmId,
+          groupId: selectedGroupId,
           messageId: msgId,
         }),
       });
@@ -147,6 +165,66 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
       alert('Delete failed');
       console.error(err);
     }
+  };
+
+  // --- Edit Group Name ---
+  const handleEditGroupName = async () => {
+    if (!editName.trim()) {
+      setEditNameError('Group name required');
+      return;
+    }
+    setEditNameLoading(true);
+    setEditNameError('');
+    try {
+      const res = await fetch('http://192.168.1.34:3000/api/group/updateGroupName', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: selectedGroupId,
+          newName: editName,
+        }),
+      });
+      const data = await res.json();
+      if (data.success || data.status === 'ok') {
+        setShowEditName(false);
+        setEditName('');
+        setEditNameError('');
+        setGroupName(editName); // <-- update group name in UI immediately
+      } else {
+        setEditNameError(data.error || 'Failed to update group name');
+      }
+    } catch (err) {
+      setEditNameError('Failed to update group name');
+    }
+    setEditNameLoading(false);
+  };
+
+  // --- Leave Group ---
+  const handleLeaveGroup = async () => {
+    setLeaveLoading(true);
+    setLeaveError('');
+    try {
+      const res = await fetch('http://192.168.1.34:3000/api/group/toggleUserinGroup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: selectedGroupId,
+          userId: currentUserId,
+          isMember: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success || data.status === 'ok') {
+        setShowLeave(false);
+        // Optionally: redirect or clear chat
+        window.location.reload();
+      } else {
+        setLeaveError(data.error || 'Failed to leave group');
+      }
+    } catch (err) {
+      setLeaveError('Failed to leave group');
+    }
+    setLeaveLoading(false);
   };
 
   const scrollToBottom = () => {
@@ -161,8 +239,8 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
-    if (selectedDmId) setLoading(true);
-  }, [selectedDmId]);
+    if (selectedGroupId) setLoading(true);
+  }, [selectedGroupId]);
 
   useEffect(() => {
       // Always exit loading when messages are loaded, even if empty
@@ -177,11 +255,11 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
     );
   }
 
-  if (!selectedDmId) {
+  if (!selectedGroupId) {
     return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
         <CardContent>
-          <Typography variant="h6">{t('dm.chat_header')}</Typography>
+          <Typography variant="h6">{t('group.chat_header')}</Typography>
         </CardContent>
       </Card>
     );
@@ -240,18 +318,181 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
-          <Avatar sx={{ width: 40, height: 40, fontSize: 15}}>
-            {otherFullName
-              ? otherFullName.slice(0, 2).toUpperCase()
+          <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
+            {groupName
+              ? groupName.slice(0, 2).toUpperCase()
               : "??"}
           </Avatar>
-          <Box ml={1.5}>
+          <Box ml={1.5} flex={1}>
             <Typography variant="h6">
-              {otherFullName || ""}
+              {groupName || ""}
             </Typography>
           </Box>
+          <IconButton
+            onClick={e => setMenuAnchor(e.currentTarget)}
+            sx={{ ml: 1 }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={() => setMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null);
+                setEditName(groupName || '');
+                setShowEditName(true);
+              }}
+            >
+              {t('group.chat_menu_editname')}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null);
+                setShowLeave(true);
+              }}
+              sx={{ color: theme.palette.error.main }}
+            >
+              {t('group.chat_menu_leave')}
+            </MenuItem>
+          </Menu>
         </Box>
         <Divider />
+
+        {/* Edit Group Name Popup */}
+        {showEditName && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: 'rgba(0,0,0,0.25)',
+              zIndex: 1300,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                width: 350,
+                bgcolor: 'background.paper',
+                borderRadius: 3,
+                boxShadow: 24,
+                p: 3,
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <IconButton
+                onClick={() => setShowEditName(false)}
+                sx={{ position: 'absolute', top: 8, right: 8 }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                {t('group.popup_chat_edit_header')}
+              </Typography>
+              <TextField
+                label={t('group.popup_chat_edit_groupname')}
+                value={editName}
+                onChange={e => {
+                  if (e.target.value.length <= 32) setEditName(e.target.value);
+                }}
+                inputProps={{ maxLength: 32 }}
+                fullWidth
+                size="small"
+                sx={{ mb: 2 }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, ml: 0.5 }}>
+                {editName.length}/32
+              </Typography>
+              {editNameError && <Typography color="error" variant="body2" mb={1}>{editNameError}</Typography>}
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<CheckIcon />}
+                onClick={handleEditGroupName}
+                disabled={editNameLoading || !editName.trim() || editName.length < 1}
+                fullWidth
+              >
+                {editNameLoading ? t('group.popup_chat_edit_saving') : t('group.popup_chat_edit_save')}
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {/* Leave Group Popup */}
+        {showLeave && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: 'rgba(0,0,0,0.25)',
+              zIndex: 1300,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                width: 350,
+                bgcolor: 'background.paper',
+                borderRadius: 3,
+                boxShadow: 24,
+                p: 3,
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <IconButton
+                onClick={() => setShowLeave(false)}
+                sx={{ position: 'absolute', top: 8, right: 8 }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography variant="subtitle1" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                {t('group.popup_chat_leave_header')}
+              </Typography>
+              <Typography variant="subtitle1" mb={2} sx={{ fontSize: '14px'}}>
+                {t('group.popup_chat_leave_description')}
+              </Typography>
+              {leaveError && <Typography color="error" variant="body2" mb={1}>{leaveError}</Typography>}
+              <Box display="flex" gap={1}>
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<CheckIcon />}
+                  onClick={handleLeaveGroup}
+                  disabled={leaveLoading}
+                  fullWidth
+                >
+                  {leaveLoading ? t('group.popup_chat_leave_submitting') : t('group.popup_chat_leave_submit')}
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<CloseIcon />}
+                  onClick={() => setShowLeave(false)}
+                  disabled={leaveLoading}
+                  fullWidth
+                >
+                  {t('group.popup_chat_leave_cancel')}
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        )}
 
         {/* Messages */}
         <Box
@@ -332,7 +573,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
                     <Box sx={{ ml: 1, flex: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {msg.displayName || (msg.senderId === currentUserId ? msg.fullName : otherFullName) || msg.senderId}
+                          {msg.fullName || msg.senderId}
                         </Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2 , fontSize: '11px' }}>
                           {msg.createdAt &&
@@ -448,4 +689,4 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   );
 };
 
-export default DirectMessageChat;
+export default GroupMessageChat;

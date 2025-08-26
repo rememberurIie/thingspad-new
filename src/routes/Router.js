@@ -10,7 +10,7 @@ const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 /* ****Pages***** */
 const Dashboard = lazy(() => import('../views/dashboard/Dashboard'));
 const DirectMessage = lazy(() => import('../views/chat/dm/DirectMessage'));
-const ChatbyRole = lazy(() => import('../views/chat/role/ChatbyRole'));
+const GroupMessage = lazy(() => import('../views/chat/role/GroupMessage'));
 const Project = lazy(() => import('../views/project/Project'));
 
 
@@ -23,18 +23,21 @@ const Error = lazy(() => import('../views/authentication/Error'));
 import { ChatListProvider } from '../contexts/ChatListContext';
 import { ProjectListProvider } from '../contexts/ProjectListContext';
 import { DirectMessageListProvider } from '../contexts/DirectMessageListContext';
+import { GroupMessageListProvider } from '../contexts/GroupMessageListContext';
 
 const Router = [
   {
     path: '/',
     element: (
-      <ChatListProvider>
-        <ProjectListProvider>
-          <DirectMessageListProvider>
-            <FullLayout />
-          </DirectMessageListProvider>
-        </ProjectListProvider>
-      </ChatListProvider>
+      <GroupMessageListProvider>
+        <ChatListProvider>
+          <ProjectListProvider>
+            <DirectMessageListProvider>
+              <FullLayout />
+            </DirectMessageListProvider>
+          </ProjectListProvider>
+        </ChatListProvider>
+      </GroupMessageListProvider>
     ),
     children: [
       {
@@ -58,10 +61,10 @@ const Router = [
         ),
       },
       {
-        path: '/chat/role',
+        path: '/chat/group',
         element: (
           <ProtectedRoute>
-            <ChatbyRole />
+            <GroupMessage />
           </ProtectedRoute>
         ),
       },

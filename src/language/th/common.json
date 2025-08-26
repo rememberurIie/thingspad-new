@@ -4,7 +4,7 @@
     "myTask": "งานของฉัน",
     "chats": "แชท",
     "directChat": "แชทส่วนตัว",
-    "chatByRole": "แชทตามบทบาท",
+    "groupChat": "แชทกลุ่ม",
     "projects": "โครงการ"
   },
   "header": {
@@ -13,12 +13,44 @@
   "dm": {
     "list_header": "แชท",
     "chat_header": "กรุณาเลือกห้องเพื่อเริ่มแชท!",
-    "find_user": "เลือกผู้ใช้งาน"
+    "find_user": "เลือกผู้ใช้งาน",
+    "search_user_box": "ค้นหาผู้ใช้งาน",
+    "search_chat_box": "ค้นหาแชท"
+  },
+  "group": {
+    "list_header": "แชท",
+    "chat_header": "กรุณาเลือกกลุ่มเพื่อเริ่มแชท!",
+    "find_user": "เลือกผู้ใช้งาน",
+    "search_user_box": "ค้นหาผู้ใช้งาน",
+    "search_chat_box": "ค้นหาแชท",
+    "popup_list_header" : "สร้างกลุ่ม",
+    "popup_list_description" : "ตั้งชื่อกลุ่มและเพิ่มสมาชิก<br><br/>(ชั้นต่ำ 3 คน รวมถึงคุณด้วย)",
+    "popup_list_group_name" : "ชื่อกลุ่ม",
+    "popup_list_you" : "คุณ",
+    "popup_list_submit_button" : "สร้างกลุ่ม",
+    "chat_menu_editname" : "เปลี่ยนชื่อกลุ่ม",
+    "chat_menu_leave" : "ออกจากกลุ่ม",
+    "popup_chat_edit_header" : "เปลี่ยนชื่อกลุ่ม",
+    "popup_chat_edit_groupname" : "ชื่อกลุ่ม",
+    "popup_chat_edit_saving" : "กำลังบันทึก...",
+    "popup_chat_edit_save" : "บันทึก",
+    "popup_chat_leave_header" : "ออกจากกลุ่ม",
+    "popup_chat_leave_description" : "คุณต้องการออกจากกลุ่มนี้หรือไม่?",
+    "popup_chat_leave_submitting" : "กำลังออก...",
+    "popup_chat_leave_submit" : "ออก",
+    "popup_chat_leave_cancel" : "ยกเลิก",
+    "popup_member_header" : "สมาชิกกลุ่ม",
+    "popup_member_searchbox" : "ค้นหาผู้ใช้งาน...",
+    "popup_member_add" : "เพิ่ม",
+    "popup_member_adding" : "กำลังเพิ่ม...",
+    "popup_member_nouser" : "ไม่มีผู้ใช้งานที่จะเพิ่ม"
   },
   "project": {
     "rooms": "ห้องแชท",
     "room_select": "กรุณาเลือกห้องเพื่อเริ่มแชท!",
-    "members": "สมาชิก"
+    "members": "สมาชิก",
+    "newroom_name": "ชื่อห้องใหม่",
+    "newroom_create": "สร้าง"
   },
   "login": {
     "description": "กรุณาล็อกอินก่อน",

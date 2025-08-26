@@ -46,7 +46,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   }, [messages]);
 
   useSSE(
-    projectId ? 'http://192.168.1.38:3000/api/project/getProjectData' : null,
+    projectId ? 'http://192.168.1.34:3000/api/project/getProjectData' : null,
     (data) => {
       switch (data.type) {
         case 'users': {
@@ -111,7 +111,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.38:3000/api/project/sendMessage';
+      const endpoint = 'http://192.168.1.34:3000/api/project/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -143,7 +143,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.38:3000/api/project/deleteMessage', {
+      await fetch('http://192.168.1.34:3000/api/project/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -158,17 +158,6 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
       console.error(err);
     }
   };
-
-  // const scrollToBottom = () => {
-  //   if (messagesContainerRef.current) {
-  //     messagesContainerRef.current.scrollTo({
-  //       top: messagesContainerRef.current.scrollHeight,
-  //       behavior: 'smooth',
-  //     });
-  //   }
-  // };
-
-  // useEffect(() => { scrollToBottom(); }, [messages]);
 
   if (loading) {
     return (
@@ -194,7 +183,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
     if (att.contentType?.startsWith('image/')) {
       return (
-        <Box mt={0.5}>
+        <Box mt={1}>
           <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8 }} />
         </Box>
       );
