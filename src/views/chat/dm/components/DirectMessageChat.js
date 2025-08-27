@@ -202,9 +202,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
             />
           </Box>
         );
-      }
-  
-      ont 
+      } 
   
       // generic file
       return (
