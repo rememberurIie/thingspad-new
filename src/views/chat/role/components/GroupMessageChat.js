@@ -272,7 +272,12 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     if (att.contentType?.startsWith('image/')) {
       return (
         <Box mt={0.5}>
-          <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <img
+            src={att.url}
+            alt={att.name || 'image'}
+            style={{ maxWidth: '100%', borderRadius: 8 }}
+            loading="lazy" // เพิ่มบรรทัดนี้
+          />
         </Box>
       );
     }
@@ -280,7 +285,12 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     if (att.contentType?.startsWith('video/')) {
       return (
         <Box mt={0.5}>
-          <video src={att.url} controls style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <video
+            src={att.url}
+            controls
+            style={{ maxWidth: '50%', borderRadius: 8 }}
+            preload="none" // ช่วยลดโหลดล่วงหน้า
+          />
         </Box>
       );
     }

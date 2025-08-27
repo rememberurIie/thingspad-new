@@ -41,80 +41,96 @@ const ChatList = ({ onSelect, projectId }) => {
     if (rooms.length > 0) setLoading(false);
   }, [rooms]);
 
-  // Get comparable timestamp (seconds) from various shapes
-  const getCreatedAt = (room) => {
-    const ca = room?.createdAt;
-    if (!ca) return Infinity;
-    if (typeof ca === 'number') return ca;                       // plain epoch seconds
-    if (typeof ca === 'string') return Date.parse(ca) / 1000;    // ISO string
-    if (typeof ca?._seconds === 'number') return ca._seconds;    // Firestore TS from API
-    if (typeof ca?.seconds === 'number') return ca.seconds;      // Firestore TS from SDK
-    return Infinity;
-  };
-
-  // SSE handler for groupData events
+  // --- SSE: Real-time room list ---
   useSSE(
-    projectId ? 'http://192.168.1.34:3000/api/project/getProjectData' : null,
+    projectId ? 'http://192.168.1.34:3000/api/project/getRoomList' : null,
     (evt) => {
-      // Expect: { type: 'groupData', groupId, payload }
-      if (evt?.type === 'groupData' && evt?.groupId && evt?.payload) {
-        setRooms((prev) => {
-          const idx = prev.findIndex(r => r.id === evt.groupId);
-          const nextRoom = { id: evt.groupId, ...evt.payload };
-
-          let next;
-          if (idx !== -1) {
-            next = [...prev];
-            next[idx] = nextRoom;
-          } else {
-            next = [...prev, nextRoom];
-          }
-
-          next.sort((a, b) => getCreatedAt(a) - getCreatedAt(b)); // oldest first
-          return next;
-        });
+      // กรณี 1: { type: 'rooms', payload: [...] }
+      if (Array.isArray(evt)) {
+        setRooms(evt.map(r => ({
+          ...r,
+          id: r.id,
+          name: r.name,
+        })));
+        setLoading(false);
       }
     },
     projectId ? { projectId } : undefined
   );
 
+  
+
   const handleOpenMenuAddUser = () => {
     setShowInput((prev) => !prev);
   };
 
+  // Add room
   const handleAddRoom = async () => {
     if (!newRoomName.trim()) return;
-    // TODO: Replace with your API call to create a new room
-    // Example:
-    // await fetch('/api/project/createRoom', { method: 'POST', body: JSON.stringify({ name: newRoomName, projectId }) });
-    setRooms(prev => [
-      ...prev,
-      { id: `temp-${Date.now()}`, name: newRoomName }
-    ]);
+    try {
+      const res = await fetch('http://192.168.1.34:3000/api/project/createRoom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, roomName: newRoomName }),
+      });
+      const data = await res.json();
+      if (data.room) {
+        setRooms(prev => [
+          ...prev,
+          {
+            ...data.room,
+            id: data.room.roomId || data.room.id,
+            name: data.room.roomName || data.room.name,
+          }
+        ]);
+      }
+    } catch {}
     setNewRoomName('');
     setShowInput(false);
   };
 
-  const handleEditRoom = (room) => {
-    setEditingId(room.id);
-    setEditName(room.name);
-  };
-
-  const handleEditNameSave = () => {
-    setRooms(prev =>
-      prev.map(r => r.id === editingId ? { ...r, name: editName } : r)
-    );
+  // Edit room name
+  const handleEditNameSave = async () => {
+    if (!editName.trim()) return;
+    try {
+      await fetch('http://192.168.1.34:3000/api/project/updateRoomName', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, roomId: editingId, newName: editName }),
+      });
+      setRooms(prev =>
+        prev.map(r => r.id === editingId ? { ...r, name: editName } : r)
+      );
+      // แจ้ง parent ว่าห้องนี้ชื่อใหม่แล้ว (ถ้าเลือกอยู่)
+      if (selectedId === editingId && onSelect) {
+        const updatedRoom = rooms.find(r => r.id === editingId);
+        if (updatedRoom) onSelect({ ...updatedRoom, name: editName });
+      }
+    } catch {}
     setEditingId(null);
     setEditName('');
   };
 
-  const handleDeleteRoom = (roomId) => {
-    setRooms(prev => prev.filter(r => r.id !== roomId));
-    if (selectedId === roomId) setSelectedId(null);
+  const handleDeleteRoom = async (roomId) => {
+    try {
+      await fetch('http://192.168.1.34:3000/api/project/deleteRoom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, roomId }),
+      });
+      setRooms(prev => prev.filter(r => r.id !== roomId));
+      if (selectedId === roomId) setSelectedId(null);
+    } catch {}
   };
 
-  // ถ้ายัง loading ให้โชว์ spinner
-  if (loading) {
+  const handleEditRoom = (group) => {
+    setEditingId(group.id);
+    setEditName(group.name || '');
+    setMenuOpenId(null);
+  };
+
+  // ถ้ายัง loading และ rooms มีมากกว่า 0 ให้โชว์ spinner
+  if (loading && rooms.length > 0) {
     return (
       <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />

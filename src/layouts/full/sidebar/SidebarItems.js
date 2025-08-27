@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, NavLink } from "react-router-dom";
-import { Box, Divider } from "@mui/material";
+import { Box, Divider, Button, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox, ListItem as MuiListItem, ListItemAvatar, ListItemText, Avatar, List as MuiList, CircularProgress, TextField, Typography, IconButton } from "@mui/material";
 import {
   Logo,
   Sidebar as MUI_Sidebar,
@@ -16,6 +16,7 @@ import { useTheme } from "@mui/material/styles";
 import { useTranslation } from 'react-i18next';
 import useSSE from "../../../hook/useSSE";
 import { useProjectList } from '../../../contexts/ProjectListContext';
+import AddIcon from '@mui/icons-material/Add';
 
 const renderMenuItems = (items, pathDirect, isMinimized) => {
 
@@ -63,15 +64,87 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
 };
 
 const SidebarItems = ({ isMinimized }) => {
-  // const [projects, setProjects] = useState([]); // REMOVE
-  const { projects, setProjects } = useProjectList(); // USE CONTEXT
+  const { projects, setProjects } = useProjectList();
   const location = useLocation();
   const pathDirect = location.pathname;
   const theme = useTheme();
-
   const user = useSelector(state => state.auth.user);
-
   const { t } = useTranslation();
+
+  // --- Create Project Dialog State ---
+  const [openCreate, setOpenCreate] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [projectName, setProjectName] = useState('');
+
+  // Open dialog and load users
+  const handleOpenCreate = async () => {
+    setOpenCreate(true);
+    setLoadingUsers(true);
+    setCreateError('');
+    try {
+      // ไม่ต้องส่ง body หรือ header ใดๆ
+      const res = await fetch('http://192.168.1.34:3000/api/group/getUserToCreateGroup', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      // users อยู่ใน data.users
+      setAllUsers((data.users || []).map(u => ({
+        ...u,
+        id: u.userId, // ให้ใช้ id สำหรับ checkbox/select
+      })));
+      // Preselect myself (ถ้ามี user?.uid ตรงกับ userId ใน list)
+      if (user?.uid) setSelectedMembers([user.uid]);
+    } catch {
+      setAllUsers([]);
+      setCreateError('Failed to load users');
+    }
+    setLoadingUsers(false);
+  };
+
+  const handleCloseCreate = () => {
+    setOpenCreate(false);
+    setProjectName('');
+    setSelectedMembers(user?.uid ? [user.uid] : []);
+    setCreateError('');
+  };
+
+  const handleToggleMember = (uid) => {
+    setSelectedMembers(prev =>
+      prev.includes(uid)
+        ? prev.filter(id => id !== uid)
+        : [...prev, uid]
+    );
+  };
+
+  const handleCreateProject = async () => {
+    if (!projectName.trim() || selectedMembers.length < 3) return;
+    setCreateLoading(true);
+    setCreateError('');
+    try {
+      const res = await fetch('http://192.168.1.34:3000/api/project/createProject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName,
+          members: selectedMembers,
+        }),
+      });
+      const data = await res.json();
+      // สำเร็จถ้า data.success === true
+      if (data.success) {
+        handleCloseCreate();
+      } else {
+        setCreateError(data.error || 'Create failed');
+      }
+    } catch {
+      setCreateError('Create failed');
+    }
+    setCreateLoading(false);
+  };
 
   // Use SSE hook to fetch projects
   useSSE(
@@ -98,27 +171,141 @@ const SidebarItems = ({ isMinimized }) => {
   // รวมเมนูหลักและเมนูโปรเจกต์
   const combinedMenu = [
     ...Menuitems,
-    { subheader: t('menu.projects', 'Projects') }, ,
+    { subheader: t('menu.projects', 'Projects') },
     ...projectMenuItems,
   ];
 
   return (
-    <Box sx={{ px: "24px", overflowX: "hidden", py: { xs: "15px", lg: 0 } }}>
-      <MUI_Sidebar
-        width={isMinimized ? "45px" : "100%"}
-        showProfile={false}
-        themeColor={"#5D87FF"}
-        themeSecondaryColor={"#49BEFF1a"}
-        textColor={theme.palette.grey[600]}
+    <>
+      <Box sx={{ px: "24px", overflowX: "hidden", py: { xs: "15px", lg: 0 } }}>
+        <MUI_Sidebar
+          width={isMinimized ? "45px" : "100%"}
+          showProfile={false}
+          themeColor={"#5D87FF"}
+          themeSecondaryColor={"#49BEFF1a"}
+          textColor={theme.palette.grey[600]}
+        >
+          <Box sx={{ margin: "0 -24px" }}>
+            <Logo img={logoicn} component={NavLink} to="/">
+              {!isMinimized && "Flexy"}
+            </Logo>
+          </Box>
+          {renderMenuItems(combinedMenu, pathDirect, isMinimized)}
+        </MUI_Sidebar>
+      </Box>
+      <Box
+        sx={{
+          mt: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          px: "24px",
+          width: isMinimized ? '100%' : 'auto',
+        }}
       >
-        <Box sx={{ margin: "0 -24px" }}>
-          <Logo img={logoicn} component={NavLink} to="/">
-            {!isMinimized && "Flexy"}
-          </Logo>
-        </Box>
-        {renderMenuItems(combinedMenu, pathDirect, isMinimized)}
-      </MUI_Sidebar>
-    </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenCreate}
+          sx={{
+            width: isMinimized ? 45 : '100%',
+            minWidth: 45,
+            height: 40,
+            borderRadius: '7px',
+            p: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxShadow: 'none',
+            background: theme.palette.grey[800],
+            color: theme.palette.grey[100],
+            display: 'flex',
+            gap: 1,
+            '& .MuiButton-startIcon': {
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+            },
+            '& span': {
+              display: isMinimized ? 'none' : 'inline',
+            },
+          }}
+          disabled={false}
+          startIcon={<AddIcon />}
+        >
+          <span>{!isMinimized && t('menu.create_project', 'Create Project')}</span>
+        </Button>
+      </Box>
+      {/* Create Project Dialog */}
+      <Dialog open={openCreate} onClose={handleCloseCreate} maxWidth="xs" fullWidth>
+        <DialogTitle>{t('menu.create_project', 'Create Project')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label={t('project.name', 'Project Name')}
+            value={projectName}
+            onChange={e => setProjectName(e.target.value)}
+            fullWidth
+            size="small"
+            sx={{ mb: 2 }}
+            autoFocus
+          />
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {t('project.select_members', 'Select members (min 3)')}
+          </Typography>
+          {loadingUsers ? (
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <CircularProgress size={18} /> {t('Loading...')}
+            </Box>
+          ) : (
+            <MuiList sx={{ maxHeight: 180, overflowY: 'auto', mb: 1 }}>
+              {allUsers.map(u => (
+                <MuiListItem key={u.id || u.uid} dense>
+                  <Checkbox
+                    checked={selectedMembers.includes(u.id || u.uid)}
+                    onChange={() => handleToggleMember(u.id || u.uid)}
+                    disabled={u.id === user?.uid || u.uid === user?.uid}
+                    size="small"
+                  />
+                  <ListItemAvatar>
+                    <Avatar src={u.avatarUrl}>
+                      {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={u.fullName || u.username || u.id || u.uid}
+                    secondary={u.username ? `@${u.username}` : null}
+                  />
+                </MuiListItem>
+              ))}
+              {/* Always show myself as checked and disabled */}
+              {/*
+              {user?.uid && (
+                <MuiListItem dense>
+                  <Checkbox checked disabled size="small" />
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      {(allUsers.find(u => (u.id || u.uid) === user.uid)?.fullName || 'Me').slice(0, 2).toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={t('You', 'You')} />
+                </MuiListItem>
+              )}
+              */}
+            </MuiList>
+          )}
+          {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCreate} color="inherit">{t('Cancel')}</Button>
+          <Button
+            onClick={handleCreateProject}
+            variant="contained"
+            color="primary"
+            disabled={createLoading || !projectName.trim() || selectedMembers.length < 3}
+          >
+            {createLoading ? t('Creating...') : t('Create')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

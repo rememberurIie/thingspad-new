@@ -16,11 +16,12 @@ import { useTranslation } from 'react-i18next';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
-const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
+const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserId }) => {
   const theme = useTheme(); // <-- Add this line
 
   const [messages, setMessages] = useState([]);
-  const [groupData, setGroupData] = useState(null);
+
+
   const [userMap, setUserMap] = useState({});
   const [input, setInput] = useState('');
 
@@ -37,32 +38,28 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
-    if (selectedRoom) setLoading(true);
-  }, [selectedRoom]);
+    if (selectedRoomId) setLoading(true);
+  }, [selectedRoomId]);
 
   useEffect(() => {
     // Always exit loading when messages are loaded, even if empty
     setLoading(false);
   }, [messages]);
 
+  // --- SSE: Real-time messages ---
   useSSE(
-    projectId ? 'http://192.168.1.34:3000/api/project/getProjectData' : null,
+    projectId && selectedRoomId
+      ? 'http://192.168.1.34:3000/api/project/getMessage'
+      : null,
     (data) => {
       switch (data.type) {
-        case 'users': {
-          const map = {};
-          data.payload.forEach((u) => { map[u.id] = u.fullName; });
-          setUserMap(map);
-          break;
-        }
-        case 'groupData': {
-          if (data.groupId === selectedRoom?.id) setGroupData(data.payload);
-          break;
-        }
         case 'messages': {
-          if (data.groupId === selectedRoom?.id) {
+          if (data.roomId === selectedRoomId || data.groupId === selectedRoomId) {
             setMessages(
-              data.payload.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
+              data.payload.sort((a, b) =>
+                (a.createdAt.seconds ?? a.createdAt?._seconds ?? 0) -
+                (b.createdAt.seconds ?? b.createdAt?._seconds ?? 0)
+              )
             );
           }
           break;
@@ -71,7 +68,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
           console.warn('Unknown SSE type:', data.type);
       }
     },
-    projectId && selectedRoom?.id ? { projectId, selectedRoomId: selectedRoom.id } : null
+    projectId && selectedRoomId ? { projectId, roomId: selectedRoomId } : null
   );
 
   const clearFile = () => {
@@ -115,7 +112,8 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
       if (file) {
         const form = new FormData();
-        form.append('groupId', selectedRoom.id);
+        form.append('projectId', projectId);
+        form.append('roomId', selectedRoomId);
         form.append('senderId', currentUserId);
         form.append('text', input || '');
         form.append('file', file);
@@ -126,7 +124,8 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            groupId: selectedRoom.id,
+            projectId,
+            roomId: selectedRoomId,
             senderId: currentUserId,
             text: input,
           }),
@@ -135,7 +134,6 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
 
       setInput('');
       clearFile();
-      // scrollToBottom();
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -147,11 +145,10 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          groupId: selectedRoom.id,
+          groupId: selectedRoomId, // ใช้ groupId = roomId ตาม API เดิม
           messageId: msgId,
         }),
       });
-      // ลบข้อความออกจาก state ทันที (หรือรอ SSE อัปเดต)
       setMessages(msgs => msgs.filter(m => m.id !== msgId));
     } catch (err) {
       alert('Delete failed');
@@ -167,7 +164,7 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
     );
   }
 
-  if (!selectedRoom) {
+  if (!selectedRoomId) {
     return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
         <CardContent>
@@ -178,42 +175,52 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
   }
 
   const renderAttachment = (msg) => {
-    const att = msg.attachment;
-    if (!att || !att.url) return null;
-
-    if (att.contentType?.startsWith('image/')) {
-      return (
-        <Box mt={1}>
-          <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8 }} />
-        </Box>
-      );
-    }
-
-    if (att.contentType?.startsWith('video/')) {
+      const att = msg.attachment;
+      if (!att || !att.url) return null;
+  
+      if (att.contentType?.startsWith('image/')) {
+        return (
+          <Box mt={0.5}>
+            <img
+              src={att.url}
+              alt={att.name || 'image'}
+              style={{ maxWidth: '100%', borderRadius: 8 }}
+              loading="lazy" // เพิ่มบรรทัดนี้
+            />
+          </Box>
+        );
+      }
+  
+      if (att.contentType?.startsWith('video/')) {
+        return (
+          <Box mt={0.5}>
+            <video
+              src={att.url}
+              controls
+              style={{ maxWidth: '50%', borderRadius: 8 }}
+              preload="none" // ช่วยลดโหลดล่วงหน้า
+            />
+          </Box>
+        );
+      }
+  
+      // generic file
       return (
         <Box mt={0.5}>
-          <video src={att.url} controls style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <Typography variant="body2">
+            <a
+              href={att.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
+            >
+              {att.name || 'Download file'}
+            </a>
+            {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
+          </Typography>
         </Box>
       );
-    }
-
-    // generic file
-    return (
-      <Box mt={0.5}>
-        <Typography variant="body2">
-          <a
-            href={att.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
-          >
-            {att.name || 'Download file'}
-          </a>
-          {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
-        </Typography>
-      </Box>
-    );
-  };
+    };
 
   function linkify(text) {
   if (!text) return '';
@@ -231,7 +238,9 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
           <Typography variant="h5" sx={{pl: 1}}>#</Typography>
-          <Box ml={1}><Typography variant="h6">{groupData?.name || selectedRoom.name}</Typography></Box>
+          <Box ml={1}>
+            <Typography variant="h6">{selectedRoomName || ''}</Typography>
+          </Box>
         </Box>
         <Divider />
 
@@ -306,14 +315,12 @@ const ChatContent = ({ selectedRoom, projectId, currentUserId }) => {
                         mt: 0.5,
                       }}
                     >
-                      {(userMap[msg.senderId]?.fullName || userMap[msg.senderId] || msg.senderId)
-                        .slice(0, 2)
-                        .toUpperCase()}
+                      {(msg.fullName || '??').slice(0, 2).toUpperCase()}
                     </Avatar>
                     <Box sx={{ ml: 1, flex: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {userMap[msg.senderId]?.fullName || userMap[msg.senderId] || msg.senderId}
+                         {msg.fullName || msg.senderId}
                         </Typography>
                          <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2, fontSize: '11px' }}>
                           {msg.createdAt &&

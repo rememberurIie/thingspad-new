@@ -188,42 +188,41 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
   }
 
   const renderAttachment = (msg) => {
-    const att = msg.attachment;
-    if (!att || !att.url) return null;
-
-    if (att.contentType?.startsWith('image/')) {
+      const att = msg.attachment;
+      if (!att || !att.url) return null;
+  
+      if (att.contentType?.startsWith('image/')) {
+        return (
+          <Box mt={0.5}>
+            <img
+              src={att.url}
+              alt={att.name || 'image'}
+              style={{ maxWidth: '100%', borderRadius: 8 }}
+              loading="lazy" // เพิ่มบรรทัดนี้
+            />
+          </Box>
+        );
+      }
+  
+      ont 
+  
+      // generic file
       return (
         <Box mt={0.5}>
-          <img src={att.url} alt={att.name || 'image'} style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <Typography variant="body2">
+            <a
+              href={att.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
+            >
+              {att.name || 'Download file'}
+            </a>
+            {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
+          </Typography>
         </Box>
       );
-    }
-
-    if (att.contentType?.startsWith('video/')) {
-      return (
-        <Box mt={0.5}>
-          <video src={att.url} controls style={{ maxWidth: '100%', borderRadius: 8 }} />
-        </Box>
-      );
-    }
-
-    // generic file
-    return (
-      <Box mt={0.5}>
-        <Typography variant="body2">
-          <a
-            href={att.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
-          >
-            {att.name || 'Download file'}
-          </a>
-          {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
-        </Typography>
-      </Box>
-    );
-  };
+    };
 
   function linkify(text) {
     if (!text) return '';

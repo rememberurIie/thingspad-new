@@ -8,13 +8,14 @@ import {
   Toolbar,
   Typography
 } from '@mui/material';
+import { useParams, Navigate } from "react-router-dom";
 
 import ChatIcon from '@mui/icons-material/Chat';
 import GroupIcon from '@mui/icons-material/Group';
 
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useProjectList } from '../../contexts/ProjectListContext'; // หรือดึงจาก Redux
 
 import ChatList from './components/ChatList';
 import ChatContent from './components/ChatContent';
@@ -24,10 +25,9 @@ const drawerWidth = 300;
 const rightWidth = 280;
 
 const Project = () => {
-
-  const user = useSelector(state => state.auth.user);
-
   const { projectId } = useParams();
+  const { projects } = useProjectList(); // หรือดึงจาก Redux
+  const user = useSelector(state => state.auth.user);
 
   const [selectedRoom, setSelectedRoom] = useState(null);
 
@@ -38,7 +38,6 @@ const Project = () => {
 
   const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
   const handleDrawerToggleRight = () => setMobileOpenRight(!mobileOpenRight);
-
 
   const chatListDrawer = (
     <Box sx={{ width: drawerWidth, height: '85vh' }}>
@@ -54,9 +53,18 @@ const Project = () => {
 
   const ChatMemberDrawer = (
     <Box sx={{ width: rightWidth, height: '85vh' }}>
-      <ChatMember projectId={projectId} selectedRoom={selectedRoom} />
+      <ChatMember projectId={projectId} currentUserId={user?.uid} />
     </Box>
   );
+
+  // ตรวจสอบว่า user มีสิทธิ์ใน projectId นี้หรือไม่
+  const hasAccess = projects.some(p => p.id === projectId);
+
+  if (!hasAccess) {
+    // redirect ไปหน้า 404 หรือหน้า dashboard
+    return <Navigate to="/" replace />;
+    // หรือ return <div>Access Denied</div>
+  }
 
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
@@ -115,10 +123,12 @@ const Project = () => {
             }}
           >
             <ChatContent
-              selectedRoom={selectedRoom}
+              selectedRoomName={selectedRoom?.name}
+              selectedRoomId={selectedRoom?.id}
               projectId={projectId}
               currentUserId={user?.uid}
             />
+
           </Box>
 
           {/* Right drawer / column */}
