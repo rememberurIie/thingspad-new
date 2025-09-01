@@ -10,13 +10,16 @@ import {
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
 import { useTheme } from '@mui/material/styles';
-
+import { useSelector } from 'react-redux';
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext'; // Adjust the import path as needed
 
 
 const GroupMessageList = ({ onSelect, userId }) => {
   const theme = useTheme(); // <-- get theme
   const { t } = useTranslation();
+  const user = useSelector(state => state.auth.user);
+
+
   const { groups, setGroups } = useGroupMessageList();
   const [groupSearch, setGroupSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -30,7 +33,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for Group List ---
   useSSE(
-    userId ? 'http://192.168.1.34:3000/api/group/getGroupList' : null,
+    userId ? 'http://localhost:3000/api/group/getGroupList' : null,
     (data) => {
       if (data.type === 'groupList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -92,20 +95,16 @@ const GroupMessageList = ({ onSelect, userId }) => {
     setCreateError('');
     setLoadingUsers(true);
     try {
-      const res = await fetch('http://192.168.1.34:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://localhost:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       });
       const data = await res.json();
-      setUserList(
-        (data.users || [])
-          .filter(u => u.userId !== userId)
-          .map(u => ({
-            ...u,
-            id: u.userId, // เพิ่ม id สำหรับใช้ใน UI
-          }))
-      );
+      setUserList((data.users || []).map(u => ({
+          ...u,
+          id: u.userId, // เพิ่ม id สำหรับใช้ใน UI
+        })));
     } catch (err) {
       setUserList([]);
     }
@@ -138,7 +137,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
     }
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.34:3000/api/group/createGroup', {
+      const res = await fetch('http://localhost:3000/api/group/createGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,6 +239,9 @@ const GroupMessageList = ({ onSelect, userId }) => {
                   sx={{ mr: 1 }}
                 />
               </Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                {t('project.select_members', 'Select members (min 3)')}
+              </Typography>
               {loadingUsers ? (
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <CircularProgress size={18} /> {t('Loading...')}
@@ -251,6 +253,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
                       <Checkbox
                         checked={selectedMembers.includes(u.id)}
                         onChange={() => handleToggleMember(u.id)}
+                        disabled={u.id === user?.uid || u.uid === user?.uid}
                         size="small"
                       />
                       <Avatar src={u.avatarUrl} sx={{ width: 28, height: 28, fontSize: 12, mr: 1 }}>
@@ -260,14 +263,14 @@ const GroupMessageList = ({ onSelect, userId }) => {
                     </Box>
                   ))}
 
-                  {/* Always show yourself as checked and disabled */}
+                  {/* Always show yourself as checked and disabled
                   <Box display="flex" alignItems="center" mb={0.5}>
                     <Checkbox checked disabled size="small" />
                     <Avatar sx={{ width: 28, height: 28, mr: 1, fontSize: 12, bgcolor: 'primary.main' }}>
                       {(userList.find(u => u.id === userId)?.fullName || 'Me').slice(0, 2).toUpperCase()}
                     </Avatar>
                     <Typography variant="body2">{t('group.popup_list_you')}</Typography>
-                  </Box>
+                  </Box> */}
                 </Box>
               )}
               {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}

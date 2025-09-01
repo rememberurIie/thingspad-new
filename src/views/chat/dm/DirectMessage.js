@@ -87,6 +87,7 @@ const DirectMessage = () => {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
+              pl: 1 
             }}
           >
             <DirectMessageChat

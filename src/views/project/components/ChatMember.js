@@ -33,7 +33,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
 
   // SSE for member list
   useSSE(
-    projectId ? 'http://192.168.1.34:3000/api/project/getMemberList' : null,
+    projectId ? 'http://localhost:3000/api/project/getMemberList' : null,
     (evt) => {
       if (Array.isArray(evt)) {
         setMembers(
@@ -61,7 +61,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
     setAddLoading(true);
     setAddError('');
     try {
-      const res = await fetch('http://192.168.1.34:3000/api/project/getUserNotInProject', {
+      const res = await fetch('http://localhost:3000/api/project/getUserNotInProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId }),
@@ -85,7 +85,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleAddUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.34:3000/api/project/toggleUser', {
+      await fetch('http://localhost:3000/api/project/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: false }),
@@ -101,7 +101,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleRemoveUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.34:3000/api/project/toggleUser', {
+      await fetch('http://localhost:3000/api/project/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: true }),

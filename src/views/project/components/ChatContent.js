@@ -49,7 +49,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
   // --- SSE: Real-time messages ---
   useSSE(
     projectId && selectedRoomId
-      ? 'http://192.168.1.34:3000/api/project/getMessage'
+      ? 'http://localhost:3000/api/project/getMessage'
       : null,
     (data) => {
       switch (data.type) {
@@ -108,7 +108,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.34:3000/api/project/sendMessage';
+      const endpoint = 'http://localhost:3000/api/project/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -141,7 +141,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
 
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.34:3000/api/project/deleteMessage', {
+      await fetch('http://localhost:3000/api/project/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

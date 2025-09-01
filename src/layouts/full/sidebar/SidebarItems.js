@@ -17,6 +17,9 @@ import { useTranslation } from 'react-i18next';
 import useSSE from "../../../hook/useSSE";
 import { useProjectList } from '../../../contexts/ProjectListContext';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+
 
 const renderMenuItems = (items, pathDirect, isMinimized) => {
 
@@ -87,7 +90,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateError('');
     try {
       // ไม่ต้องส่ง body หรือ header ใดๆ
-      const res = await fetch('http://192.168.1.34:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://localhost:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
       });
       const data = await res.json();
@@ -125,7 +128,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.34:3000/api/project/createProject', {
+      const res = await fetch('http://localhost:3000/api/project/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -148,7 +151,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   // Use SSE hook to fetch projects
   useSSE(
-    user ? "http://192.168.1.34:3000/api/project/getProjectList" : null,
+    user ? "http://localhost:3000/api/project/getProjectList" : null,
     (data) => {
       setProjects(prev => {
         if (JSON.stringify(prev) !== JSON.stringify(data)) {
@@ -235,76 +238,94 @@ const SidebarItems = ({ isMinimized }) => {
         </Button>
       </Box>
       {/* Create Project Dialog */}
-      <Dialog open={openCreate} onClose={handleCloseCreate} maxWidth="xs" fullWidth>
-        <DialogTitle>{t('menu.create_project', 'Create Project')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            label={t('project.name', 'Project Name')}
-            value={projectName}
-            onChange={e => setProjectName(e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mb: 2 }}
-            autoFocus
-          />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t('project.select_members', 'Select members (min 3)')}
-          </Typography>
-          {loadingUsers ? (
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <CircularProgress size={18} /> {t('Loading...')}
+      {openCreate && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            bgcolor: 'rgba(0,0,0,0.25)',
+            zIndex: 1300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Box
+            sx={{
+              width: 370,
+              bgcolor: 'background.paper',
+              borderRadius: 3,
+              boxShadow: 24,
+              p: 3,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Typography variant="subtitle2" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+              {t('menu.popup_create_project_header')}
+            </Typography>
+            <Typography variant="subtitle2" mb={2}>
+              {t('menu.popup_create_project_description')}
+            </Typography>
+            <IconButton
+              onClick={handleCloseCreate}
+              sx={{ position: 'absolute', top: 8, right: 8 }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <Box display="flex" alignItems="center" mb={2}>
+              <TextField
+                label={t('menu.popup_create_project_searchbox')}
+                value={projectName}
+                onChange={e => setProjectName(e.target.value)}
+                fullWidth
+                size="small"
+              />
             </Box>
-          ) : (
-            <MuiList sx={{ maxHeight: 180, overflowY: 'auto', mb: 1 }}>
-              {allUsers.map(u => (
-                <MuiListItem key={u.id || u.uid} dense>
-                  <Checkbox
-                    checked={selectedMembers.includes(u.id || u.uid)}
-                    onChange={() => handleToggleMember(u.id || u.uid)}
-                    disabled={u.id === user?.uid || u.uid === user?.uid}
-                    size="small"
-                  />
-                  <ListItemAvatar>
-                    <Avatar src={u.avatarUrl}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {t('menu.popup_create_project_selectmember')}
+            </Typography>
+            {loadingUsers ? (
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <CircularProgress size={18} /> {t('Loading...')}
+              </Box>
+            ) : (
+              <Box sx={{ maxHeight: 180, overflowY: 'auto', mb: 1 }}>
+                {allUsers.map(u => (
+                  <Box key={u.id || u.uid} display="flex" alignItems="center" mb={0.5}>
+                    <Checkbox
+                      checked={selectedMembers.includes(u.id || u.uid)}
+                      onChange={() => handleToggleMember(u.id || u.uid)}
+                      disabled={u.id === user?.uid || u.uid === user?.uid}
+                      size="small"
+                    />
+                    <Avatar src={u.avatarUrl} sx={{ width: 28, height: 28, fontSize: 12, mr: 1 }}>
                       {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
                     </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={u.fullName || u.username || u.id || u.uid}
-                    secondary={u.username ? `@${u.username}` : null}
-                  />
-                </MuiListItem>
-              ))}
-              {/* Always show myself as checked and disabled */}
-              {/*
-              {user?.uid && (
-                <MuiListItem dense>
-                  <Checkbox checked disabled size="small" />
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: 'primary.main' }}>
-                      {(allUsers.find(u => (u.id || u.uid) === user.uid)?.fullName || 'Me').slice(0, 2).toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={t('You', 'You')} />
-                </MuiListItem>
-              )}
-              */}
-            </MuiList>
-          )}
-          {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseCreate} color="inherit">{t('Cancel')}</Button>
-          <Button
-            onClick={handleCreateProject}
-            variant="contained"
-            color="primary"
-            disabled={createLoading || !projectName.trim() || selectedMembers.length < 3}
-          >
-            {createLoading ? t('Creating...') : t('Create')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+                    <Typography variant="body2">{u.fullName || u.username || u.id || u.uid}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+            {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<CheckIcon />}
+              onClick={handleCreateProject}
+              disabled={createLoading || !projectName.trim() || selectedMembers.length < 3}
+              fullWidth
+              sx={{ mt: 1 }}
+            >
+              {createLoading ? t('menu.popup_create_project_creating') : t('menu.popup_create_project_create')}
+            </Button>
+          </Box>
+        </Box>
+      )}
     </>
   );
 };

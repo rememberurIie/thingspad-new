@@ -5,7 +5,14 @@
     "chats": "แชท",
     "directChat": "แชทส่วนตัว",
     "groupChat": "แชทกลุ่ม",
-    "projects": "โครงการ"
+    "projects": "โครงการ",
+    "create_project": "สร้างโครงการ",
+    "popup_create_project_header": "สร้างโครงการ",
+    "popup_create_project_description": "สร้างโครงการใหม่และเลือกสมาชิก (ขั้นต่ำ 3 คน)",
+    "popup_create_project_searchbox": "ชื่อโครงการ",
+    "popup_create_project_selectmember": "เลือกสมาชิก",
+    "popup_create_project_creating": "กำลังสร้าง...",
+    "popup_create_project_create": "สร้าง"
   },
   "header": {
     "profile": "โปรไฟล์ผู้ใช้"
@@ -24,7 +31,7 @@
     "search_user_box": "ค้นหาผู้ใช้งาน",
     "search_chat_box": "ค้นหาแชท",
     "popup_list_header" : "สร้างกลุ่ม",
-    "popup_list_description" : "ตั้งชื่อกลุ่มและเพิ่มสมาชิก<br><br/>(ชั้นต่ำ 3 คน รวมถึงคุณด้วย)",
+    "popup_list_description" : "ตั้งชื่อกลุ่มและเพิ่มสมาชิก (ชั้นต่ำ 3 คน)",
     "popup_list_group_name" : "ชื่อกลุ่ม",
     "popup_list_you" : "คุณ",
     "popup_list_submit_button" : "สร้างกลุ่ม",

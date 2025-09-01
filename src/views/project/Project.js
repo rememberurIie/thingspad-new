@@ -120,6 +120,7 @@ const Project = () => {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
+              px: 1 
             }}
           >
             <ChatContent
@@ -144,7 +145,7 @@ const Project = () => {
               {ChatMemberDrawer}
             </Drawer>
           ) : (
-            <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }, pl: 1 }}>
+            <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }}}>
               {ChatMemberDrawer}
             </Box>
           )}

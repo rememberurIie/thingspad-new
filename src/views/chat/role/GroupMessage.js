@@ -97,7 +97,8 @@ const GroupMessage = () => {
               height: '85vh',
               overflow: 'hidden',
               display: 'flex',
-              flexDirection: 'column',
+              flexDirection: 'column', 
+              px: 1 
             }}
           >
             <GroupMessageChat
@@ -120,7 +121,7 @@ const GroupMessage = () => {
                 {GroupMemberDrawer}
               </Drawer>
             ) : (
-              <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }, pl: 1 }}>
+              <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }}}>
                 {GroupMemberDrawer}
               </Box>
             )}

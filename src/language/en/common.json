@@ -5,7 +5,14 @@
     "chats": "Chats",
     "directChat": "Direct Chat",
     "groupChat": "Group Chat",
-    "projects": "Projects"
+    "projects": "Projects",
+    "create_project": "Create Project",
+    "popup_create_project_header": "Create Project",
+    "popup_create_project_description": "Create a new project and select members (Minimum 3 people).",
+    "popup_create_project_searchbox": "Project Name",
+    "popup_create_project_selectmember": "Select Members",
+    "popup_create_project_creating": "Creating...",
+    "popup_create_project_create": "Create"
   },
     "header": {
     "profile": "User Profile"
@@ -24,7 +31,7 @@
     "search_user_box": "Search User",
     "search_chat_box": "Search Chat",
     "popup_list_header" : "Create Group",
-    "popup_list_description" : "Name the group and add members<br><br/>(Minimum 3 people including you)",
+    "popup_list_description" : "Name the group and add members (Minimum 3 people)",
     "popup_list_group_name" : "Group Name",
     "popup_list_you" : "You",
     "popup_list_submit_button" : "Create Group",
