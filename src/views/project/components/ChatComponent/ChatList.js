@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography,
   List, ListItem, ListItemText, Divider, CircularProgress, Box, IconButton, TextField, Button // เพิ่ม CircularProgress
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles'; // Add this import
 import { useTranslation } from 'react-i18next';
-import useSSE from '../../../hook/useSSE';
-import { useChatList } from '../../../contexts/ChatListContext';
+import useSSE from '../../../../hook/useSSE';
+import { useChatList } from '../../../../contexts/ChatListContext';
 
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -15,11 +15,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ChatList = ({ onSelect, projectId }) => {
+const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   const { t } = useTranslation();
   const { rooms, setRooms } = useChatList();
   const theme = useTheme(); // Add this line
-  const [selectedId, setSelectedId] = useState(null); // Track selected room
   const [loading, setLoading] = useState(true); // เพิ่ม state loading
   const [showInput, setShowInput] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
@@ -28,22 +27,19 @@ const ChatList = ({ onSelect, projectId }) => {
   const [editName, setEditName] = useState('');
   const [menuOpenId, setMenuOpenId] = useState(null); // Track open menu ID
 
-  // Auto-select the first room in the list
-  React.useEffect(() => {
-    if (rooms.length > 0 && !selectedId) {
-      setSelectedId(rooms[0].id);
-      onSelect?.(rooms[0]);
-    }
-  }, [rooms, selectedId, onSelect]);
-
   // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
   React.useEffect(() => {
     if (rooms.length > 0) setLoading(false);
   }, [rooms]);
 
+   // Show loading spinner when projectId changes
+  useEffect(() => {
+    setLoading(true);
+  }, [projectId]);
+
   // --- SSE: Real-time room list ---
   useSSE(
-    projectId ? 'http://localhost:3000/api/project/getRoomList' : null,
+    projectId ? 'http://192.168.1.32:3000/api/project/getRoomList' : null,
     (evt) => {
       // กรณี 1: { type: 'rooms', payload: [...] }
       if (Array.isArray(evt)) {
@@ -68,7 +64,7 @@ const ChatList = ({ onSelect, projectId }) => {
   const handleAddRoom = async () => {
     if (!newRoomName.trim()) return;
     try {
-      const res = await fetch('http://localhost:3000/api/project/createRoom', {
+      const res = await fetch('http://192.168.1.32:3000/api/project/createRoom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomName: newRoomName }),
@@ -93,7 +89,7 @@ const ChatList = ({ onSelect, projectId }) => {
   const handleEditNameSave = async () => {
     if (!editName.trim()) return;
     try {
-      await fetch('http://localhost:3000/api/project/updateRoomName', {
+      await fetch('http://192.168.1.32:3000/api/project/updateRoomName', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomId: editingId, newName: editName }),
@@ -102,7 +98,7 @@ const ChatList = ({ onSelect, projectId }) => {
         prev.map(r => r.id === editingId ? { ...r, name: editName } : r)
       );
       // แจ้ง parent ว่าห้องนี้ชื่อใหม่แล้ว (ถ้าเลือกอยู่)
-      if (selectedId === editingId && onSelect) {
+      if (selectedRoomId === editingId && onSelect) {
         const updatedRoom = rooms.find(r => r.id === editingId);
         if (updatedRoom) onSelect({ ...updatedRoom, name: editName });
       }
@@ -113,13 +109,13 @@ const ChatList = ({ onSelect, projectId }) => {
 
   const handleDeleteRoom = async (roomId) => {
     try {
-      await fetch('http://localhost:3000/api/project/deleteRoom', {
+      await fetch('http://192.168.1.32:3000/api/project/deleteRoom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomId }),
       });
       setRooms(prev => prev.filter(r => r.id !== roomId));
-      if (selectedId === roomId) setSelectedId(null);
+      if (selectedRoomId === roomId) setSelectedId(null);
     } catch {}
   };
 
@@ -130,16 +126,26 @@ const ChatList = ({ onSelect, projectId }) => {
   };
 
   // ถ้ายัง loading และ rooms มีมากกว่า 0 ให้โชว์ spinner
-  if (loading && rooms.length > 0) {
+  if (loading) {
     return (
-      <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
+      <Card
+        variant="outlined"
+        sx={{
+          height: '100%',
+          overflowY: 'auto',
+          borderRadius: { xs: 0, lg: '10px' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <CircularProgress size={30} sx={{ color: theme.palette.grey[500] }} />
       </Card>
     );
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: { xs: 0, lg: '10px' } }}>
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
@@ -181,17 +187,16 @@ const ChatList = ({ onSelect, projectId }) => {
               <ListItem
                 button
                 onClick={() => {
-                  setSelectedId(group.id);
                   onSelect?.(group);
                 }}
-                selected={selectedId === group.id}
+                selected={selectedRoomId === group.id}
                 onMouseEnter={() => setHoveredId(group.id)}
                 onMouseLeave={() => {
                   setHoveredId(null);
                   setMenuOpenId(null); // <-- Close menu when unhover
                 }}
                 sx={{
-                  bgcolor: selectedId === group.id ? theme.palette.action.hover : 'inherit',
+                  bgcolor: selectedRoomId === group.id ? theme.palette.action.hover : 'inherit',
                   borderRadius: 2,
                   transition: 'background 0.2s',
                   position: 'relative'

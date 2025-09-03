@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   useMediaQuery,
@@ -6,7 +6,8 @@ import {
   IconButton,
   AppBar,
   Toolbar,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import { useParams, Navigate } from "react-router-dom";
 
@@ -17,139 +18,82 @@ import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
 import { useProjectList } from '../../contexts/ProjectListContext'; // หรือดึงจาก Redux
 
-import ChatList from './components/ChatList';
-import ChatContent from './components/ChatContent';
-import ChatMember from './components/ChatMember';
+import ChatList from './components/ChatComponent/ChatList';
+import ChatContent from './components/ChatComponent/ChatContent';
+import ChatMember from './components/ChatComponent/ChatMember';
+import Header from './components/Header';
+import TableView from './components/TableView';
+import KandanBoard from './components/KandanBoard';
+import ProjectChat from './components/ProjectChat';
 
 const drawerWidth = 300;
 const rightWidth = 280;
 
 const Project = () => {
   const { projectId } = useParams();
-  const { projects } = useProjectList(); // หรือดึงจาก Redux
+  const { projects } = useProjectList();
   const user = useSelector(state => state.auth.user);
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [view, setView] = useState('chat');
 
-  // Mobile drawers
-  const [mobileOpenLeft, setMobileOpenLeft] = useState(false);
-  const [mobileOpenRight, setMobileOpenRight] = useState(false);
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  // If projects are still loading, show nothing or a spinner
+  if (!projects || projects.length === 0) {
+    return null;
+  }
 
-  const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
-  const handleDrawerToggleRight = () => setMobileOpenRight(!mobileOpenRight);
-
-  const chatListDrawer = (
-    <Box sx={{ width: drawerWidth, height: '85vh' }}>
-      <ChatList
-        onSelect={(group) => {
-          setSelectedRoom(group);
-          if (isMobile) setMobileOpenLeft(false);
-        }}
-        projectId={projectId}
-      />
-    </Box>
-  );
-
-  const ChatMemberDrawer = (
-    <Box sx={{ width: rightWidth, height: '85vh' }}>
-      <ChatMember projectId={projectId} currentUserId={user?.uid} />
-    </Box>
-  );
-
-  // ตรวจสอบว่า user มีสิทธิ์ใน projectId นี้หรือไม่
   const hasAccess = projects.some(p => p.id === projectId);
-
   if (!hasAccess) {
-    // redirect ไปหน้า 404 หรือหน้า dashboard
     return <Navigate to="/" replace />;
-    // หรือ return <div>Access Denied</div>
   }
 
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
-      <Box sx={{ height: '88vh', display: 'flex', flexDirection: 'column' }}>
-        {isMobile && (
-          <AppBar position="static" color="default" elevation={0}>
-            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <IconButton
-                color="inherit"
-                aria-label="open chat list"
-                edge="start"
-                onClick={handleDrawerToggleLeft}
-              >
-                <ChatIcon />
-              </IconButton>
-              
-              <IconButton
-                color="inherit"
-                aria-label="open members list"
-                edge="end"
-                onClick={handleDrawerToggleRight}
-              >
-                <GroupIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        )}
+      <Box sx={{
+        maxHeight: '87vh',
+        height: '87vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}>
+        <Box sx={{ my: 1 }}>
+          <Header projectName={projects.find(p => p.id === projectId)?.name} view={view} setView={setView} />
+        </Box>
 
-        <Box sx={{ flex: 0, display: 'flex', flexGrow: 1 }}>
-          {/* Left drawer / column */}
-          {isMobile ? (
-            <Drawer
-              variant="temporary"
-              open={mobileOpenLeft}
-              onClose={handleDrawerToggleLeft}
-              ModalProps={{ keepMounted: true }}
-              sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
-            >
-              {chatListDrawer}
-            </Drawer>
-          ) : (
-            <Box sx={{ width: drawerWidth, display: { xs: 'none', lg: 'block' } }}>
-              {chatListDrawer}
-            </Box>
-          )}
-
-          {/* Middle content */}
+        {/* <Box sx={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}> */}
           <Box
-            component="main"
             sx={{
-              flexGrow: 1,
-              height: '85vh',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              px: 1 
+              display: view === 'chat' ? 'flex' : 'none',
+              flex: 1,
+              width: '100%',
+              minHeight: 0,
+              position: 'relative',
             }}
           >
-            <ChatContent
-              selectedRoomName={selectedRoom?.name}
-              selectedRoomId={selectedRoom?.id}
-              projectId={projectId}
-              currentUserId={user?.uid}
-            />
-
+            <ProjectChat projectId={projectId} user={user} projects={projects} />
           </Box>
-
-          {/* Right drawer / column */}
-          {isMobile ? (
-            <Drawer
-              anchor="right"
-              variant="temporary"
-              open={mobileOpenRight}
-              onClose={handleDrawerToggleRight}
-              ModalProps={{ keepMounted: true }}
-              sx={{ '& .MuiDrawer-paper': { width: rightWidth } }}
-            >
-              {ChatMemberDrawer}
-            </Drawer>
-          ) : (
-            <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }}}>
-              {ChatMemberDrawer}
-            </Box>
-          )}
-        </Box>
+          <Box
+            sx={{
+              display: view === 'table' ? 'flex' : 'none',
+              flex: 1,
+              width: '100%',
+              minHeight: 0,
+              position: 'relative',
+            }}
+          >
+            <TableView />
+          </Box>
+          <Box
+            sx={{
+              display: view === 'kanban' ? 'flex' : 'none',
+              flex: 1,
+              width: '100%',
+              minHeight: 0,
+              position: 'relative',
+            }}
+          >
+            <KandanBoard />
+          </Box>
+        {/* </Box> */}
       </Box>
     </PageContainer>
   );

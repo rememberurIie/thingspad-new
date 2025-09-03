@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, Avatar,
   List, ListItem, ListItemAvatar, ListItemText, Box, IconButton, TextField, Button, CircularProgress
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import useSSE from '../../../hook/useSSE';
+import useSSE from '../../../../hook/useSSE';
+import { useTheme } from '@mui/material/styles'; // Add this import
+
 
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,7 +16,10 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const { t } = useTranslation();
+    const theme = useTheme(); // Add this line
+  
   const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true); // <-- เพิ่ม state loading
   const [editMode, setEditMode] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
@@ -31,9 +36,14 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
       (a.fullName || '').localeCompare(b.fullName || '', undefined, { sensitivity: 'base' })
     );
 
+  // ตั้ง loading เป็น true เมื่อ projectId เปลี่ยน
+  useEffect(() => {
+    setLoading(true);
+  }, [projectId]);
+
   // SSE for member list
   useSSE(
-    projectId ? 'http://localhost:3000/api/project/getMemberList' : null,
+    projectId ? 'http://192.168.1.32:3000/api/project/getMemberList' : null,
     (evt) => {
       if (Array.isArray(evt)) {
         setMembers(
@@ -48,12 +58,13 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
             }))
           )
         );
+        setLoading(false); // <-- ปิด loading เมื่อได้ข้อมูล
       }
     },
     projectId ? { projectId } : undefined
   );
 
-  console.log(members);
+
 
   // --- Add User Logic ---
   const handleOpenAdd = async () => {
@@ -61,7 +72,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
     setAddLoading(true);
     setAddError('');
     try {
-      const res = await fetch('http://localhost:3000/api/project/getUserNotInProject', {
+      const res = await fetch('http://192.168.1.32:3000/api/project/getUserNotInProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId }),
@@ -85,7 +96,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleAddUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://localhost:3000/api/project/toggleUser', {
+      await fetch('http://192.168.1.32:3000/api/project/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: false }),
@@ -101,7 +112,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleRemoveUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://localhost:3000/api/project/toggleUser', {
+      await fetch('http://192.168.1.32:3000/api/project/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: true }),
@@ -113,8 +124,27 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
     setAddingUserId(null);
   };
 
+  // แสดง loading เหมือน ChatList
+  if (loading) {
+    return (
+      <Card
+        variant="outlined"
+        sx={{
+          height: '100%',
+          overflowY: 'auto',
+          borderRadius: { xs: 0, lg: '10px' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <CircularProgress size={30} sx={{ color: theme.palette.grey[500] }} />
+      </Card>
+    );
+  }
+
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: { xs: 0, lg: '10px' } }}>
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>

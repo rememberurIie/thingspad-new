@@ -10,13 +10,23 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ChatIcon from '@mui/icons-material/Chat';
+import GroupIcon from '@mui/icons-material/Group';
 
-import useSSE from '../../../hook/useSSE';
+import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
-const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserId }) => {
+const ChatContent = ({
+  selectedRoomId,
+  selectedRoomName,
+  projectId,
+  currentUserId,
+  isMobile,
+  onOpenChatList,
+  onOpenMemberList
+}) => {
   const theme = useTheme(); // <-- Add this line
 
   const [messages, setMessages] = useState([]);
@@ -41,6 +51,10 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
     if (selectedRoomId) setLoading(true);
   }, [selectedRoomId]);
 
+  // useEffect(() => {
+  //   if (projectId) setLoading(true);
+  // }, [projectId]);
+
   useEffect(() => {
     // Always exit loading when messages are loaded, even if empty
     setLoading(false);
@@ -49,7 +63,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
   // --- SSE: Real-time messages ---
   useSSE(
     projectId && selectedRoomId
-      ? 'http://localhost:3000/api/project/getMessage'
+      ? 'http://192.168.1.32:3000/api/project/getMessage'
       : null,
     (data) => {
       switch (data.type) {
@@ -108,7 +122,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://localhost:3000/api/project/sendMessage';
+      const endpoint = 'http://192.168.1.32:3000/api/project/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -141,7 +155,7 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
 
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://localhost:3000/api/project/deleteMessage', {
+      await fetch('http://192.168.1.32:3000/api/project/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -236,11 +250,23 @@ const ChatContent = ({ selectedRoomId, selectedRoomName, projectId, currentUserI
     <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <Box display="flex" alignItems="center" mb={2}>
-          <Typography variant="h5" sx={{pl: 1}}>#</Typography>
-          <Box ml={1}>
-            <Typography variant="h6">{selectedRoomName || ''}</Typography>
+        <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
+          <Box display="flex" alignItems="center">
+            {isMobile && (
+              <IconButton onClick={onOpenChatList} sx={{ mr: 1 }}>
+                <ChatIcon />
+              </IconButton>
+            )}
+            <Typography variant="h5" sx={{ pl: 1 }}>#</Typography>
+            <Box ml={1}>
+              <Typography variant="h6">{selectedRoomName || ''}</Typography>
+            </Box>
           </Box>
+          {isMobile && (
+            <IconButton onClick={onOpenMemberList}>
+              <GroupIcon />
+            </IconButton>
+          )}
         </Box>
         <Divider />
 
