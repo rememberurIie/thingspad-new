@@ -80,7 +80,7 @@ const Project = () => {
               position: 'relative',
             }}
           >
-            <TableView />
+            <TableView projectId={projectId}/>
           </Box>
           <Box
             sx={{
@@ -91,7 +91,7 @@ const Project = () => {
               position: 'relative',
             }}
           >
-            <KandanBoard />
+            <KandanBoard projectId={projectId}/>
           </Box>
         {/* </Box> */}
       </Box>

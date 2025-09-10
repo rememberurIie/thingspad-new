@@ -26,9 +26,7 @@ const ProjectChat = ({ projectId, user, projects }) => {
    const [mobileOpenLeft, setMobileOpenLeft] = useState(false);
    const [mobileOpenRight, setMobileOpenRight] = useState(false);
    const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
-
-   console.log(selectedRoom);
-
+   
    useEffect(() => {
       // Reset selectedRoom ทุกครั้งที่ projectId เปลี่ยน
       setSelectedRoom(null);
