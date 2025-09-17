@@ -29,7 +29,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
     setError('');
     setSuccess('');
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/account/register', {
+      const res = await fetch('http://192.168.1.36:3000/api/account/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,12 +1,9 @@
 import React from 'react';
-import { Select, MenuItem } from '@mui/material';
+import { Select, MenuItem, Card, CardContent, CardHeader, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import DashboardCard from '../../../components/shared/DashboardCard';
 import Chart from 'react-apexcharts';
 
-
-const SalesOverview = () => {
-
+const FinishedTaskGraph = ({ finishedTasks8MonthsBack = [] }) => {
     // select
     const [month, setMonth] = React.useState('1');
 
@@ -19,7 +16,12 @@ const SalesOverview = () => {
     const primary = theme.palette.primary.main;
     const secondary = theme.palette.secondary.main;
 
-    // chart
+    // Prepare data for chart
+    const categories = finishedTasks8MonthsBack.map(
+        d => `${d.month.toString().padStart(2, '0')}/${d.year}`
+    );
+    const finishedCounts = finishedTasks8MonthsBack.map(d => d.count);
+
     const optionscolumnchart = {
         chart: {
             type: 'bar',
@@ -30,7 +32,7 @@ const SalesOverview = () => {
             },
             height: 370,
         },
-        colors: [primary, secondary],
+        colors: [primary],
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -41,13 +43,12 @@ const SalesOverview = () => {
                 borderRadiusWhenStacked: 'all',
             },
         },
-
         stroke: {
             show: true,
             width: 5,
             lineCap: "butt",
             colors: ["transparent"],
-          },
+        },
         dataLabels: {
             enabled: false,
         },
@@ -67,7 +68,7 @@ const SalesOverview = () => {
             tickAmount: 4,
         },
         xaxis: {
-            categories: ['16/08', '17/08', '18/08', '19/08', '20/08', '21/08', '22/08', '23/08'],
+            categories,
             axisBorder: {
                 show: false,
             },
@@ -79,38 +80,30 @@ const SalesOverview = () => {
     };
     const seriescolumnchart = [
         {
-            name: 'Eanings this month',
-            data: [355, 390, 300, 350, 390, 180, 355, 390],
-        },
-        {
-            name: 'Expense this month',
-            data: [280, 250, 325, 215, 250, 310, 280, 250],
-        },
+            name: 'Finished Tasks',
+            data: finishedCounts,
+        }
     ];
 
     return (
-
-        <DashboardCard title="Sales Overview" action={
-            <Select
-                labelId="month-dd"
-                id="month-dd"
-                value={month}
-                size="small"
-                onChange={handleChange}
-            >
-                <MenuItem value={1}>March 2025</MenuItem>
-                <MenuItem value={2}>April 2025</MenuItem>
-                <MenuItem value={3}>May 2025</MenuItem>
-            </Select>
-        }>
-            <Chart
-                options={optionscolumnchart}
-                series={seriescolumnchart}
-                type="bar"
-                height="370px"
+        <Card variant="outlined" sx={{ borderRadius: '10px', height: '100%' }}>
+            <CardHeader
+                title="Finished Task Graph (Monthly)"
+                sx={{ pb: 0 }}
             />
-        </DashboardCard>
+            <CardContent sx={{ py: 6 }}>
+                <Box sx={{ height: 'calc(100vh - 610px)', width: '100%' }}>
+                    <Chart
+                        options={optionscolumnchart}
+                        series={seriescolumnchart}
+                        type="bar"
+                        height="100%"
+                        width="100%"
+                    />
+                </Box>
+            </CardContent>
+        </Card>
     );
 };
 
-export default SalesOverview;
+export default FinishedTaskGraph;

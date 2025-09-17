@@ -33,7 +33,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for Group List ---
   useSSE(
-    userId ? 'http://192.168.1.32:3000/api/group/getGroupList' : null,
+    userId ? 'http://192.168.1.36:3000/api/group/getGroupList' : null,
     (data) => {
       if (data.type === 'groupList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -95,7 +95,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
     setCreateError('');
     setLoadingUsers(true);
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
@@ -137,7 +137,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
     }
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/group/createGroup', {
+      const res = await fetch('http://192.168.1.36:3000/api/group/createGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

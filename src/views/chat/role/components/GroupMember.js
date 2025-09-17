@@ -33,7 +33,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
 
   // Use SSE for users and user events
   useSSE(
-    selectedGroup ? 'http://192.168.1.32:3000/api/group/getGroupMember' : null,
+    selectedGroup ? 'http://192.168.1.36:3000/api/group/getGroupMember' : null,
     (evt) => {
       if (evt.type === 'members' && Array.isArray(evt.payload)) {
         setMembers(
@@ -59,7 +59,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
     setAddLoading(true);
     setAddError('');
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/group/getUserToAdd', {
+      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToAdd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup }),
@@ -83,7 +83,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const handleAddUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.32:3000/api/group/toggleUserinGroup', {
+      await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: false }),
@@ -99,7 +99,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const handleRemoveUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.32:3000/api/group/toggleUserinGroup', {
+      await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: true }),

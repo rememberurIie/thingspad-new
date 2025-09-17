@@ -90,7 +90,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateError('');
     try {
       // ไม่ต้องส่ง body หรือ header ใดๆ
-      const res = await fetch('http://192.168.1.32:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
       });
       const data = await res.json();
@@ -128,7 +128,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.32:3000/api/project/chat/createProject', {
+      const res = await fetch('http://192.168.1.36:3000/api/project/chat/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +151,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   // // Use SSE hook to fetch projects
   // useSSE(
-  //   user ? "http://192.168.1.32:3000/api/project/chat/getProjectList" : null,
+  //   user ? "http://192.168.1.36:3000/api/project/chat/getProjectList" : null,
   //   (data) => {
   //     setProjects(prev => {
   //       if (JSON.stringify(prev) !== JSON.stringify(data)) {
