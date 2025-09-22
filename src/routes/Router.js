@@ -10,9 +10,9 @@ const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 /* ****Pages***** */
 const Dashboard = lazy(() => import('../views/dashboard/Dashboard'));
 const DirectMessage = lazy(() => import('../views/chat/dm/DirectMessage'));
-const GroupMessage = lazy(() => import('../views/chat/role/GroupMessage'));
+const GroupMessage = lazy(() => import('../views/chat/group/GroupMessage'));
 const Project = lazy(() => import('../views/project/Project'));
-
+const InviteJoin = lazy(() => import('../views/project/InviteJoin'));
 
 // *****auth*****
 const Register = lazy(() => import('../views/authentication/Register'));
@@ -85,6 +85,10 @@ const Router = [
         ),
       },
       {
+        path: '/project/invite/:projectId',
+        element: <InviteJoin />,
+      },
+      {
         path: '*',
         element: <Navigate to="/auth/404" />,
       },
@@ -121,7 +125,6 @@ const Router = [
     ],
   },
 ];
-
 
 const router = createBrowserRouter(Router);
 

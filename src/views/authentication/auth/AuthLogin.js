@@ -38,7 +38,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://192.168.68.81:3000/api/account/login', {
+      const res = await fetch('http://192.168.1.36:3000/api/account/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

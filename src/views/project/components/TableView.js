@@ -31,7 +31,7 @@ const STATUS_OPTIONS = [
    'Completed'
 ];
 
-const API_BASE = 'http://192.168.68.81:3000/api/project/task';
+const API_BASE = 'http://192.168.1.36:3000/api/project/task';
 
 const statusColor = (status) => {
    switch (status) {
@@ -68,8 +68,6 @@ const TableView = ({ projectId }) => {
    // --- Load all user API (for assigned )---
    const [allUsers, setAllUsers] = useState([]);
 
-   console.log('All users:', allUsers);
-
    // More menu state
    const [menuAnchor, setMenuAnchor] = useState(null);
    const [menuTask, setMenuTask] = useState(null);
@@ -97,7 +95,7 @@ const TableView = ({ projectId }) => {
 
    useEffect(() => {
       if (!projectId) return;
-      fetch('http://192.168.68.81:3000/api/project/chat/getMemberListNonSSE', {
+      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย

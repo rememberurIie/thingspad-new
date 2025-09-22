@@ -18,10 +18,6 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
   const safeInProgress = Number.isFinite(taskInProgressCount) ? taskInProgressCount : 0;
   const totalTasks = safeFinished + safeInProgress;
 
-  console.log('Finished:', safeFinished, 'In Progress:', safeInProgress);
-
-
-
   const options = {
     chart: {
       type: 'bar',
