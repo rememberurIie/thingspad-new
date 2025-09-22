@@ -1,9 +1,11 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, Avatar } from '@mui/material';
 
-
+import { useTranslation } from 'react-i18next';
 
 const WelcomeCard = ({ fullName }) => {
+
+   const { t } = useTranslation();
 
    return (
 
@@ -13,7 +15,7 @@ const WelcomeCard = ({ fullName }) => {
   >
     <CardContent
       sx={{
-        my: 2,
+        my: 1,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -34,7 +36,7 @@ const WelcomeCard = ({ fullName }) => {
           </Avatar>
           <Box gap={1} display="flex" flexDirection="column">
             <Typography sx={{ fontSize: '25px', fontWeight: 100 }}>
-              Welcome Back!
+              {t('dashboard.welcome')}
             </Typography>
             <Typography sx={{ fontSize: '35px', fontWeight: 700 }}>
               {fullName}
@@ -56,7 +58,7 @@ const WelcomeCard = ({ fullName }) => {
       }}
     >
       <img
-        src="https://img2.pic.in.th/pic/cartoon-flowers-on-green-grass-with-white-background-flat-colorful-design-free-vector-removebg-preview.png"
+        src="src\assets\images\WelcomeCard.png"
         alt="flowers"
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
       />

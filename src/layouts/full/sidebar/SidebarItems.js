@@ -9,7 +9,10 @@ import {
 } from "react-mui-sidebar";
 import { IconPoint } from "@tabler/icons-react";
 import Menuitems from "./MenuItems";
-import logoicn from "../../../assets/images/logos/dark1-logo.svg";
+import logoicn_dark from "../../../assets/images/logos/ThingsPad-small.svg";
+import logoicn from "../../../assets/images/logos/ThingsPad-small-dark.svg";
+import logoicn_small from "../../../assets/images/logos/ThingsPad-square-dark.svg";
+import logoicn_small_dark from "../../../assets/images/logos/ThingsPad-square.svg";
 import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useTheme } from "@mui/material/styles";
@@ -90,7 +93,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateError('');
     try {
       // ไม่ต้องส่ง body หรือ header ใดๆ
-      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://192.168.68.81:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
       });
       const data = await res.json();
@@ -128,7 +131,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/project/chat/createProject', {
+      const res = await fetch('http://192.168.68.81:3000/api/project/chat/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +154,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   // // Use SSE hook to fetch projects
   // useSSE(
-  //   user ? "http://192.168.1.36:3000/api/project/chat/getProjectList" : null,
+  //   user ? "http://192.168.68.81:3000/api/project/chat/getProjectList" : null,
   //   (data) => {
   //     setProjects(prev => {
   //       if (JSON.stringify(prev) !== JSON.stringify(data)) {
@@ -188,11 +191,28 @@ const SidebarItems = ({ isMinimized }) => {
           themeSecondaryColor={"#49BEFF1a"}
           textColor={theme.palette.grey[600]}
         >
-          <Box sx={{ margin: "0 -24px" }}>
-            <Logo img={logoicn} component={NavLink} to="/">
-              {!isMinimized && "Flexy"}
-            </Logo>
-          </Box>
+          <Box sx={{ margin: "0 -19px" }}>
+          <Logo
+            img={
+              isMinimized
+                ? (theme.palette.mode === 'dark' ? logoicn_small_dark : logoicn_small)
+                : (theme.palette.mode === 'light' ? logoicn : logoicn_dark)
+            }
+            component={NavLink}
+            to="/"
+            sx={{
+              width: isMinimized ? 32 : 120,
+              height: isMinimized ? 32 : 40,
+              mx: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'width 0.2s, height 0.2s'
+            }}
+          >
+            {!isMinimized && "Flexy"}
+          </Logo>
+        </Box>
           {renderMenuItems(combinedMenu, pathDirect, isMinimized)}
         </MUI_Sidebar>
       </Box>

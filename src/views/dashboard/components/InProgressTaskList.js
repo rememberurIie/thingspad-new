@@ -15,11 +15,13 @@ import {
   TimelineContent,
   timelineOppositeContentClasses,
 } from '@mui/lab';
+import { useTranslation } from 'react-i18next';
 
 const InProgessTaskList = ({ tasks = [], loading = false }) => {
+  const { t } = useTranslation();
   return (
     <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
-      <CardHeader title="In Progress Task List (Due this Month)" sx={{ pb: 0 }} />
+      <CardHeader title={t('dashboard.inprogress_list')} sx={{ pb: 0 }} />
       <CardContent sx={{ pt: 1 }}>
         <Timeline
           className="theme-timeline"

@@ -3,12 +3,16 @@ import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Card, CardContent, Box } from '@mui/material'; // เพิ่ม Box
 
+import { useTranslation } from 'react-i18next';
+
 const InProgessTask = ({ taskInProgressCount }) => {
   // chart color
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
   const secondarylight = '#f5fcff';
   const errorlight = '#fdede8';
+
+  const { t } = useTranslation();
 
   // chart
   const optionscolumnchart = {
@@ -54,11 +58,11 @@ const InProgessTask = ({ taskInProgressCount }) => {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" fontWeight="700">
-            In Progress Work (this month)
+             {t('dashboard.inprogress')}
           </Typography>
         </Stack>
         <Typography variant="h1" fontWeight="700" mt="-10px">
-          {taskInProgressCount || 0} tasks
+          {taskInProgressCount || 0} {t('dashboard.task_ea')}
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
           {/* <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>
@@ -86,7 +90,7 @@ const InProgessTask = ({ taskInProgressCount }) => {
         sx={{
           position: 'absolute',
           right: 0,
-          bottom: '-10px',         // ขยับให้ชิดขอบล่าง
+          bottom: '-13px',         // ขยับให้ชิดขอบล่าง
           width: 170,         // ปรับขนาดให้เหมาะสม
           height: 'auto',        // ปรับขนาดให้เหมาะสม
           zIndex: 1,
@@ -94,7 +98,7 @@ const InProgessTask = ({ taskInProgressCount }) => {
         }}
       >
         <img
-          src="https://png.pngtree.com/png-clipart/20230403/original/pngtree-man-working-with-a-laptop-png-image_9024046.png"
+          src="src\assets\images\InProgressCard.png"
           alt="man working"
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />

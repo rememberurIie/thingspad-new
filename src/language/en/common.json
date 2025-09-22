@@ -1,4 +1,13 @@
 {
+  "dashboard": {
+    "welcome": "Welcome Back!",
+    "inprogress": "In Progress Works",
+    "inprogress_list": "In Progress Task List",
+    "finished": "Finished Tasks",
+    "finished_load": "Finished Tasks Loading...",
+    "finished_graph": "Finished Task Graph (Monthly)",
+    "task_ea": " tasks"
+  },
   "menu": {
     "home": "Home",
     "myTask": "My Task",

@@ -3,7 +3,12 @@ import { Select, MenuItem, Card, CardContent, CardHeader, Box } from '@mui/mater
 import { useTheme } from '@mui/material/styles';
 import Chart from 'react-apexcharts';
 
+import { useTranslation } from 'react-i18next';
+
 const FinishedTaskGraph = ({ finishedTasks8MonthsBack = [] }) => {
+
+    const { t } = useTranslation();
+
     // select
     const [month, setMonth] = React.useState('1');
 
@@ -88,11 +93,11 @@ const FinishedTaskGraph = ({ finishedTasks8MonthsBack = [] }) => {
     return (
         <Card variant="outlined" sx={{ borderRadius: '10px', height: '100%' }}>
             <CardHeader
-                title="Finished Task Graph (Monthly)"
+                title={t('dashboard.finished_graph')}
                 sx={{ pb: 0 }}
             />
-            <CardContent sx={{ py: 6 }}>
-                <Box sx={{ height: 'calc(100vh - 610px)', width: '100%' }}>
+            <CardContent sx={{}}>
+                <Box sx={{ width: '100%', height: '195px' }}>
                     <Chart
                         options={optionscolumnchart}
                         series={seriescolumnchart}

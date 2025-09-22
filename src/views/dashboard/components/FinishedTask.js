@@ -3,7 +3,12 @@ import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Card, CardContent, CardActions } from '@mui/material';
 
+import { useTranslation } from 'react-i18next';
+
+
 const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
+  const { t } = useTranslation();
+
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
@@ -14,6 +19,8 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
   const totalTasks = safeFinished + safeInProgress;
 
   console.log('Finished:', safeFinished, 'In Progress:', safeInProgress);
+
+
 
   const options = {
     chart: {
@@ -74,11 +81,11 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" fontWeight="700">
-            Finished Task (this month)
+            {t('dashboard.finished')}
           </Typography>
         </Stack>
         <Typography variant="h1" fontWeight="700" mt="-10px">
-          {safeFinished}/{totalTasks} tasks
+          {safeFinished}/{totalTasks} {t('dashboard.task_ea')}
         </Typography>
       </CardContent>
       <CardActions
@@ -91,19 +98,14 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
         }}
         disableSpacing
       >
-        {(safeFinished === 0 && safeInProgress === 0) ? (
-          <Typography align="center" color="text.secondary" sx={{width: '100%' }}>
-            No data to display
-          </Typography>
-        ) : (
-          <Chart
-            options={options}
-            series={series}
-            type="bar"
-            height="80px"
-            style={{ flex: 1 }} // เพิ่มบรรทัดนี้
-          />
-        )}
+        <Chart
+          options={options}
+          series={series}
+          type="bar"
+          height="80px"
+          style={{ flex: 1 }} // เพิ่มบรรทัดนี้
+        />
+
       </CardActions>
     </Card>
   );
