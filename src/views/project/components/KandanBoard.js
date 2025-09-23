@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import useSSE from 'src/hook/useSSE';
 import {
    Card, CardContent, Box, Paper, Typography, Chip, Avatar, Stack, Button, Tabs, Tab, useMediaQuery, Fab, IconButton, Menu, MenuItem, TextField, CircularProgress
@@ -58,7 +59,9 @@ const KandanBoard = ({ projectId }) => {
 
    // --- Load all user API (for assigned )---
    const [allUsers, setAllUsers] = useState([]);
-   
+
+   console.log(allUsers);
+
    // Drag state
    const [draggedTask, setDraggedTask] = useState(null);
    const [draggedFromCol, setDraggedFromCol] = useState(null);
@@ -80,7 +83,7 @@ const KandanBoard = ({ projectId }) => {
    const [editImage, setEditImage] = useState(null);
    const [removeImage, setRemoveImage] = useState(false);
 
-      // --- Group tasks by status ---
+   // --- Group tasks by status ---
    const columns = useMemo(() =>
       STATUS_OPTIONS.map(status => ({
          title: status,
@@ -91,19 +94,19 @@ const KandanBoard = ({ projectId }) => {
    );
 
    useEffect(() => {
-   if (!projectId) return;
-   fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย
-   })
-      .then(res => res.json())
-      .then(data => {
-         // Always set as array
-         const arr = Array.isArray(data) ? data : (data.members || []);
-         setAllUsers(arr);
-      });
-}, [projectId]);
+      if (!projectId) return;
+      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย
+      })
+         .then(res => res.json())
+         .then(data => {
+            // Always set as array
+            const arr = Array.isArray(data) ? data : (data.members || []);
+            setAllUsers(arr);
+         });
+   }, [projectId]);
 
    // --- Load all task API ---
    useSSE(
@@ -175,37 +178,37 @@ const KandanBoard = ({ projectId }) => {
 
    const handleEditClose = () => setEditOpen(false);
    const handleEditSubmit = async () => {
-  if (
-    !editImage &&
-    !removeImage &&
-    (!editData.name?.trim() || !editData.assigneeId || !editData.due)
-  ) {
-    alert('Please fill in all required fields.');
-    return;
-  }
-  const formData = new FormData();
-  formData.append('projectId', editData.projectId || projectId);
-  formData.append('id', editData.id);
-  formData.append('name', editData.name);
-  formData.append('assigneeId', editData.assigneeId);
-  formData.append('due', editData.due);
-  formData.append('status', editData.status);
+      if (
+         !editImage &&
+         !removeImage &&
+         (!editData.name?.trim() || !editData.assigneeId || !editData.due)
+      ) {
+         alert('Please fill in all required fields.');
+         return;
+      }
+      const formData = new FormData();
+      formData.append('projectId', editData.projectId || projectId);
+      formData.append('id', editData.id);
+      formData.append('name', editData.name);
+      formData.append('assigneeId', editData.assigneeId);
+      formData.append('due', editData.due);
+      formData.append('status', editData.status);
 
-  if (editImage) {
-    formData.append('image', editImage);
-  }
-  if (removeImage) {
-    formData.append('removeImage', '1');
-  }
+      if (editImage) {
+         formData.append('image', editImage);
+      }
+      if (removeImage) {
+         formData.append('removeImage', '1');
+      }
 
-  await fetch(`${API_BASE}/editTask`, {
-    method: 'POST',
-    body: formData,
-  });
-  setEditOpen(false);
-  setEditImage(null);
-  setRemoveImage(false);
-};
+      await fetch(`${API_BASE}/editTask`, {
+         method: 'POST',
+         body: formData,
+      });
+      setEditOpen(false);
+      setEditImage(null);
+      setRemoveImage(false);
+   };
 
    // --- Delete Popups ---
    const handleDeleteOpen = () => {
@@ -258,7 +261,7 @@ const KandanBoard = ({ projectId }) => {
    };
 
    // --- Render Edit/Delete/Add Popups (Box style like TableView) ---
-   const renderPopup = () => (
+   const renderPopup = () => ReactDOM.createPortal(
       <>
          {/* Add Task Popup */}
          {addOpen !== false && (
@@ -311,9 +314,10 @@ const KandanBoard = ({ projectId }) => {
                      ListboxProps={{ style: { maxHeight: 200 } }} // scroll ถ้าเกิน 4 คน
                      renderOption={(props, option) => (
                         <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                           <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>
-                              {(option.fullName || option.username || '?')[0]}
-                           </Avatar>
+                           <Avatar
+                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                              sx={{ width: 24, height: 24, fontSize: 14 }}
+                           />
                            <Typography>{option.fullName || option.username}</Typography>
                         </Box>
                      )}
@@ -392,7 +396,7 @@ const KandanBoard = ({ projectId }) => {
                   width: '100vw',
                   height: '100vh',
                   bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 1300,
+                  zIndex: 3000,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -421,6 +425,7 @@ const KandanBoard = ({ projectId }) => {
                      onChange={e => setEditData({ ...editData, name: e.target.value })}
                   />
                   <Autocomplete
+                     disablePortal
                      options={allUsers}
                      getOptionLabel={option => option.fullName || option.username}
                      value={allUsers.find(u => u.userId === editData.assigneeId) || null}
@@ -432,9 +437,10 @@ const KandanBoard = ({ projectId }) => {
                      ListboxProps={{ style: { maxHeight: 200 } }}
                      renderOption={(props, option) => (
                         <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                           <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>
-                              {(option.fullName || option.username || '?')[0]}
-                           </Avatar>
+                           <Avatar
+                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                              sx={{ width: 24, height: 24, fontSize: 14 }}
+                           />
                            <Typography>{option.fullName || option.username}</Typography>
                         </Box>
                      )}
@@ -448,38 +454,38 @@ const KandanBoard = ({ projectId }) => {
                      />
                   </LocalizationProvider>
                   <>
-                    {editData.imageUrl && !removeImage && !editImage && (
-  <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
-    <img
-      src={editData.imageUrl}
-      alt="current"
-      style={{
-        maxHeight: 250,
-        maxWidth: '100%',
-        width: 'auto',
-        height: 'auto',
-        borderRadius: 8,
-        cursor: 'pointer',
-      }}
-    />
-    <IconButton
-      size="small"
-      color="error"
-      sx={{
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        minWidth: 0,
-        p: 0.5,
-        bgcolor: 'white',
-        boxShadow: 1
-      }}
-      onClick={() => setRemoveImage(true)}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  </Box>
-)}
+                     {editData.imageUrl && !removeImage && !editImage && (
+                        <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
+                           <img
+                              src={editData.imageUrl}
+                              alt="current"
+                              style={{
+                                 maxHeight: 250,
+                                 maxWidth: '100%',
+                                 width: 'auto',
+                                 height: 'auto',
+                                 borderRadius: 8,
+                                 cursor: 'pointer',
+                              }}
+                           />
+                           <IconButton
+                              size="small"
+                              color="error"
+                              sx={{
+                                 position: 'absolute',
+                                 top: 8,
+                                 right: 8,
+                                 minWidth: 0,
+                                 p: 0.5,
+                                 bgcolor: 'white',
+                                 boxShadow: 1
+                              }}
+                              onClick={() => setRemoveImage(true)}
+                           >
+                              <CloseIcon fontSize="small" />
+                           </IconButton>
+                        </Box>
+                     )}
                      {editImage && (
                         <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
                            <img
@@ -547,7 +553,7 @@ const KandanBoard = ({ projectId }) => {
                   width: '100vw',
                   height: '100vh',
                   bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 1300,
+                  zIndex: 3000,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -584,14 +590,15 @@ const KandanBoard = ({ projectId }) => {
                onClick={() => setFullImage(null)}
                sx={{
                   position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex',
+                  bgcolor: 'rgba(0,0,0,0.85)', zIndex: 3000, display: 'flex',
                   alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out'
                }}
             >
                <img src={fullImage} alt="full" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 12 }} />
             </Box>
          )}
-      </>
+      </>,
+      document.body
    );
 
    if (loading) {
@@ -748,7 +755,10 @@ const KandanBoard = ({ projectId }) => {
                                  {/* {task.status && <Chip label={task.status} color="default" size="small" sx={{ color: '#3d3d3dff', fontWeight: 600 }} />} */}
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                 <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>{task.assigneeFullName[0]}</Avatar>
+                                 <Avatar
+                                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg`}
+                                    sx={{ width: 24, height: 24, fontSize: 14 }}
+                                 />
                                  <Typography sx={{ fontSize: 13, color: '#000000', fontWeight: 600 }}>{task.assigneeFullName}</Typography>
                               </Box>
                            </Paper>
@@ -920,7 +930,10 @@ const KandanBoard = ({ projectId }) => {
                                        {/* {task.status && <Chip label={task.status} color="default" size="small" sx={{color: '#3f3f3fff', fontWeight: 600}}/>} */}
                                     </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                       <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>{task.assigneeFullName[0]}</Avatar>
+                                       <Avatar
+                                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg`}
+                                          sx={{ width: 24, height: 24, fontSize: 14 }}
+                                       />
                                        <Typography sx={{ fontSize: 13, color: '#000000', fontWeight: 600 }}>{task.assigneeFullName}</Typography>
                                     </Box>
 

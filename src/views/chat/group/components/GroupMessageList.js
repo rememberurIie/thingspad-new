@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,6 +30,8 @@ const GroupMessageList = ({ onSelect, userId }) => {
   const [selectedMembers, setSelectedMembers] = useState([userId]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [showEditName, setShowEditName] = useState(false);
+  const [showLeave, setShowLeave] = useState(false);
 
   // --- SSE for Group List ---
   useSSE(
@@ -189,103 +192,99 @@ const GroupMessageList = ({ onSelect, userId }) => {
         </Box>
 
         {/* Create Group Dialog */}
-        {showCreate && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              bgcolor: 'rgba(0,0,0,0.25)',
-              zIndex: 1300,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+        {showCreate &&
+          ReactDOM.createPortal(
             <Box
               sx={{
-                width: 370,
-                bgcolor: 'background.paper',
-                borderRadius: 3,
-                boxShadow: 24,
-                p: 3,
-                position: 'relative',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                bgcolor: 'rgba(0,0,0,0.25)',
+                zIndex: 1300,
                 display: 'flex',
-                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <Typography variant="subtitle2" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                {t('group.popup_list_header')}
-              </Typography>
-              <Typography variant="subtitle2" mb={2}>
-                {t('group.popup_list_description')}
-              </Typography>
-              <IconButton
-                onClick={handleCloseCreate}
-                sx={{ position: 'absolute', top: 8, right: 8 }}
+              <Box
+                sx={{
+                  width: 370,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
-                <CloseIcon />
-              </IconButton>
-              <Box display="flex" alignItems="center" mb={2}>
-                <TextField
-                  label={t('group.popup_list_group_name')}
-                  size="small"
-                  value={newGroupName}
-                  onChange={e => setNewGroupName(e.target.value)}
+                <Typography variant="subtitle2" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  {t('group.popup_list_header')}
+                </Typography>
+                <Typography variant="subtitle2" mb={2}>
+                  {t('group.popup_list_description')}
+                </Typography>
+                <IconButton
+                  onClick={handleCloseCreate}
+                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Box display="flex" alignItems="center" mb={2}>
+                  <TextField
+                    label={t('group.popup_list_group_name')}
+                    size="small"
+                    value={newGroupName}
+                    onChange={e => setNewGroupName(e.target.value)}
+                    fullWidth
+                    sx={{ mr: 1 }}
+                  />
+                </Box>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  {t('project.select_members', 'Select members (min 3)')}
+                </Typography>
+                {loadingUsers ? (
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <CircularProgress size={18} /> {t('Loading...')}
+                  </Box>
+                ) : (
+                  <Box sx={{ maxHeight: 180, overflowY: 'auto', mb: 1 }}>
+                    {userList.map(u => (
+                      <Box key={u.id} display="flex" alignItems="center" mb={0.5}>
+                        <Checkbox
+                          checked={selectedMembers.includes(u.id)}
+                          onChange={() => handleToggleMember(u.id)}
+                          disabled={u.id === user?.uid || u.uid === user?.uid}
+                          size="small"
+                        />
+                        <Avatar
+                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`}
+                          sx={{ width: 28, height: 28, fontSize: 12, mr: 1 }}
+                        >
+                          {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
+                        </Avatar>
+                        <Typography variant="body2">{u.fullName || u.username || u.id}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+                {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<CheckIcon />}
+                  onClick={handleCreateGroup}
+                  disabled={!newGroupName.trim() || selectedMembers.length < 3}
                   fullWidth
-                  sx={{ mr: 1 }}
-                />
+                >
+                  {t('group.popup_list_submit_button')}
+                </Button>
               </Box>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                {t('project.select_members', 'Select members (min 3)')}
-              </Typography>
-              {loadingUsers ? (
-                <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <CircularProgress size={18} /> {t('Loading...')}
-                </Box>
-              ) : (
-                <Box sx={{ maxHeight: 180, overflowY: 'auto', mb: 1 }}>
-                  {userList.map(u => (
-                    <Box key={u.id} display="flex" alignItems="center" mb={0.5}>
-                      <Checkbox
-                        checked={selectedMembers.includes(u.id)}
-                        onChange={() => handleToggleMember(u.id)}
-                        disabled={u.id === user?.uid || u.uid === user?.uid}
-                        size="small"
-                      />
-                      <Avatar src={u.avatarUrl} sx={{ width: 28, height: 28, fontSize: 12, mr: 1 }}>
-                        {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
-                      </Avatar>
-                      <Typography variant="body2">{u.fullName || u.username || u.id}</Typography>
-                    </Box>
-                  ))}
-
-                  {/* Always show yourself as checked and disabled
-                  <Box display="flex" alignItems="center" mb={0.5}>
-                    <Checkbox checked disabled size="small" />
-                    <Avatar sx={{ width: 28, height: 28, mr: 1, fontSize: 12, bgcolor: 'primary.main' }}>
-                      {(userList.find(u => u.id === userId)?.fullName || 'Me').slice(0, 2).toUpperCase()}
-                    </Avatar>
-                    <Typography variant="body2">{t('group.popup_list_you')}</Typography>
-                  </Box> */}
-                </Box>
-              )}
-              {createError && <Typography color="error" variant="body2" mb={1}>{createError}</Typography>}
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<CheckIcon />}
-                onClick={handleCreateGroup}
-                disabled={!newGroupName.trim() || selectedMembers.length < 3}
-                fullWidth
-              >
-                {t('group.popup_list_submit_button')}
-              </Button>
-            </Box>
-          </Box>
-        )}
+            </Box>,
+            document.body
+          )}
 
         <TextField
           fullWidth
@@ -372,6 +371,101 @@ const GroupMessageList = ({ onSelect, userId }) => {
             </React.Fragment>
           ))}
         </List>
+
+        {showEditName &&
+          ReactDOM.createPortal(
+            <Box
+              sx={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                boxShadow: 24,
+                p: 3,
+                zIndex: 1400,
+                width: 300,
+                maxWidth: '90%',
+              }}
+            >
+              <Typography variant="subtitle1" mb={2} sx={{ fontWeight: 'medium' }}>
+                {t('group.edit_group_name')}
+              </Typography>
+              <TextField
+                label={t('group.group_name')}
+                value={newGroupName}
+                onChange={e => setNewGroupName(e.target.value)}
+                fullWidth
+                size="small"
+                sx={{ mb: 2 }}
+              />
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  size="small"
+                  onClick={() => setShowEditName(false)}
+                >
+                  {t('action.cancel')}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={handleCreateGroup}
+                >
+                  {t('action.save')}
+                </Button>
+              </Box>
+            </Box>,
+            document.body
+          )}
+
+        {showLeave &&
+          ReactDOM.createPortal(
+            <Box
+              sx={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                boxShadow: 24,
+                p: 3,
+                zIndex: 1400,
+                width: 300,
+                maxWidth: '90%',
+              }}
+            >
+              <Typography variant="subtitle1" mb={2} sx={{ fontWeight: 'medium' }}>
+                {t('group.leave_group')}
+              </Typography>
+              <Typography variant="body2" mb={2}>
+                {t('group.leave_group_confirmation')}
+              </Typography>
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  size="small"
+                  onClick={() => setShowLeave(false)}
+                >
+                  {t('action.cancel')}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={handleCreateGroup}
+                >
+                  {t('action.leave')}
+                </Button>
+              </Box>
+            </Box>,
+            document.body
+          )}
       </CardContent>
     </Card>
   );

@@ -48,52 +48,35 @@ const Project = () => {
 
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
-      <Box sx={{
-        maxHeight: '87vh',
-        height: '87vh',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
+      <Box
+        sx={{
+          maxHeight: '87vh',
+          height: '87vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
         <Box sx={{ my: 1 }}>
           <Header projectId={projectId} projectName={projects.find(p => p.id === projectId)?.name} view={view} setView={setView} />
         </Box>
-
-        {/* <Box sx={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}> */}
-          <Box
-            sx={{
-              display: view === 'chat' ? 'flex' : 'none',
-              flex: 1,
-              width: '100%',
-              minHeight: 0,
-              position: 'relative',
-            }}
-          >
-            <ProjectChat projectId={projectId} user={user} projects={projects} />
-          </Box>
-          <Box
-            sx={{
-              display: view === 'table' ? 'flex' : 'none',
-              flex: 1,
-              width: '100%',
-              minHeight: 0,
-              position: 'relative',
-            }}
-          >
-            <TableView projectId={projectId}/>
-          </Box>
-          <Box
-            sx={{
-              display: view === 'kanban' ? 'flex' : 'none',
-              flex: 1,
-              width: '100%',
-              minHeight: 0,
-              position: 'relative',
-            }}
-          >
-            <KandanBoard projectId={projectId}/>
-          </Box>
-        {/* </Box> */}
+        <Box sx={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
+          {view === 'chat' && (
+            <Box sx={{ flex: 1, width: '100%', minHeight: 0, position: 'relative', display: 'flex' }}>
+              <ProjectChat projectId={projectId} user={user} projects={projects} />
+            </Box>
+          )}
+          {view === 'table' && (
+            <Box sx={{ flex: 1, width: '100%', minHeight: 0, position: 'relative', display: 'flex' }}>
+              <TableView projectId={projectId}/>
+            </Box>
+          )}
+          {view === 'kanban' && (
+            <Box sx={{ flex: 1, width: '100%', minHeight: 0, position: 'relative', display: 'flex' }}>
+              <KandanBoard projectId={projectId}/>
+            </Box>
+          )}
+        </Box>
       </Box>
     </PageContainer>
   );

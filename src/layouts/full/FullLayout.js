@@ -77,6 +77,7 @@ const FullLayout = () => {
           isSidebarMinimized={isSidebarMinimized}
           fullName={user?.fullName || "Guest"}
           username={user?.username || ""}
+          userId={user?.uid || ""}
         />
         {/* ------------------------------------------- */}
         {/* PageContent */}

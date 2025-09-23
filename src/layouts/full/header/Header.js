@@ -15,7 +15,8 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
-import { IconBellRinging, IconMenu } from '@tabler/icons-react';
+import { IconMenu } from '@tabler/icons-react';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Profile from './Profile';
 import PropTypes from 'prop-types';
 import { useTheme } from "@mui/material/styles";
@@ -38,7 +39,8 @@ const Header = ({
   toggleSidebarMinimized,
   isSidebarMinimized,
   fullName,
-  username
+  username,
+  userId
 }) => {
   const { isDarkMode, toggle } = useContext(ColorModeContext);
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -104,7 +106,7 @@ const Header = ({
         </Box>
 
         <Box>
-          <IconButton
+          {/* <IconButton
             aria-label='show notifications'
             aria-controls='notification-menu'
             aria-haspopup='true'
@@ -113,7 +115,7 @@ const Header = ({
             <Badge variant='dot' color='primary'>
               <IconBellRinging size='21' stroke='1.5' />
             </Badge>
-          </IconButton>
+          </IconButton> */}
 
           <Menu
             id='notification-menu'
@@ -162,27 +164,7 @@ const Header = ({
             </IconButton>
           </Tooltip>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ mx: 0.5 ,height: 40, orderRightWidth: 2, alignSelf: 'center', display: { xs: 'none', lg: 'flex' } }}
-          />
-
-          <Stack direction="column" spacing={0} alignItems="flex-end" sx={{ pl: '9px', display: { xs: 'none', lg: 'flex' } }}>
-            <Typography variant="body1" color={theme.palette.grey[600]}>{fullName}</Typography>
-            <Typography variant="body2" color={theme.palette.grey[500]}>@{username}</Typography>
-          </Stack>
-          <Profile fullName={fullName} username={username} handleLogout={handleLogout} sx={{ px: '-10px'}} />
-
-          <Tooltip sx={{display: { xs: 'none', lg: 'flex' } }}>
-            <IconButton
-              aria-label='logout'
-              size='small'
-              onClick={handleLogout}
-            >
-              <LogoutIcon />
-            </IconButton>
-          </Tooltip>
+          <Profile fullName={fullName} username={username} handleLogout={handleLogout} userId={userId} sx={{ px: '-10px'}} />
 
         </Stack>
       </ToolbarStyled>

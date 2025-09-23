@@ -80,7 +80,7 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
             {t('dashboard.finished')}
           </Typography>
         </Stack>
-        <Typography variant="h1" fontWeight="700" mt="-10px">
+        <Typography variant="h1" fontWeight="700" mt="-20px">
           {safeFinished}/{totalTasks} {t('dashboard.task_ea')}
         </Typography>
       </CardContent>

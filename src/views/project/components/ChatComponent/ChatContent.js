@@ -159,11 +159,12 @@ const ChatContent = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          groupId: selectedRoomId, // ใช้ groupId = roomId ตาม API เดิม
+          projectId,
+          roomId: selectedRoomId,
           messageId: msgId,
         }),
       });
-      setMessages(msgs => msgs.filter(m => m.id !== msgId));
+      // Do not filter messages here; SSE will update the list
     } catch (err) {
       alert('Delete failed');
       console.error(err);
@@ -332,7 +333,7 @@ const ChatContent = ({
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
-                      src={userMap[msg.senderId]?.avatarUrl}
+                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg`}
                       sx={{
                         width: 40,
                         height: 40,

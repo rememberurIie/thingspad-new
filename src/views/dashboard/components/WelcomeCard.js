@@ -1,11 +1,14 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, Avatar } from '@mui/material';
-
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from 'react-i18next';
 
-const WelcomeCard = ({ fullName }) => {
+const WelcomeCard = ({ fullName, userId }) => {
 
-   const { t } = useTranslation();
+  console.log(fullName, userId);
+
+  const theme = useTheme();
+  const { t } = useTranslation();
 
    return (
 
@@ -26,19 +29,32 @@ const WelcomeCard = ({ fullName }) => {
       <Box sx={{ width: '100%' }}>
         <Box display="flex" flexDirection="row" alignItems="center">
           <Avatar
-            src="https://scontent.fbkk22-8.fna.fbcdn.net/v/t39.30808-6/244255392_411819196968895_469472291332141984_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeGN98UTya7iaf5osv5ir3RnTq0bD5Dbgr9OrRsPkNuCv77tBmhrYbeTLKIeoVmfW6SEE2HAq3CR2EsCT8Q1HLjy&_nc_ohc=dxh95hbaDD0Q7kNvwGY6tlI&_nc_oc=AdlwqbCz_jSZaxuaD810mWNt6_QQOk4mVJdlTwUVyw1mcii-2wVh33xQEuieL1-9iPI&_nc_zt=23&_nc_ht=scontent.fbkk22-8.fna&_nc_gid=dRjYekkFmD0zeS7UjyUC-w&oh=00_AfZMwpMo-BuyTOMR0wpFNCcxNQF0tQaGkuFct7nJ_u_a4A&oe=68D0E745"
+            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg`}
             sx={{
               width: 75,
               height: 75,
               mr: 2,
             }}
           >
+            <Typography color={theme.palette.grey[100]}>
+              {fullName ? fullName.slice(0, 2).toUpperCase() : ''}
+            </Typography>
           </Avatar>
           <Box gap={1} display="flex" flexDirection="column">
-            <Typography sx={{ fontSize: '25px', fontWeight: 100 }}>
+            <Typography
+              sx={{
+                fontSize: { xs: '18px', sm: '22px', md: '25px', lg: '25px' },
+                fontWeight: 100
+              }}
+            >
               {t('dashboard.welcome')}
             </Typography>
-            <Typography sx={{ fontSize: '35px', fontWeight: 700 }}>
+            <Typography
+              sx={{
+                fontSize: { xs: '24px', sm: '30px', md: '35px', lg: '35px' },
+                fontWeight: 700
+              }}
+            >
               {fullName}
             </Typography>
           </Box>
@@ -49,9 +65,9 @@ const WelcomeCard = ({ fullName }) => {
     <Box
       sx={{
         position: 'absolute',
-        right: 30,
-        bottom: '-15px',         // ขยับให้ชิดขอบล่าง
-        width: 150,
+        right: { xs: 10, sm: 20, md: 30 },
+        bottom: { xs: '-8px', sm: '-12px', md: '-15px' },
+        width: { xs: 80, sm: 110, md: 140, lg: 150 }, // responsive width
         height: 'auto',
         zIndex: 1,
         pointerEvents: 'none',

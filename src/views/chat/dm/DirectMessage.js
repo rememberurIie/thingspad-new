@@ -92,6 +92,7 @@ const DirectMessage = () => {
           >
             <DirectMessageChat
               selectedDmId={selectedDm?.dmId}
+              otherUserId={selectedDm?.userId}
               otherFullName={selectedDm?.fullName}
               currentUserId={user?.uid}
             />

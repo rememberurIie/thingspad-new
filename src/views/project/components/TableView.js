@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import ReactDOM from 'react-dom'; // เพิ่มบรรทัดนี้
 import {
    Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
    Typography, Chip, Avatar, Box, Stack, useMediaQuery, IconButton, InputBase, Paper, Menu, MenuItem, Button, TextField, Dialog, DialogContent, DialogActions, DialogTitle,
@@ -293,90 +294,256 @@ const TableView = ({ projectId }) => {
 
 
    // --- Render Add/Edit/Delete Popups ---
-   const renderPopup = () => (
-      <>
-         {/* Add Task Popup */}
-         {addOpen && (
+   const renderPopup = () => ReactDOM.createPortal(
+   <>
+      {/* Add Task Popup */}
+      {addOpen && (
+         <Box
+            sx={{
+               position: 'fixed',
+               top: 0,
+               left: 0,
+               width: '100vw',
+               height: '100vh',
+               bgcolor: 'rgba(0,0,0,0.25)',
+               zIndex: 3000, // เพิ่ม zIndex ให้สูงขึ้น
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center'
+            }}
+         >
             <Box
                sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 1300,
+                  width: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  flexDirection: 'column',
+                  gap: 2
                }}
             >
-               <Box
-                  sx={{
-                     width: 350,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
-                     display: 'flex',
-                     flexDirection: 'column',
-                     gap: 2
+               <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  Add Task
+               </Typography>
+               <TextField
+                  fullWidth
+                  label="Task Name"
+                  value={addData.name}
+                  onChange={e => setAddData({ ...addData, name: e.target.value })}
+               />
+               <Autocomplete
+                  options={allUsers}
+                  getOptionLabel={option => option.fullName || option.username}
+                  value={allUsers.find(u => u.userId === addData.assigneeId) || null}
+                  onChange={(_, value) => setAddData({ ...addData, assigneeId: value ? value.userId : '' })}
+                  renderInput={(params) => (
+                     <TextField {...params} label="Assignee" />
+                  )}
+                  isOptionEqualToValue={(option, value) => option.userId === value.userId}
+                  renderOption={(props, option) => (
+                     <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar
+                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                           sx={{ width: 24, height: 24, fontSize: 14 }}
+                        >
+                           {(option.fullName || option.username || '?')[0]}
+                        </Avatar>
+                        <Typography>{option.fullName || option.username}</Typography>
+                     </Box>
+                  )}
+               />
+               <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                     label="Due"
+                     value={addData.due}
+                     onChange={date => setAddData({ ...addData, due: date })}
+                     renderInput={(params) => <TextField {...params} fullWidth />}
+                  />
+               </LocalizationProvider>
+               <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                     const file = e.target.files[0];
+                     if (file && file.size > 1024 * 1024) {
+                        alert('File must be less than 1MB');
+                        return;
+                     }
+                     // Compress image (optional, use your compressImage if needed)
+                     setAddImage(file);
                   }}
-               >
-                  <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Add Task
-                  </Typography>
-                  <TextField
-                     fullWidth
-                     label="Task Name"
-                     value={addData.name}
-                     onChange={e => setAddData({ ...addData, name: e.target.value })}
-                  />
-                  <Autocomplete
-                     options={allUsers}
-                     getOptionLabel={option => option.fullName || option.username}
-                     value={allUsers.find(u => u.userId === addData.assigneeId) || null}
-                     onChange={(_, value) => setAddData({ ...addData, assigneeId: value ? value.userId : '' })}
-                     renderInput={(params) => (
-                        <TextField {...params} label="Assignee" />
-                     )}
-                     isOptionEqualToValue={(option, value) => option.userId === value.userId}
-                     renderOption={(props, option) => (
-                        <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                           <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>
-                              {(option.fullName || option.username || '?')[0]}
-                           </Avatar>
-                           <Typography>{option.fullName || option.username}</Typography>
-                        </Box>
-                     )}
-                  />
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                     <DatePicker
-                        label="Due"
-                        value={addData.due}
-                        onChange={date => setAddData({ ...addData, due: date })}
-                        renderInput={(params) => <TextField {...params} fullWidth />}
+                  style={{ marginBottom: 16 }}
+               />
+               {addImage && (
+                  <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
+                     <img
+                        src={URL.createObjectURL(addImage)}
+                        alt="preview"
+                        style={{
+                           maxHeight: 250,
+                           maxWidth: '100%',
+                           width: 'auto',
+                           height: 'auto',
+                           borderRadius: 8,
+                           cursor: 'pointer',
+                           display: 'block',
+                           margin: '0 auto'
+                        }}
                      />
-                  </LocalizationProvider>
-                  <input
-                     type="file"
-                     accept="image/*"
-                     onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file && file.size > 1024 * 1024) {
-                           alert('File must be less than 1MB');
-                           return;
-                        }
-                        // Compress image (optional, use your compressImage if needed)
-                        setAddImage(file);
-                     }}
-                     style={{ marginBottom: 16 }}
+                     <IconButton
+                        size="small"
+                        color="error"
+                        sx={{
+                           position: 'absolute',
+                           top: 8,
+                           right: 8,
+                           minWidth: 0,
+                           p: 0.5,
+                           bgcolor: 'white',
+                           boxShadow: 1
+                        }}
+                        onClick={() => setAddImage(null)}
+                     >
+                        <CloseIcon fontSize="small" />
+                     </IconButton>
+                  </Box>
+               )}
+               <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                     label="Status"
+                     value={addData.status}
+                     onChange={e => setAddData({ ...addData, status: e.target.value })}
+                  >
+                     {STATUS_OPTIONS.map(option => (
+                        <MenuItem key={option} value={option}>{option}</MenuItem>
+                     ))}
+                  </Select>
+               </FormControl>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Button onClick={handleAddClose} startIcon={<CloseIcon />}>Cancel</Button>
+                  <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>Add</Button>
+               </Box>
+            </Box>
+         </Box>
+      )}
+      {/* Edit Task Popup */}
+      {editOpen && (
+         <Box
+            sx={{
+               position: 'fixed',
+               top: 0,
+               left: 0,
+               width: '100vw',
+               height: '100vh',
+               bgcolor: 'rgba(0,0,0,0.25)',
+               zIndex: 3000, // เพิ่ม zIndex ให้สูงขึ้น
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center'
+            }}
+         >
+            <Box
+               sx={{
+                  width: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2
+               }}
+            >
+               <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  Edit Task
+               </Typography>
+               <TextField
+                  fullWidth
+                  label="Task Name"
+                  value={editData.name}
+                  onChange={e => setEditData({ ...editData, name: e.target.value })}
+               />
+               <Autocomplete
+                  disablePortal
+                  options={allUsers}
+                  getOptionLabel={option => option.fullName || option.username || 'Unknown User'}
+                  value={allUsers.find(u => u.userId === editData.assigneeId) || null}
+                  onChange={(_, value) => {
+                     console.log('Selected user:', value); // Add debugging
+                     setEditData({ ...editData, assigneeId: value ? value.userId : '' })
+                  }}
+                  renderInput={(params) => (
+                     <TextField
+                        {...params}
+                        label="Assignee"
+                        placeholder="Select an assignee..."
+                     />
+                  )}
+                  isOptionEqualToValue={(option, value) => option.userId === value?.userId}
+                  ListboxProps={{ style: { maxHeight: 200 } }}
+                  renderOption={(props, option) => (
+                     <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar
+                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                           sx={{ width: 24, height: 24, fontSize: 14 }}
+                        >
+                           {(option.fullName || option.username || '?')[0]}
+                        </Avatar>
+                        <Typography>{option.fullName || option.username || 'Unknown User'}</Typography>
+                     </Box>
+                  )}
+                  noOptionsText="No users found"
+               />
+               <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                     label="Due"
+                     value={editData.due ? new Date(editData.due) : null}
+                     onChange={date => setEditData({ ...editData, due: date })}
+                     renderInput={(params) => <TextField {...params} fullWidth />}
                   />
-                  {addImage && (
+               </LocalizationProvider>
+               <>
+                  {editData.imageUrl && !removeImage && !editImage && (
                      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
                         <img
-                           src={URL.createObjectURL(addImage)}
+                           src={editData.imageUrl}
+                           alt="current"
+                           style={{
+                              maxHeight: 250,
+                              maxWidth: '100%',
+                              width: 'auto',
+                              height: 'auto',
+                              borderRadius: 8,
+                              cursor: 'pointer',
+                           }}
+                        />
+                        <IconButton
+                           size="small"
+                           color="error"
+                           sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              minWidth: 0,
+                              p: 0.5,
+                              bgcolor: 'white',
+                              boxShadow: 1
+                           }}
+                           onClick={() => setRemoveImage(true)}
+                        >
+                           <CloseIcon fontSize="small" />
+                        </IconButton>
+                     </Box>
+                  )}
+                  {editImage && (
+                     <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
+                        <img
+                           src={URL.createObjectURL(editImage)}
                            alt="preview"
                            style={{
                               maxHeight: 250,
@@ -401,352 +568,197 @@ const TableView = ({ projectId }) => {
                               bgcolor: 'white',
                               boxShadow: 1
                            }}
-                           onClick={() => setAddImage(null)}
+                           onClick={() => setEditImage(null)}
                         >
                            <CloseIcon fontSize="small" />
                         </IconButton>
                      </Box>
                   )}
-                  <FormControl fullWidth>
-                     <InputLabel>Status</InputLabel>
-                     <Select
-                        label="Status"
-                        value={addData.status}
-                        onChange={e => setAddData({ ...addData, status: e.target.value })}
-                     >
-                        {STATUS_OPTIONS.map(option => (
-                           <MenuItem key={option} value={option}>{option}</MenuItem>
-                        ))}
-                     </Select>
-                  </FormControl>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleAddClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>Add</Button>
-                  </Box>
-               </Box>
-            </Box>
-         )}
-         {/* Edit Task Popup */}
-         {editOpen && (
-            <Box
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 1300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
-               <Box
-                  sx={{
-                     width: 350,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
-                     display: 'flex',
-                     flexDirection: 'column',
-                     gap: 2
-                  }}
-               >
-                  <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Edit Task
-                  </Typography>
-                  <TextField
-                     fullWidth
-                     label="Task Name"
-                     value={editData.name}
-                     onChange={e => setEditData({ ...editData, name: e.target.value })}
-                  />
-                  <Autocomplete
-                     options={allUsers}
-                     getOptionLabel={option => option.fullName || option.username || 'Unknown User'}
-                     value={allUsers.find(u => u.userId === editData.assigneeId) || null}
-                     onChange={(_, value) => {
-                        console.log('Selected user:', value); // Add debugging
-                        setEditData({ ...editData, assigneeId: value ? value.userId : '' })
+                  <input
+                     type="file"
+                     accept="image/*"
+                     onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file && file.size > 1024 * 1024) {
+                           alert('File must be less than 1MB');
+                           return;
+                        }
+                        setEditImage(file);
+                        setRemoveImage(false);
                      }}
-                     renderInput={(params) => (
-                        <TextField
-                           {...params}
-                           label="Assignee"
-                           placeholder="Select an assignee..."
-                        />
-                     )}
-                     isOptionEqualToValue={(option, value) => option.userId === value?.userId}
-                     ListboxProps={{ style: { maxHeight: 200 } }}
-                     renderOption={(props, option) => (
-                        <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                           <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>
-                              {(option.fullName || option.username || '?')[0]}
-                           </Avatar>
-                           <Typography>{option.fullName || option.username || 'Unknown User'}</Typography>
-                        </Box>
-                     )}
-                     noOptionsText="No users found"
+                     style={{ marginBottom: 16 }}
                   />
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                     <DatePicker
-                        label="Due"
-                        value={editData.due ? new Date(editData.due) : null}
-                        onChange={date => setEditData({ ...editData, due: date })}
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                     />
-                  </LocalizationProvider>
-                  <>
-                     {editData.imageUrl && !removeImage && !editImage && (
-                        <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
-                           <img
-                              src={editData.imageUrl}
-                              alt="current"
-                              style={{
-                                 maxHeight: 250,
-                                 maxWidth: '100%',
-                                 width: 'auto',
-                                 height: 'auto',
-                                 borderRadius: 8,
-                                 cursor: 'pointer',
-                              }}
-                           />
-                           <IconButton
-                              size="small"
-                              color="error"
-                              sx={{
-                                 position: 'absolute',
-                                 top: 8,
-                                 right: 8,
-                                 minWidth: 0,
-                                 p: 0.5,
-                                 bgcolor: 'white',
-                                 boxShadow: 1
-                              }}
-                              onClick={() => setRemoveImage(true)}
-                           >
-                              <CloseIcon fontSize="small" />
-                           </IconButton>
-                        </Box>
-                     )}
-                     {editImage && (
-                        <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', mb: 1 }}>
-                           <img
-                              src={URL.createObjectURL(editImage)}
-                              alt="preview"
-                              style={{
-                                 maxHeight: 250,
-                                 maxWidth: '100%',
-                                 width: 'auto',
-                                 height: 'auto',
-                                 borderRadius: 8,
-                                 cursor: 'pointer',
-                                 display: 'block',
-                                 margin: '0 auto'
-                              }}
-                           />
-                           <IconButton
-                              size="small"
-                              color="error"
-                              sx={{
-                                 position: 'absolute',
-                                 top: 8,
-                                 right: 8,
-                                 minWidth: 0,
-                                 p: 0.5,
-                                 bgcolor: 'white',
-                                 boxShadow: 1
-                              }}
-                              onClick={() => setEditImage(null)}
-                           >
-                              <CloseIcon fontSize="small" />
-                           </IconButton>
-                        </Box>
-                     )}
-                     <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                           const file = e.target.files[0];
-                           if (file && file.size > 1024 * 1024) {
-                              alert('File must be less than 1MB');
-                              return;
-                           }
-                           setEditImage(file);
-                           setRemoveImage(false);
-                        }}
-                        style={{ marginBottom: 16 }}
-                     />
-                  </>
-                  <FormControl fullWidth>
-                     <InputLabel>Status</InputLabel>
-                     <Select
-                        label="Status"
-                        value={editData.status}
-                        onChange={e => setEditData({ ...editData, status: e.target.value })}
-                     >
-                        {STATUS_OPTIONS.map(option => (
-                           <MenuItem key={option} value={option}>{option}</MenuItem>
-                        ))}
-                     </Select>
-                  </FormControl>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleEditClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>Save</Button>
-                  </Box>
-               </Box>
-            </Box>
-         )}
-         {/* Delete Confirm Popup */}
-         {deleteOpen && (
-            <Box
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 1300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
-               <Box
-                  sx={{
-                     width: 350,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
-                     display: 'flex',
-                     flexDirection: 'column',
-                  }}
-               >
-                  <Typography variant="subtitle1" mb={2} sx={{ fontSize: '20px', fontWeight: 'bold' }}>
-                     Confirm Delete
-                  </Typography>
-                  <Typography mb={3}>
-                     Are you sure you want to delete <b>{selectedRow?.name}</b>?
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>Delete</Button>
-                  </Box>
-               </Box>
-            </Box>
-         )}
-         {/* Full Task View Popup */}
-         {fullTask && (
-            <Box
-               onClick={() => setFullTask(null)}
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.7)',
-                  zIndex: 2000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'zoom-out'
-               }}
-            >
-               <Box
-                  onClick={e => e.stopPropagation()}
-                  sx={{
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     minWidth: 320,
-                     maxWidth: 400,
-                     width: '90vw',
-                     display: 'flex',
-                     flexDirection: 'column',
-                     gap: 3,
-                     position: 'relative'
-                  }}
-               >
-                  <IconButton
-                     onClick={() => setFullTask(null)}
-                     sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        zIndex: 10
-                     }}
-                     size="small"
+               </>
+               <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                     label="Status"
+                     value={editData.status}
+                     onChange={e => setEditData({ ...editData, status: e.target.value })}
                   >
-                     <CloseIcon />
-                  </IconButton>
+                     {STATUS_OPTIONS.map(option => (
+                        <MenuItem key={option} value={option}>{option}</MenuItem>
+                     ))}
+                  </Select>
+               </FormControl>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Button onClick={handleEditClose} startIcon={<CloseIcon />}>Cancel</Button>
+                  <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>Save</Button>
+               </Box>
+            </Box>
+         </Box>
+      )}
+      {/* Delete Confirm Popup */}
+      {deleteOpen && (
+         <Box
+            sx={{
+               position: 'fixed',
+               top: 0,
+               left: 0,
+               width: '100vw',
+               height: '100vh',
+               bgcolor: 'rgba(0,0,0,0.25)',
+               zIndex: 3000, // เพิ่ม zIndex ให้สูงขึ้น
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center'
+            }}
+         >
+            <Box
+               sx={{
+                  width: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+               }}
+            >
+               <Typography variant="subtitle1" mb={2} sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                  Confirm Delete
+               </Typography>
+               <Typography mb={3}>
+                  Are you sure you want to delete <b>{selectedRow?.name}</b>?
+               </Typography>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>Cancel</Button>
+                  <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>Delete</Button>
+               </Box>
+            </Box>
+         </Box>
+      )}
+      {/* Full Task View Popup */}
+      {fullTask && (
+         <Box
+            onClick={() => setFullTask(null)}
+            sx={{
+               position: 'fixed',
+               top: 0,
+               left: 0,
+               width: '100vw',
+               height: '100vh',
+               bgcolor: 'rgba(0,0,0,0.7)',
+               zIndex: 4000, // ให้สูงสุด
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               cursor: 'zoom-out'
+            }}
+         >
+            <Box
+               onClick={e => e.stopPropagation()}
+               sx={{
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  minWidth: 320,
+                  maxWidth: 400,
+                  width: '90vw',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 3,
+                  position: 'relative'
+               }}
+            >
+               <IconButton
+                  onClick={() => setFullTask(null)}
+                  sx={{
+                     position: 'absolute',
+                     top: 8,
+                     right: 8,
+                     zIndex: 10
+                  }}
+                  size="small"
+               >
+                  <CloseIcon />
+               </IconButton>
 
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     {fullTask.status && (
-                        <Chip
-                           label={fullTask.status}
-                           size="small"
-                           sx={{
-                              color: '#3f3f3fff',
-                              fontWeight: 600,
-                              backgroundColor: statusColor(fullTask.status),
-                              mt: '5px',
-                           }}
-                        />
-                     )}
-                     <Typography fontWeight={700} fontSize={20}>{fullTask.name}</Typography>
-                  </Box>
-
-                  {fullTask.imageUrl && (
-                     <img
-                        src={fullTask.imageUrl}
-                        alt="task"
-                        style={{
-                           maxWidth: '100%',
-                           maxHeight: 220,
-                           borderRadius: 8,
-                           objectFit: 'contain'
+               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {fullTask.status && (
+                     <Chip
+                        label={fullTask.status}
+                        size="small"
+                        sx={{
+                           color: '#3f3f3fff',
+                           fontWeight: 600,
+                           backgroundColor: statusColor(fullTask.status),
+                           mt: '5px',
                         }}
                      />
                   )}
+                  <Typography fontWeight={700} fontSize={20}>{fullTask.name}</Typography>
+               </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     <Typography fontSize={16} fontWeight={600}>Due Date: </Typography>
-                     {fullTask.due && (
-                        <Chip
-                           label={(() => {
-                              try {
-                                 const date = new Date(fullTask.due);
-                                 return isNaN(date) ? fullTask.due : format(date, 'dd MMM yyyy');
-                              } catch {
-                                 return fullTask.due;
-                              }
-                           })()}
-                           color="warning"
-                           size="small"
-                           sx={{ color: '#3f3f3fff', fontWeight: 600 }}
-                        />
-                     )}
-                  </Box>
+               {fullTask.imageUrl && (
+                  <img
+                     src={fullTask.imageUrl}
+                     alt="task"
+                     style={{
+                        maxWidth: '100%',
+                        maxHeight: 220,
+                        borderRadius: 8,
+                        objectFit: 'contain'
+                     }}
+                  />
+               )}
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     <Avatar sx={{ width: 32, height: 32, fontSize: 18 }}>
-                        {fullTask.assigneeFullName?.[0]}
-                     </Avatar>
-                     <Typography fontSize={16} fontWeight={600}>{fullTask.assigneeFullName}</Typography>
-                  </Box>
+               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={16} fontWeight={600}>Due Date: </Typography>
+                  {fullTask.due && (
+                     <Chip
+                        label={(() => {
+                           try {
+                              const date = new Date(fullTask.due);
+                              return isNaN(date) ? fullTask.due : format(date, 'dd MMM yyyy');
+                           } catch {
+                              return fullTask.due;
+                           }
+                        })()}
+                        color="warning"
+                        size="small"
+                        sx={{ color: '#3f3f3fff', fontWeight: 600 }}
+                     />
+                  )}
+               </Box>
+
+               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                     src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${fullTask.assigneeId}/avatar.jpg`}
+                     sx={{ width: 32, height: 32, fontSize: 18 }}
+                  >
+                     {fullTask.assigneeFullName?.[0]}
+                  </Avatar>
+                  <Typography fontSize={16} fontWeight={600}>{fullTask.assigneeFullName}</Typography>
                </Box>
             </Box>
-         )}
-      </>
+         </Box>
+      )}
+   </>,
+   document.body
    );
 
    const FilterControls = (
@@ -909,7 +921,10 @@ const TableView = ({ projectId }) => {
                                     )}
 
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
-                                       <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>{row.assignee?.[0]}</Avatar>
+                                       <Avatar
+                                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg`}
+                                           sx={{ width: 24, height: 24, fontSize: 14 }}
+                                       />
                                        <Typography fontSize={14}>{row.assigneeFullName}</Typography>
                                     </Box>
 
@@ -1121,7 +1136,10 @@ const TableView = ({ projectId }) => {
                               </TableCell>
                               <TableCell sx={{ width: '15%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Avatar sx={{ width: 24, height: 24, fontSize: 14 }}>{row.assignee?.[0]}</Avatar>
+                                    <Avatar
+                                       src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg`}
+                                       sx={{ width: 24, height: 24, fontSize: 14 }}
+                                    />
                                     <Typography fontSize={14}>{row.assigneeFullName}</Typography>
                                  </Box>
                               </TableCell>

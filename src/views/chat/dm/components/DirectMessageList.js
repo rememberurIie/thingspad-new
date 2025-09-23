@@ -183,7 +183,10 @@ const DirectMessageList = ({ onSelect, userId }) => {
                 onClick={() => handleSelectPerson(person)}
                 sx={{ minWidth: 240, ml: "-12px" }}
               >
-                <Avatar sx={{ width: 30, height: 30, fontSize: 12, mr: 1 }}>
+                <Avatar
+                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${person.userId}/avatar.jpg`}
+                  sx={{ width: 30, height: 30, fontSize: 12, mr: 1 }}
+                >
                   {(person.fullName || person.username || '??').slice(0, 2).toUpperCase()}
                 </Avatar>
                 {person.fullName || person.username || 'No Name'}
@@ -218,7 +221,10 @@ const DirectMessageList = ({ onSelect, userId }) => {
                   onSelect?.(user);
                 }}
               >
-                <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
+                <Avatar
+                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${user.userId}/avatar.jpg`}
+                  sx={{ width: 40, height: 40, fontSize: 15 }}
+                >
                   {user?.fullName
                     ? user.fullName.slice(0, 2).toUpperCase()
                     : "??"}

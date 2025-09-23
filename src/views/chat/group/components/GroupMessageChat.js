@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState,} from 'react';
+import ReactDOM from 'react-dom';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
   List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
@@ -374,137 +375,135 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
         <Divider />
 
         {/* Edit Group Name Popup */}
-        {showEditName && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              bgcolor: 'rgba(0,0,0,0.25)',
-              zIndex: 1300,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+        {showEditName &&
+          ReactDOM.createPortal(
             <Box
               sx={{
-                width: 350,
-                bgcolor: 'background.paper',
-                borderRadius: 3,
-                boxShadow: 24,
-                p: 3,
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0,0,0,0.25)',
+                zIndex: 1300,
+                display: 'grid',
+                placeItems: 'center'
               }}
             >
-              <IconButton
-                onClick={() => setShowEditName(false)}
-                sx={{ position: 'absolute', top: 8, right: 8 }}
-              >
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                {t('group.popup_chat_edit_header')}
-              </Typography>
-              <TextField
-                label={t('group.popup_chat_edit_groupname')}
-                value={editName}
-                onChange={e => {
-                  if (e.target.value.length <= 32) setEditName(e.target.value);
+              <Box
+                sx={{
+                  width: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
-                inputProps={{ maxLength: 32 }}
-                fullWidth
-                size="small"
-                sx={{ mb: 2 }}
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, ml: 0.5 }}>
-                {editName.length}/32
-              </Typography>
-              {editNameError && <Typography color="error" variant="body2" mb={1}>{editNameError}</Typography>}
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<CheckIcon />}
-                onClick={handleEditGroupName}
-                disabled={editNameLoading || !editName.trim() || editName.length < 1}
-                fullWidth
               >
-                {editNameLoading ? t('group.popup_chat_edit_saving') : t('group.popup_chat_edit_save')}
-              </Button>
-            </Box>
-          </Box>
-        )}
-
-        {/* Leave Group Popup */}
-        {showLeave && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              bgcolor: 'rgba(0,0,0,0.25)',
-              zIndex: 1300,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Box
-              sx={{
-                width: 350,
-                bgcolor: 'background.paper',
-                borderRadius: 3,
-                boxShadow: 24,
-                p: 3,
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <IconButton
-                onClick={() => setShowLeave(false)}
-                sx={{ position: 'absolute', top: 8, right: 8 }}
-              >
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="subtitle1" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                {t('group.popup_chat_leave_header')}
-              </Typography>
-              <Typography variant="subtitle1" mb={2} sx={{ fontSize: '14px'}}>
-                {t('group.popup_chat_leave_description')}
-              </Typography>
-              {leaveError && <Typography color="error" variant="body2" mb={1}>{leaveError}</Typography>}
-              <Box display="flex" gap={1}>
+                <IconButton
+                  onClick={() => setShowEditName(false)}
+                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  {t('group.popup_chat_edit_header')}
+                </Typography>
+                <TextField
+                  label={t('group.popup_chat_edit_groupname')}
+                  value={editName}
+                  onChange={e => {
+                    if (e.target.value.length <= 32) setEditName(e.target.value);
+                  }}
+                  inputProps={{ maxLength: 32 }}
+                  fullWidth
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, ml: 0.5 }}>
+                  {editName.length}/32
+                </Typography>
+                {editNameError && <Typography color="error" variant="body2" mb={1}>{editNameError}</Typography>}
                 <Button
                   variant="contained"
-                  color="error"
+                  color="primary"
                   startIcon={<CheckIcon />}
-                  onClick={handleLeaveGroup}
-                  disabled={leaveLoading}
+                  onClick={handleEditGroupName}
+                  disabled={editNameLoading || !editName.trim() || editName.length < 1}
                   fullWidth
                 >
-                  {leaveLoading ? t('group.popup_chat_leave_submitting') : t('group.popup_chat_leave_submit')}
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  startIcon={<CloseIcon />}
-                  onClick={() => setShowLeave(false)}
-                  disabled={leaveLoading}
-                  fullWidth
-                >
-                  {t('group.popup_chat_leave_cancel')}
+                  {editNameLoading ? t('group.popup_chat_edit_saving') : t('group.popup_chat_edit_save')}
                 </Button>
               </Box>
-            </Box>
-          </Box>
-        )}
+            </Box>,
+            document.body
+          )
+        }
+
+        {/* Leave Group Popup */}
+        {showLeave &&
+          ReactDOM.createPortal(
+            <Box
+              sx={{
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0,0,0,0.25)',
+                zIndex: 1300,
+                display: 'grid',
+                placeItems: 'center'
+              }}
+            >
+              <Box
+                sx={{
+                  width: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <IconButton
+                  onClick={() => setShowLeave(false)}
+                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Typography variant="subtitle1" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  {t('group.popup_chat_leave_header')}
+                </Typography>
+                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '14px'}}>
+                  {t('group.popup_chat_leave_description')}
+                </Typography>
+                {leaveError && <Typography color="error" variant="body2" mb={1}>{leaveError}</Typography>}
+                <Box display="flex" gap={1}>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<CheckIcon />}
+                    onClick={handleLeaveGroup}
+                    disabled={leaveLoading}
+                    fullWidth
+                  >
+                    {leaveLoading ? t('group.popup_chat_leave_submitting') : t('group.popup_chat_leave_submit')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    startIcon={<CloseIcon />}
+                    onClick={() => setShowLeave(false)}
+                    disabled={leaveLoading}
+                    fullWidth
+                  >
+                    {t('group.popup_chat_leave_cancel')}
+                  </Button>
+                </Box>
+              </Box>
+            </Box>,
+            document.body
+          )
+        }
 
         {/* Messages */}
         <Box
@@ -571,6 +570,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
+                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg`}
                       sx={{
                         width: 40,
                         height: 40,

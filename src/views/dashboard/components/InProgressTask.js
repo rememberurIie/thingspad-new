@@ -58,41 +58,25 @@ const InProgessTask = ({ taskInProgressCount }) => {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" fontWeight="700">
-             {t('dashboard.inprogress')}
+            {t('dashboard.inprogress')}
           </Typography>
         </Stack>
-        <Typography variant="h1" fontWeight="700" mt="-10px">
+        <Typography variant="h1" fontWeight="700" mt="-20px">
           {taskInProgressCount || 0} {t('dashboard.task_ea')}
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
-          {/* <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>
-            <IconArrowDownRight width={20} color="#FA896B" />
-          </Avatar>
-          <Typography variant="subtitle2" fontWeight="600">
-            +9%
-          </Typography>
-          <Typography variant="subtitle2" color="textSecondary">
-            last year
-          </Typography> */}
+
         </Stack>
       </CardContent>
-      {/* <CardActions sx={{ p: 0, width: '100%', display: 'block' }} disableSpacing>
-      <Chart
-        options={optionscolumnchart}
-        series={seriescolumnchart}
-        type="area"
-        height="60px"
-        width="100%"
-      />
-    </CardActions> */}
+
       {/* รูปภาพที่มุมขวาล่าง */}
       <Box
         sx={{
           position: 'absolute',
-          right: 0,
-          bottom: '-13px',         // ขยับให้ชิดขอบล่าง
-          width: 170,         // ปรับขนาดให้เหมาะสม
-          height: 'auto',        // ปรับขนาดให้เหมาะสม
+          right: { xs: 8, sm: 16, md: 24, lg: 32 },
+          bottom: { xs: '-8px', sm: '-12px', md: '-15px' },
+          width: { xs: 80, sm: 110, md: 140, lg: 170 }, // responsive width
+          height: 'auto',
           zIndex: 1,
           pointerEvents: 'none',
         }}

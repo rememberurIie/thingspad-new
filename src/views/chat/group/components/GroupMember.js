@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import {
   Card, CardContent, Typography, Avatar,
   List, ListItem, ListItemAvatar, ListItemText, Box, IconButton, TextField, Button, CircularProgress
@@ -156,98 +157,97 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
         </Box>
 
         {/* Add User Modal */}
-        {showAdd && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              bgcolor: 'rgba(0,0,0,0.25)',
-              zIndex: 1300,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+        {showAdd &&
+          ReactDOM.createPortal(
             <Box
               sx={{
-                width: 350,
-                height: 350,
-                bgcolor: 'background.paper',
-                borderRadius: 3,
-                boxShadow: 24,
-                p: 3,
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0,0,0,0.25)',
+                zIndex: 1300,
+                display: 'grid',
+                placeItems: 'center'
               }}
             >
-              <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                {t('group.popup_member_header')}
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder={t('group.popup_member_searchbox')}
-                value={addSearch}
-                onChange={e => setAddSearch(e.target.value)}
-                sx={{ mb: 2 }}
-              />
-              {addLoading ? (
-                <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <CircularProgress size={18} /> Loading...
-                </Box>
-              ) : addList.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">{t('group.popup_member_nouser')}</Typography>
-              ) : (
-                <List>
-                  {addList
-                    .filter(u =>
-                      (u.fullName || u.username || '')
-                        .toLowerCase()
-                        .includes(addSearch.toLowerCase())
-                    )
-                    .map(u => (
-                      <ListItem key={u.id} secondaryAction={
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleAddUser(u.id)}
-                          disabled={addingUserId === u.id}
-                        >
-                          {addingUserId === u.id ? t('group.popup_member_adding') : t('group.popup_member_add')}
-                        </Button>
-                      }>
-                        <ListItemAvatar>
-                          <Avatar src={u.avatarUrl}>
-                            {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={u.fullName || u.username || u.id}
-                          secondary={u.username ? `@${u.username}` : null}
-                        />
-                      </ListItem>
-                    ))}
-                </List>
-              )}
-              {addError && <Typography color="error" variant="body2" mt={1}>{addError}</Typography>}
-              <IconButton
-                onClick={() => {
-                  setShowAdd(false);
-                  setAddList([]);
-                  setAddError('');
-                  setAddSearch('');
+              <Box
+                sx={{
+                  width: 350,
+                  height: 350,
+                  bgcolor: 'background.paper',
+                  borderRadius: 3,
+                  boxShadow: 24,
+                  p: 3,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
-                sx={{ position: 'absolute', top: 8, right: 8 }}
               >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-          </Box>
-        )}
+                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                  {t('group.popup_member_header')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder={t('group.popup_member_searchbox')}
+                  value={addSearch}
+                  onChange={e => setAddSearch(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                {addLoading ? (
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <CircularProgress size={18} /> Loading...
+                  </Box>
+                ) : addList.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">{t('group.popup_member_nouser')}</Typography>
+                ) : (
+                  <List>
+                    {addList
+                      .filter(u =>
+                        (u.fullName || u.username || '')
+                          .toLowerCase()
+                          .includes(addSearch.toLowerCase())
+                      )
+                      .map(u => (
+                        <ListItem key={u.id} secondaryAction={
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => handleAddUser(u.id)}
+                            disabled={addingUserId === u.id}
+                          >
+                            {addingUserId === u.id ? t('group.popup_member_adding') : t('group.popup_member_add')}
+                          </Button>
+                        }>
+                          <ListItemAvatar>
+                            <Avatar src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`}>
+                              {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={u.fullName || u.username || u.id}
+                            secondary={u.username ? `@${u.username}` : null}
+                          />
+                        </ListItem>
+                      ))}
+                  </List>
+                )}
+                {addError && <Typography color="error" variant="body2" mt={1}>{addError}</Typography>}
+                <IconButton
+                  onClick={() => {
+                    setShowAdd(false);
+                    setAddList([]);
+                    setAddError('');
+                    setAddSearch('');
+                  }}
+                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </Box>,
+            document.body
+          )
+        }
 
         <List>
           {members.map((u) => {
@@ -304,7 +304,9 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
                 }
               >
                 <ListItemAvatar>
-                  <Avatar src={u.avatarUrl} alt={initials.toUpperCase()}>
+                  <Avatar 
+                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`} 
+                    alt={initials.toUpperCase()}>
                     {(!u.avatarUrl || u.avatarUrl === '') && (
                       <Typography
                         sx={{

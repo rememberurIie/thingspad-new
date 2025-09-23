@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
-const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
+const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUserId }) => {
   const { messagesByDmId, setMessagesForDm } = useDirectMessageList();
 
   // Use messages from context
@@ -239,7 +239,9 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
-          <Avatar sx={{ width: 40, height: 40, fontSize: 15}}>
+          <Avatar
+            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${otherUserId}/avatar.jpg`}
+            sx={{ width: 40, height: 40, fontSize: 15 }}>
             {otherFullName
               ? otherFullName.slice(0, 2).toUpperCase()
               : "??"}
@@ -317,6 +319,7 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
+                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg`}
                       sx={{
                         width: 40,
                         height: 40,

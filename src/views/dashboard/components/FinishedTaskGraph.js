@@ -97,14 +97,22 @@ const FinishedTaskGraph = ({ finishedTasks8MonthsBack = [] }) => {
                 sx={{ pb: 0 }}
             />
             <CardContent sx={{}}>
-                <Box sx={{ width: '100%', height: '380px' }}>
-                    <Chart
-                        options={optionscolumnchart}
-                        series={seriescolumnchart}
-                        type="bar"
-                        height="100%"
-                        width="100%"
-                    />
+                <Box
+                  sx={{
+                    pt: 4,
+                    width: '100%',
+                    height: { xs: '290px', sm: '300px', md: '40vh', lg: '36vh' }, // responsive by screen
+                    minHeight: 200,
+                    maxHeight: 500,
+                  }}
+                >
+                  <Chart
+                    options={optionscolumnchart}
+                    series={seriescolumnchart}
+                    type="bar"
+                    height="100%"
+                    width="100%"
+                  />
                 </Box>
             </CardContent>
         </Card>
