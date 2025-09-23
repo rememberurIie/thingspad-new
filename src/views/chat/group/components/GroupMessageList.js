@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
 import { useTheme } from '@mui/material/styles';
 import { useSelector } from 'react-redux';
-import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext'; // Adjust the import path as needed
+import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
 
 
 const GroupMessageList = ({ onSelect, userId }) => {
@@ -20,9 +20,8 @@ const GroupMessageList = ({ onSelect, userId }) => {
   const user = useSelector(state => state.auth.user);
 
 
-  const { groups, setGroups } = useGroupMessageList();
+  const { groups, setGroups, selectedGroup, setSelectedGroup } = useGroupMessageList();
   const [groupSearch, setGroupSearch] = useState('');
-  const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true); // เพิ่ม state loading
   const [showCreate, setShowCreate] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -69,11 +68,11 @@ const GroupMessageList = ({ onSelect, userId }) => {
 
   // Auto-select the first group in the filtered list
   React.useEffect(() => {
-    if (filteredGroups.length > 0 && !selectedId) {
-      setSelectedId(filteredGroups[0].id);
+    if (filteredGroups.length > 0 && !selectedGroup) {
+      setSelectedGroup(filteredGroups[0]);
       onSelect?.(filteredGroups[0]);
     }
-  }, [filteredGroups, selectedId, onSelect]);
+  }, [filteredGroups, selectedGroup, setSelectedGroup, onSelect]);
 
   // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
     React.useEffect(() => {
@@ -302,15 +301,15 @@ const GroupMessageList = ({ onSelect, userId }) => {
             <React.Fragment key={group.id}>
               <ListItem
                 sx={{
-                  bgcolor: selectedId === group.id ? theme.palette.action.hover : 'inherit',
+                  bgcolor: selectedGroup?.id === group.id ? theme.palette.action.hover : 'inherit',
                   borderRadius: 2,
                   transition: 'background 0.2s',
                   pl: 1.5
                 }}
                 button
-                selected={selectedId === group.id}
+                selected={selectedGroup?.id === group.id}
                 onClick={() => {
-                  setSelectedId(group.id);
+                  setSelectedGroup(group);
                   onSelect?.(group);
                 }}
               >

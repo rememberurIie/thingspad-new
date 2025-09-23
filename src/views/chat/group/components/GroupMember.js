@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Card, CardContent, Typography, Avatar,
-  List, ListItem, ListItemAvatar, ListItemText, Box, IconButton, TextField, Button, Checkbox, CircularProgress
+  List, ListItem, ListItemAvatar, ListItemText, Box, IconButton, TextField, Button, CircularProgress
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
@@ -12,9 +12,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
+import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext'; // <-- import context
+
 const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const { t } = useTranslation();
-  const [members, setMembers] = useState([]);
+  const {
+    membersByGroupId,
+    setMembersForGroup
+  } = useGroupMessageList(); // <-- use context
+
+  const members = membersByGroupId[selectedGroup] || []; // <-- get from context
   const [editMode, setEditMode] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
@@ -36,7 +43,8 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
     selectedGroup ? 'http://192.168.1.36:3000/api/group/getGroupMember' : null,
     (evt) => {
       if (evt.type === 'members' && Array.isArray(evt.payload)) {
-        setMembers(
+        setMembersForGroup(
+          selectedGroup,
           sortByFullName(
             evt.payload.map(u => ({
               id: u.userId,
@@ -89,6 +97,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: false }),
       });
       setAddList(list => list.filter(u => u.id !== userId));
+      // Optionally: refetch members or rely on SSE update
     } catch {
       setAddError('Failed to add user');
     }
@@ -105,6 +114,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: true }),
       });
       setConfirmRemoveId(null);
+      // Optionally: refetch members or rely on SSE update
     } catch {
       // handle error if needed
     }

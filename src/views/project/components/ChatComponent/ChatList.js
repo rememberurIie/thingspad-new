@@ -6,7 +6,6 @@ import {
 import { useTheme } from '@mui/material/styles'; // Add this import
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
-import { useChatList } from '../../../../contexts/ChatListContext';
 
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -17,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   const { t } = useTranslation();
-  const { rooms, setRooms } = useChatList();
+  const [rooms, setRooms] = useState([]);
   const theme = useTheme(); // Add this line
   const [loading, setLoading] = useState(true); // เพิ่ม state loading
   const [showInput, setShowInput] = useState(false);
@@ -55,7 +54,6 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   );
 
   
-
   const handleOpenMenuAddUser = () => {
     setShowInput((prev) => !prev);
   };

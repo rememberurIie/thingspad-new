@@ -9,19 +9,18 @@ import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
 import { useTheme } from '@mui/material/styles';
 
-import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext'; // Adjust the import path as needed
+import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
 
 
 const DirectMessageList = ({ onSelect, userId }) => {
   const theme = useTheme(); // <-- get theme
   const { t } = useTranslation();
-  const { dms, setDms } = useDirectMessageList();
+  const { dms, setDms, selectedDm, setSelectedDm } = useDirectMessageList();
   const [anchorEl, setAnchorEl] = useState(null);
   const [people, setPeople] = useState([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
   const [search, setSearch] = useState('');
   const [dmSearch, setDmSearch] = useState(''); // Add this above the DM list rendering
-  const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true); // เพิ่ม state loading
 
   // --- SSE for DM List ---
@@ -113,11 +112,11 @@ const DirectMessageList = ({ onSelect, userId }) => {
 
   // Auto-select the first DM in the filtered list
   React.useEffect(() => {
-    if (filteredDms.length > 0 && !selectedId) {
-      setSelectedId(filteredDms[0].id);
+    if (filteredDms.length > 0 && !selectedDm) {
+      setSelectedDm(filteredDms[0]);
       onSelect?.(filteredDms[0]);
     }
-  }, [filteredDms, selectedId, onSelect]);
+  }, [filteredDms, selectedDm, setSelectedDm, onSelect]);
 
   // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
     React.useEffect(() => {
@@ -207,15 +206,15 @@ const DirectMessageList = ({ onSelect, userId }) => {
             <React.Fragment key={user.id}>
               <ListItem
                 sx={{
-                  bgcolor: selectedId === user.id ? theme.palette.action.hover : 'inherit', // Use hover color for selected
+                  bgcolor: selectedDm?.id === user.id ? theme.palette.action.hover : 'inherit',
                   borderRadius: 2,
                   transition: 'background 0.2s',
                   pl: 1.5
                 }}
                 button
-                selected={selectedId === user.id}
+                selected={selectedDm?.id === user.id}
                 onClick={() => {
-                  setSelectedId(user.id);
+                  setSelectedDm(user);
                   onSelect?.(user);
                 }}
               >

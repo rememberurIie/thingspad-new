@@ -8,6 +8,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 
 import { useSelector } from 'react-redux';
 
@@ -27,6 +28,7 @@ const Header = ({ projectId, projectName, view, setView }) => {
    // Invite link state
    const [isCanInvite, setIsCanInvite] = useState(true);
    const [snackbarOpen, setSnackbarOpen] = useState(false);
+   const [copied, setCopied] = useState(false); // เพิ่ม state
 
    // ดึงสถานะ invite link จาก API
    useEffect(() => {
@@ -87,7 +89,8 @@ const Header = ({ projectId, projectName, view, setView }) => {
          } catch (err) {}
          document.body.removeChild(textArea);
       }
-      setSnackbarOpen(true);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500); // กลับเป็นปกติหลัง 1.5 วิ
    };
 
    // Toggle invite link
@@ -107,18 +110,25 @@ const Header = ({ projectId, projectName, view, setView }) => {
             <Typography sx={{ mr: 2, fontSize: '25px', fontWeight: 700 }}>{projectName}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                {/* Invite Link Section */}
-               <Tooltip title={isCanInvite ? "Copy invite link" : "Invite link is disabled"}>
+               <Tooltip title={isCanInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
                   <span>
-                     <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<ContentCopyIcon />}
-                        onClick={handleCopyInviteLink}
-                        disabled={!isCanInvite}
-                        sx={{ mr: 1 }}
-                     >
-                        Copy Invite Link
-                     </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                      onClick={handleCopyInviteLink}
+                      disabled={!isCanInvite}
+                      sx={{
+                        mr: 1,
+                        color: copied ? 'success.main' : undefined,
+                        borderColor: copied ? 'success.main' : undefined,
+                        // '&:hover': copied
+                        //   ? { borderColor: 'success.dark', backgroundColor: 'success.light' }
+                        //   : undefined,
+                      }}
+                    >
+                      {copied ? "Copied" : "Copy Invite Link"}
+                    </Button>
                   </span>
                </Tooltip>
                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>

@@ -20,24 +20,24 @@ const Login = lazy(() => import('../views/authentication/Login'));
 const Error = lazy(() => import('../views/authentication/Error'));
 
 // *****context*****
-import { ChatListProvider } from '../contexts/ChatListContext';
 import { ProjectListProvider } from '../contexts/ProjectListContext';
 import { DirectMessageListProvider } from '../contexts/DirectMessageListContext';
 import { GroupMessageListProvider } from '../contexts/GroupMessageListContext';
+import { DashboardProvider } from '../contexts/DashboardContext'; // Add this import
 
 const Router = [
   {
     path: '/',
     element: (
-      <GroupMessageListProvider>
-        <ChatListProvider>
-          <ProjectListProvider>
-            <DirectMessageListProvider>
+      <DashboardProvider>
+        <DirectMessageListProvider>
+          <GroupMessageListProvider>
+            <ProjectListProvider>
               <FullLayout />
-            </DirectMessageListProvider>
-          </ProjectListProvider>
-        </ChatListProvider>
-      </GroupMessageListProvider>
+            </ProjectListProvider>
+          </GroupMessageListProvider>
+        </DirectMessageListProvider>
+      </DashboardProvider>
     ),
     children: [
       {

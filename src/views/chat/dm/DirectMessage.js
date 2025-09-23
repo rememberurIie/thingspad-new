@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   useMediaQuery,
@@ -13,6 +13,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
+import { useDirectMessageList } from '../../../contexts/DirectMessageListContext';
 
 import DirectMessageList from './components/DirectMessageList';
 import DirectMessageChat from './components/DirectMessageChat';
@@ -20,14 +21,13 @@ import DirectMessageChat from './components/DirectMessageChat';
 const drawerWidth = 300;
 
 const DirectMessage = () => {
-
   const user = useSelector(state => state.auth.user);
 
-  //select dm state
-  const [selectedDm, setSelectedDm] = useState(null);
+  // Remove local selectedDm state
+  const { selectedDm, setSelectedDm } = useDirectMessageList();
 
   // Mobile drawers
-  const [mobileOpenLeft, setMobileOpenLeft] = useState(false);
+  const [mobileOpenLeft, setMobileOpenLeft] = React.useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
@@ -91,7 +91,7 @@ const DirectMessage = () => {
             }}
           >
             <DirectMessageChat
-              selectedDmId={selectedDm?.dmId} // should be a string, not an object
+              selectedDmId={selectedDm?.dmId}
               otherFullName={selectedDm?.fullName}
               currentUserId={user?.uid}
             />

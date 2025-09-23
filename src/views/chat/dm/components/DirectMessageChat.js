@@ -7,6 +7,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 
 import { useSelector } from 'react-redux';
+import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
 
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,20 +21,22 @@ const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
 const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
+  const { messagesByDmId, setMessagesForDm } = useDirectMessageList();
 
-  const [messages, setMessages] = useState([]);
+  // Use messages from context
   const [input, setInput] = useState('');
-
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
   const [previewURL, setPreviewURL] = useState('');
-
   const [loading, setLoading] = useState(false);
-  const [hoveredMsgId, setHoveredMsgId] = useState(null); // 1. Track hovered message
+  const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
   const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Use context messages or empty array
+  const messages = messagesByDmId[selectedDmId] || [];
 
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -44,15 +47,14 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
       switch (data.type) {
         case 'messages': {
           if (data.dmId === selectedDmId) {
-            setMessages(
-              data.payload.sort((a, b) => {
-                const getSec = (msg) =>
-                  msg.createdAt?.seconds ??
-                  msg.createdAt?._seconds ??
-                  (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
-                return getSec(a) - getSec(b);
-              })
-            );
+            const sorted = data.payload.sort((a, b) => {
+              const getSec = (msg) =>
+                msg.createdAt?.seconds ??
+                msg.createdAt?._seconds ??
+                (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
+              return getSec(a) - getSec(b);
+            });
+            setMessagesForDm(selectedDmId, sorted); // Save to context
           }
           break;
         }
@@ -141,8 +143,8 @@ const DirectMessageChat = ({ selectedDmId, otherFullName, currentUserId }) => {
           messageId: msgId,
         }),
       });
-      // ลบข้อความออกจาก state ทันที (หรือรอ SSE อัปเดต)
-      setMessages(msgs => msgs.filter(m => m.id !== msgId));
+      // Remove from context
+      setMessagesForDm(selectedDmId, messages.filter(m => m.id !== msgId));
     } catch (err) {
       alert('Delete failed');
       console.error(err);

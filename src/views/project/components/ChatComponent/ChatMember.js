@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
 import { useTheme } from '@mui/material/styles'; // Add this import
 
-
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';

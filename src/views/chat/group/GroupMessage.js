@@ -13,6 +13,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
+import { useGroupMessageList } from '../../../contexts/GroupMessageListContext';
 
 import GroupMessageList from './components/GroupMessageList';
 import GroupMessageChat from './components/GroupMessageChat';
@@ -22,11 +23,10 @@ const drawerWidth = 300;
 const rightWidth = 280;
 
 const GroupMessage = () => {
-
   const user = useSelector(state => state.auth.user);
 
-  //select group state
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  // Use context for selected group
+  const { selectedGroup, setSelectedGroup } = useGroupMessageList();
 
   // Mobile drawers
   const [mobileOpenLeft, setMobileOpenLeft] = useState(false);
@@ -35,8 +35,6 @@ const GroupMessage = () => {
 
   const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
   const handleDrawerToggleRight = () => setMobileOpenRight(!mobileOpenRight);
-
-  // console.log('Selected Group:', selectedGroup);
 
   const GroupMessageListDrawer = (
     <Box sx={{ width: drawerWidth, height: '85vh' }}>
@@ -102,7 +100,7 @@ const GroupMessage = () => {
             }}
           >
             <GroupMessageChat
-              selectedGroupId={selectedGroup?.id} // should be a string, not an object
+              selectedGroupId={selectedGroup?.id}
               groupName={selectedGroup?.groupName}
               currentUserId={user?.uid}
             />

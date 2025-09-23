@@ -28,11 +28,6 @@ const ProjectChat = ({ projectId, user, projects }) => {
    const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
    
    useEffect(() => {
-      // Reset selectedRoom ทุกครั้งที่ projectId เปลี่ยน
-      setSelectedRoom(null);
-   }, [projectId]);
-
-   useEffect(() => {
       // ถ้า project ใหม่มี room ให้เลือกห้องแรก, ถ้าไม่มีให้ selectedRoom เป็น null
       const project = projects?.find((p) => p.id === projectId);
       if (project?.rooms?.length > 0) {
@@ -67,7 +62,6 @@ const ProjectChat = ({ projectId, user, projects }) => {
    return (
       <>
          {/* Left drawer / column */}
-
          {isMobile ? (
             <Drawer
                variant="temporary"

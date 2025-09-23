@@ -17,19 +17,19 @@ import CheckIcon from '@mui/icons-material/Check';
 
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
+import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
 const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUserId }) => {
+  const { messagesByGroupId, setMessagesForGroup } = useGroupMessageList();
 
-  const [messages, setMessages] = useState([]);
+  // Use messages from context
   const [input, setInput] = useState('');
-
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
   const [previewURL, setPreviewURL] = useState('');
-
   const [loading, setLoading] = useState(false);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
@@ -56,21 +56,23 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     setGroupName(groupNameProp || '');
   }, [groupNameProp]);
 
+  // Use context messages or empty array
+  const messages = messagesByGroupId[selectedGroupId] || [];
+
   useSSE(
     selectedGroupId ? 'http://192.168.1.36:3000/api/group/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
           if (data.groupId === selectedGroupId) {
-            setMessages(
-              data.payload.sort((a, b) => {
-                const getSec = (msg) =>
-                  msg.createdAt?.seconds ??
-                  msg.createdAt?._seconds ??
-                  (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
-                return getSec(a) - getSec(b);
-              })
-            );
+            const sorted = data.payload.sort((a, b) => {
+              const getSec = (msg) =>
+                msg.createdAt?.seconds ??
+                msg.createdAt?._seconds ??
+                (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
+              return getSec(a) - getSec(b);
+            });
+            setMessagesForGroup(selectedGroupId, sorted); // Save to context
           }
           break;
         }
@@ -159,8 +161,8 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
           messageId: msgId,
         }),
       });
-      // ลบข้อความออกจาก state ทันที (หรือรอ SSE อัปเดต)
-      setMessages(msgs => msgs.filter(m => m.id !== msgId));
+      // Remove from context
+      setMessagesForGroup(selectedGroupId, messages.filter(m => m.id !== msgId));
     } catch (err) {
       alert('Delete failed');
       console.error(err);
