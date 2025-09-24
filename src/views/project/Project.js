@@ -57,7 +57,7 @@ const Project = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ my: 1 }}>
+        <Box sx={{ mb: 1 }}>
           <Header projectId={projectId} projectName={projects.find(p => p.id === projectId)?.name} view={view} setView={setView} />
         </Box>
         <Box sx={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>

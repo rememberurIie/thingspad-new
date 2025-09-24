@@ -14,10 +14,16 @@ const ProfileSettingDialog = ({
   onSave,
 }) => {
    const user = useSelector(state => state.auth.user);
+const userId = user?.uid;
+
+// กำหนด default avatar จาก storage
+const defaultAvatar = userId
+  ? `https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`
+  : '';
 
   const [fullName, setFullName] = useState(profile.fullName || '');
   const [username, setUsername] = useState(profile.username || '');
-  const [image, setImage] = useState(profile.avatar || null);
+  const [image, setImage] = useState(profile.avatar || defaultAvatar);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [cropping, setCropping] = useState(false);
@@ -71,10 +77,15 @@ const ProfileSettingDialog = ({
   };
 
   const handleDeleteImage = () => {
-    setImage(null);
+    // ถ้าเป็น default avatar หรือรูปที่แสดงอยู่ ให้ลบจริง
+    if (image === defaultAvatar || image === profile.avatar) {
+      setImage(null);
+    } else {
+      setImage(null);
+    }
     setCropping(false);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // reset file input
+      fileInputRef.current.value = "";
     }
   };
 
@@ -128,9 +139,11 @@ const ProfileSettingDialog = ({
     if (image && image.startsWith("blob:")) {
       const response = await fetch(image);
       const blob = await response.blob();
-      // แปลงเป็น JPEG เสมอ
       const jpegBlob = await convertToJpeg(blob, 256);
       formData.append("avatar", jpegBlob, "avatar.jpg");
+    } else if (image === null) {
+      // กรณีลบรูป ให้ส่ง avatar เป็น null
+      formData.append("avatar", "");
     }
 
     const res = await fetch("http://192.168.1.36:3000/api/account/updateProfile", {
@@ -142,6 +155,7 @@ const ProfileSettingDialog = ({
     setSaving(false);
     if (result.success) {
       onClose();
+      window.location.reload();
     } else {
       // แจ้งเตือน error
     }
@@ -175,7 +189,7 @@ const ProfileSettingDialog = ({
       >
         <Typography variant="h6" mb={2}>Profile Setting</Typography>
         <Stack alignItems="center" mb={2}>
-          <Avatar src={image} sx={{ width: 90, height: 90, mb: 1 }} />
+          <Avatar src={image === null ? undefined : (image || defaultAvatar)} sx={{ width: 90, height: 90, mb: 1 }} />
           <Stack direction="row" spacing={1}>
             <IconButton color="primary" component="label">
               <PhotoCamera />

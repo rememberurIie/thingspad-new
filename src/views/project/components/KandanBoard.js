@@ -315,7 +315,7 @@ const KandanBoard = ({ projectId }) => {
                      renderOption={(props, option) => (
                         <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                            <Avatar
-                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg?${Date.now()}`}
                               sx={{ width: 24, height: 24, fontSize: 14 }}
                            />
                            <Typography>{option.fullName || option.username}</Typography>
@@ -438,7 +438,7 @@ const KandanBoard = ({ projectId }) => {
                      renderOption={(props, option) => (
                         <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                            <Avatar
-                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                              src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg?${Date.now()}`}
                               sx={{ width: 24, height: 24, fontSize: 14 }}
                            />
                            <Typography>{option.fullName || option.username}</Typography>
@@ -756,7 +756,7 @@ const KandanBoard = ({ projectId }) => {
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                  <Avatar
-                                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg`}
+                                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg?${Date.now()}`}
                                     sx={{ width: 24, height: 24, fontSize: 14 }}
                                  />
                                  <Typography sx={{ fontSize: 13, color: '#000000', fontWeight: 600 }}>{task.assigneeFullName}</Typography>
@@ -931,7 +931,7 @@ const KandanBoard = ({ projectId }) => {
                                     </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                        <Avatar
-                                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg`}
+                                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${task.assigneeId}/avatar.jpg?${Date.now()}`}
                                           sx={{ width: 24, height: 24, fontSize: 14 }}
                                        />
                                        <Typography sx={{ fontSize: 13, color: '#000000', fontWeight: 600 }}>{task.assigneeFullName}</Typography>

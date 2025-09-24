@@ -570,7 +570,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
-                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg`}
+                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg?${Date.now()}`}
                       sx={{
                         width: 40,
                         height: 40,

@@ -54,7 +54,7 @@ const Profile = ({
     <Box>
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <Avatar
-          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg`}
+          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`}
           sx={{
             width: 35,
             height: 35,
@@ -112,7 +112,7 @@ const Profile = ({
 
         <MenuItem sx={{ height: 100, display: 'flex', alignItems: 'center'}}>
           <Avatar
-            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg`}
+            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`}
             sx={{
               width: 75,
               height: 75,

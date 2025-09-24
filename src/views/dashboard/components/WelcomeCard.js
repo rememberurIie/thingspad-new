@@ -29,7 +29,7 @@ const WelcomeCard = ({ fullName, userId }) => {
       <Box sx={{ width: '100%' }}>
         <Box display="flex" flexDirection="row" alignItems="center">
           <Avatar
-            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg`}
+            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`}
             sx={{
               width: 75,
               height: 75,

@@ -184,7 +184,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
                 sx={{ minWidth: 240, ml: "-12px" }}
               >
                 <Avatar
-                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${person.userId}/avatar.jpg`}
+                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${person.userId}/avatar.jpg?${Date.now()}`}
                   sx={{ width: 30, height: 30, fontSize: 12, mr: 1 }}
                 >
                   {(person.fullName || person.username || '??').slice(0, 2).toUpperCase()}
@@ -222,7 +222,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
                 }}
               >
                 <Avatar
-                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${user.userId}/avatar.jpg`}
+                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${user.userId}/avatar.jpg?${Date.now()}`}
                   sx={{ width: 40, height: 40, fontSize: 15 }}
                 >
                   {user?.fullName

@@ -240,7 +240,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
           <Avatar
-            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${otherUserId}/avatar.jpg`}
+            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${otherUserId}/avatar.jpg?${Date.now()}`}
             sx={{ width: 40, height: 40, fontSize: 15 }}>
             {otherFullName
               ? otherFullName.slice(0, 2).toUpperCase()
@@ -319,7 +319,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
-                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg`}
+                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg?${Date.now()}`}
                       sx={{
                         width: 40,
                         height: 40,

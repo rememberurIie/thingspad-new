@@ -260,7 +260,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
                           size="small"
                         />
                         <Avatar
-                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`}
+                          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`}
                           sx={{ width: 28, height: 28, fontSize: 12, mr: 1 }}
                         >
                           {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}

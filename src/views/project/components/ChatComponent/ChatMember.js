@@ -242,7 +242,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
                         </Button>
                       }>
                         <ListItemAvatar>
-                          <Avatar src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`}>
+                          <Avatar src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`}>
                             {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
                           </Avatar>
                         </ListItemAvatar>
@@ -326,7 +326,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
               >
                 <ListItemAvatar>
                   <Avatar 
-                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg`} 
+                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`} 
                     alt={initials.toUpperCase()}
                   >
                     {(!u.avatarUrl || u.avatarUrl === '') && (

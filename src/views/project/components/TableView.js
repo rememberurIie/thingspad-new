@@ -346,7 +346,7 @@ const TableView = ({ projectId }) => {
                   renderOption={(props, option) => (
                      <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar
-                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg?${Date.now()}`}
                            sx={{ width: 24, height: 24, fontSize: 14 }}
                         >
                            {(option.fullName || option.username || '?')[0]}
@@ -489,7 +489,7 @@ const TableView = ({ projectId }) => {
                   renderOption={(props, option) => (
                      <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar
-                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg`}
+                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${option.userId}/avatar.jpg?${Date.now()}`}
                            sx={{ width: 24, height: 24, fontSize: 14 }}
                         >
                            {(option.fullName || option.username || '?')[0]}
@@ -747,7 +747,7 @@ const TableView = ({ projectId }) => {
 
                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Avatar
-                     src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${fullTask.assigneeId}/avatar.jpg`}
+                     src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${fullTask.assigneeId}/avatar.jpg?${Date.now()}`}
                      sx={{ width: 32, height: 32, fontSize: 18 }}
                   >
                      {fullTask.assigneeFullName?.[0]}
@@ -922,7 +922,7 @@ const TableView = ({ projectId }) => {
 
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
                                        <Avatar
-                                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg`}
+                                           src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg?${Date.now()}`}
                                            sx={{ width: 24, height: 24, fontSize: 14 }}
                                        />
                                        <Typography fontSize={14}>{row.assigneeFullName}</Typography>
@@ -1137,7 +1137,7 @@ const TableView = ({ projectId }) => {
                               <TableCell sx={{ width: '15%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Avatar
-                                       src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg`}
+                                       src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg?${Date.now()}`}
                                        sx={{ width: 24, height: 24, fontSize: 14 }}
                                     />
                                     <Typography fontSize={14}>{row.assigneeFullName}</Typography>

@@ -41,7 +41,12 @@ const InviteJoin = () => {
             setError("Failed to join project.");
           }
         } else {
-          navigate(`/project/${projectId}`, { replace: true });
+          // ถ้า success: true และสมาชิกมี user อยู่แล้ว ให้ redirect เลย
+          if (data.success === true) {
+            navigate(`/project/${projectId}`, { replace: true });
+          } else {
+            setError("Failed to join project.");
+          }
         }
       })
       .catch(() => setError("Failed to join project."));
