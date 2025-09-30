@@ -8,6 +8,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { useSelector } from 'react-redux';
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
@@ -155,7 +156,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
         top: messagesContainerRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: 'auto', // changed from 'smooth' to 'auto'
       });
     }
   };
@@ -235,12 +236,12 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '89vh', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
           <Avatar
-            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${otherUserId}/avatar.jpg?${Date.now()}`}
+            src={getCachedAvatarUrl(otherUserId)}
             sx={{ width: 40, height: 40, fontSize: 15 }}>
             {otherFullName
               ? otherFullName.slice(0, 2).toUpperCase()
@@ -263,7 +264,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
             ml: "-9px",
             pr: 1,
             display: 'flex',
-            flexDirection: 'column-reverse', // <-- This makes the chat start from the bottom
+            flexDirection: 'column-reverse',
             '&::-webkit-scrollbar': { width: '6px' },
             '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
             '&::-webkit-scrollbar-thumb': { backgroundColor: (t) => t.palette.grey[400], borderRadius: '3px' },
@@ -273,7 +274,6 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
         >
           <List>
             {messages.map((msg, idx) => {
-              // Date separator logic
               const prevMsg = messages[idx - 1];
               const showDate =
                 !prevMsg ||
@@ -313,20 +313,20 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                       '&:hover': {
                         bgcolor: theme.palette.action.hover,
                       },
-                      borderRadius: 2, // Optional: keep rounded corners
+                      borderRadius: 2,
                     }}
                     onMouseEnter={() => setHoveredMsgId(msg.id)}
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
-                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg?${Date.now()}`}
+                      src={getCachedAvatarUrl(msg.senderId)}
                       sx={{
                         width: 40,
                         height: 40,
                         fontSize: 15,
                         mr: 1.2,
                         mt: 0.5,
-                        ml: 0, // Remove any left margin
+                        ml: 0,
                       }}
                     >
                       {(msg.fullName || '??').slice(0, 2).toUpperCase()}

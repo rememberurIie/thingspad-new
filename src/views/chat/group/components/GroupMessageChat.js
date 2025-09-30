@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState,} from 'react';
+import React, { useEffect, useMemo, useRef, useState,} from 'react';
 import ReactDOM from 'react-dom';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
@@ -19,6 +19,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
@@ -327,7 +328,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '89vh', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
@@ -570,7 +571,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                     onMouseLeave={() => setHoveredMsgId(null)}
                   >
                     <Avatar
-                      src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${msg.senderId}/avatar.jpg?${Date.now()}`}
+                      src={getCachedAvatarUrl(msg.senderId)}
                       sx={{
                         width: 40,
                         height: 40,

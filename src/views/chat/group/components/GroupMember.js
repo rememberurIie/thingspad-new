@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Card, CardContent, Typography, Avatar,
@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -123,7 +124,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
@@ -256,6 +257,8 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
               (u.username?.trim().slice(0, 2)) ||
               '??';
 
+            const memberAvatarUrl = getCachedAvatarUrl(u.id);
+
             return (
               <ListItem
                 key={u.id}
@@ -305,7 +308,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
               >
                 <ListItemAvatar>
                   <Avatar 
-                    src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`} 
+                    src={memberAvatarUrl} 
                     alt={initials.toUpperCase()}>
                     {(!u.avatarUrl || u.avatarUrl === '') && (
                       <Typography

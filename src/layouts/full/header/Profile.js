@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import {
   Avatar,
   Box,
@@ -25,6 +25,7 @@ import { ColorModeContext } from '../../../theme/ColorModeContext';
 import LanguageSwitch from '../../../language/LanguageSwitch';
 import { useTranslation } from 'react-i18next';
 import ProfileSettingDialog from './ProfileSettingDialog';
+import { getCachedAvatarUrl } from '../../../utils/avatarCache';
 
 const Profile = ({
   fullName,
@@ -40,6 +41,9 @@ const Profile = ({
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
+  // สร้าง cached avatar URL
+  const avatarUrl = useMemo(() => getCachedAvatarUrl(userId), [userId]);
+
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -54,7 +58,7 @@ const Profile = ({
     <Box>
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <Avatar
-          src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`}
+          src={avatarUrl}
           sx={{
             width: 35,
             height: 35,
@@ -112,7 +116,7 @@ const Profile = ({
 
         <MenuItem sx={{ height: 100, display: 'flex', alignItems: 'center'}}>
           <Avatar
-            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${userId}/avatar.jpg?${Date.now()}`}
+            src={avatarUrl}
             sx={{
               width: 75,
               height: 75,

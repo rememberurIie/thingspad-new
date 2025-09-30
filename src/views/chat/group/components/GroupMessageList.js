@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
@@ -13,6 +13,7 @@ import useSSE from '../../../../hook/useSSE'; // Add this import
 import { useTheme } from '@mui/material/styles';
 import { useSelector } from 'react-redux';
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 
 const GroupMessageList = ({ onSelect, userId }) => {
@@ -170,7 +171,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
@@ -296,80 +297,86 @@ const GroupMessageList = ({ onSelect, userId }) => {
         />
 
         <List>
-          {filteredGroups.map((group, idx) => (
-            <React.Fragment key={group.id}>
-              <ListItem
-                sx={{
-                  bgcolor: selectedGroup?.id === group.id ? theme.palette.action.hover : 'inherit',
-                  borderRadius: 2,
-                  transition: 'background 0.2s',
-                  pl: 1.5
-                }}
-                button
-                selected={selectedGroup?.id === group.id}
-                onClick={() => {
-                  setSelectedGroup(group);
-                  onSelect?.(group);
-                }}
-              >
-                <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
-                  {group?.groupName
-                    ? group.groupName.slice(0, 2).toUpperCase()
-                    : "??"}
-                </Avatar>
-                <ListItemText
-                  sx={{ pl: 1.5 }}
-                  primary={
-                    <span
-                      style={{
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}
-                      title={group?.groupName || 'No Name'}
-                    >
-                      {group?.groupName || 'No Name'}
-                    </span>
-                  }
-                  secondary={
-                    (() => {
-                      const msg = group.latestMessage;
-                      if (!msg) return null;
-                      const isYou = msg.senderId === userId;
-                      let text = '';
-                      if (msg.attachment) {
-                        let typeLabel = 'attachment';
-                        if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
-                        else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
-                        text = `${isYou ? t('group.popup_list_you') + ': send' : 'send'} ${typeLabel}`;
-                      } else if (isYou) {
-                        text = `${t('group.popup_list_you')}: ${msg.text}`;
-                      } else {
-                        text = msg.text;
-                      }
-                      return (
-                        <span
-                          style={{
-                            color: '#888',
-                            fontSize: 13,
-                            display: 'block',
-                            maxWidth: 180,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                          title={text}
-                        >
-                          {text}
-                        </span>
-                      );
-                    })()
-                  }
-                />
-              </ListItem>
-            </React.Fragment>
-          ))}
+          {filteredGroups.map((group, idx) => {
+            // ❌ ห้ามใช้ useMemo ใน map
+            // const groupAvatarUrl = useMemo(() => getCachedAvatarUrl(group.groupId), [group.groupId]);
+            // ✅ ให้ใช้แบบนี้แทน
+            const groupAvatarUrl = getCachedAvatarUrl(group.groupId);
+            return (
+              <React.Fragment key={group.id}>
+                <ListItem
+                  sx={{
+                    bgcolor: selectedGroup?.id === group.id ? theme.palette.action.hover : 'inherit',
+                    borderRadius: 2,
+                    transition: 'background 0.2s',
+                    pl: 1.5
+                  }}
+                  button
+                  selected={selectedGroup?.id === group.id}
+                  onClick={() => {
+                    setSelectedGroup(group);
+                    onSelect?.(group);
+                  }}
+                >
+                  <Avatar src={groupAvatarUrl} sx={{ width: 40, height: 40, fontSize: 15 }}>
+                    {group?.groupName
+                      ? group.groupName.slice(0, 2).toUpperCase()
+                      : "??"}
+                  </Avatar>
+                  <ListItemText
+                    sx={{ pl: 1.5 }}
+                    primary={
+                      <span
+                        style={{
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={group?.groupName || 'No Name'}
+                      >
+                        {group?.groupName || 'No Name'}
+                      </span>
+                    }
+                    secondary={
+                      (() => {
+                        const msg = group.latestMessage;
+                        if (!msg) return null;
+                        const isYou = msg.senderId === userId;
+                        let text = '';
+                        if (msg.attachment) {
+                          let typeLabel = 'attachment';
+                          if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
+                          else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
+                          text = `${isYou ? t('group.popup_list_you') + ': send' : 'send'} ${typeLabel}`;
+                        } else if (isYou) {
+                          text = `${t('group.popup_list_you')}: ${msg.text}`;
+                        } else {
+                          text = msg.text;
+                        }
+                        return (
+                          <span
+                            style={{
+                              color: '#888',
+                              fontSize: 13,
+                              display: 'block',
+                              maxWidth: 180,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                            title={text}
+                          >
+                            {text}
+                          </span>
+                        );
+                      })()
+                    }
+                  />
+                </ListItem>
+              </React.Fragment>
+            );
+          })}
         </List>
 
         {showEditName &&

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   useMediaQuery,
@@ -14,6 +14,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
 import { useDirectMessageList } from '../../../contexts/DirectMessageListContext';
+import { getCachedAvatarUrl } from '../../../utils/avatarCache';
 
 import DirectMessageList from './components/DirectMessageList';
 import DirectMessageChat from './components/DirectMessageChat';
@@ -41,9 +42,13 @@ const DirectMessage = () => {
     </Box>
   );
 
+  // เพิ่ม useMemo สำหรับ avatar URL ใน component
+  const avatarUrl = useMemo(() => getCachedAvatarUrl(user.uid), [user.uid]);
+
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
-      <Box sx={{ height: '88vh', display: 'flex', flexDirection: 'column' }}>
+      {/* เปลี่ยน 90vh เป็น 89vh ให้ตรงกับ Dashboard */}
+      <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }}>
         {isMobile && (
           <AppBar position="static" color="default" elevation={0}>
             <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -55,7 +60,6 @@ const DirectMessage = () => {
               >
                 <ChatIcon />
               </IconButton>
-              
             </Toolbar>
           </AppBar>
         )}
@@ -83,7 +87,6 @@ const DirectMessage = () => {
             component="main"
             sx={{
               flexGrow: 1,
-              height: '85vh',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -95,6 +98,7 @@ const DirectMessage = () => {
               otherUserId={selectedDm?.userId}
               otherFullName={selectedDm?.fullName}
               currentUserId={user?.uid}
+              avatarUrl={avatarUrl} // ใช้ avatarUrl แทน URL เดิมใน Avatar component
             />
           </Box>
 

@@ -5,8 +5,12 @@ import { Stack, Typography, Card, CardContent, CardActions } from '@mui/material
 
 import { useTranslation } from 'react-i18next';
 
-
-const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
+const FinishedTask = ({
+  taskInProgressCount,
+  taskFinishedCount,
+  titleFontSize = 18,
+  countFontSize = 36,
+}) => {
   const { t } = useTranslation();
 
   const theme = useTheme();
@@ -57,7 +61,7 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
     },
     grid: {
       show: false,
-      padding: { left: 0, right: 15, bottom: 0, top: 0 }, // ปรับ padding ซ้ายขวาเป็น 0
+      padding: { left: 0, right: 15, bottom: 0, top: 0 },
     },
   };
 
@@ -76,21 +80,29 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
     <Card variant="outlined" sx={{ borderRadius: '10px', height: '100%' }}>
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" fontWeight="700">
+          <Typography
+            variant="h5"
+            fontWeight="700"
+            sx={{ fontSize: titleFontSize }}
+          >
             {t('dashboard.finished')}
           </Typography>
         </Stack>
-        <Typography variant="h1" fontWeight="700" mt="-20px">
+        <Typography
+          variant="h1"
+          fontWeight="700"
+          mt="-20px"
+          sx={{ fontSize: countFontSize }}
+        >
           {safeFinished}/{totalTasks} {t('dashboard.task_ea')}
         </Typography>
       </CardContent>
       <CardActions
         sx={{
-
           width: '100%',
           display: 'flex',
           height: '90px',
-          position: 'relative', // เพิ่มบรรทัดนี้
+          position: 'relative',
         }}
         disableSpacing
       >
@@ -99,9 +111,8 @@ const FinishedTask = ({ taskInProgressCount, taskFinishedCount }) => {
           series={series}
           type="bar"
           height="80px"
-          style={{ flex: 1 }} // เพิ่มบรรทัดนี้
+          style={{ flex: 1 }}
         />
-
       </CardActions>
     </Card>
   );

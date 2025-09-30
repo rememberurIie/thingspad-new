@@ -34,7 +34,9 @@ const Dashboard = () => {
                <Grid container spacing={3} sx={{ height: '100%' }}>
                   <Box sx={{ display: 'flex', height: '100%', width: '100%' }}>
                      <Box sx={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 3, width: '60%' }}>
-                        <WelcomeCard fullName={user?.fullName || ""} userId={user?.uid || ""} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                           <WelcomeCard fullName={user?.fullName || "No Data"} userId={user?.uid || ""} />
+                        </Box>
                         <Box
                            sx={{
                               display: 'flex',

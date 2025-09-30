@@ -50,8 +50,7 @@ const Project = () => {
     <PageContainer title="Chat App" description="Responsive chat UI">
       <Box
         sx={{
-          maxHeight: '87vh',
-          height: '87vh',
+          height: '89vh',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',

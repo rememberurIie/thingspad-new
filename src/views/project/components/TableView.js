@@ -335,6 +335,7 @@ const TableView = ({ projectId }) => {
                   onChange={e => setAddData({ ...addData, name: e.target.value })}
                />
                <Autocomplete
+                  disablePortal
                   options={allUsers}
                   getOptionLabel={option => option.fullName || option.username}
                   value={allUsers.find(u => u.userId === addData.assigneeId) || null}
@@ -361,6 +362,11 @@ const TableView = ({ projectId }) => {
                      value={addData.due}
                      onChange={date => setAddData({ ...addData, due: date })}
                      renderInput={(params) => <TextField {...params} fullWidth />}
+                     slotProps={{
+                        popper: {
+                           sx: { zIndex: 4001 }, // ให้สูงกว่า popup (popup ใช้ 3000)
+                        }
+                     }}
                   />
                </LocalizationProvider>
                <input
@@ -505,6 +511,11 @@ const TableView = ({ projectId }) => {
                      value={editData.due ? new Date(editData.due) : null}
                      onChange={date => setEditData({ ...editData, due: date })}
                      renderInput={(params) => <TextField {...params} fullWidth />}
+                     slotProps={{
+                        popper: {
+                           sx: { zIndex: 4001 },
+                        }
+                     }}
                   />
                </LocalizationProvider>
                <>

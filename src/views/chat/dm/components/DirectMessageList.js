@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import {
   Card, CardContent, Typography, Avatar,
@@ -8,6 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
 import { useTheme } from '@mui/material/styles';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
 
@@ -133,7 +134,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card variant="outlined" sx={{ height: '89vh',overflowY: 'auto', borderRadius: '10px' }}>
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
@@ -205,66 +206,70 @@ const DirectMessageList = ({ onSelect, userId }) => {
         />
 
         <List>
-          {filteredDms.map((user, idx) => (
-            <React.Fragment key={user.id}>
-              <ListItem
-                sx={{
-                  bgcolor: selectedDm?.id === user.id ? theme.palette.action.hover : 'inherit',
-                  borderRadius: 2,
-                  transition: 'background 0.2s',
-                  pl: 1.5
-                }}
-                button
-                selected={selectedDm?.id === user.id}
-                onClick={() => {
-                  setSelectedDm(user);
-                  onSelect?.(user);
-                }}
-              >
-                <Avatar
-                  src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${user.userId}/avatar.jpg?${Date.now()}`}
-                  sx={{ width: 40, height: 40, fontSize: 15 }}
+          {filteredDms.map((user, idx) => {
+            // แก้ไขตรงนี้: ไม่ต้องใช้ useMemo ใน map
+            const contactAvatarUrl = getCachedAvatarUrl(user.userId);
+            return (
+              <React.Fragment key={user.id}>
+                <ListItem
+                  sx={{
+                    bgcolor: selectedDm?.id === user.id ? theme.palette.action.hover : 'inherit',
+                    borderRadius: 2,
+                    transition: 'background 0.2s',
+                    pl: 1.5
+                  }}
+                  button
+                  selected={selectedDm?.id === user.id}
+                  onClick={() => {
+                    setSelectedDm(user);
+                    onSelect?.(user);
+                  }}
                 >
-                  {user?.fullName
-                    ? user.fullName.slice(0, 2).toUpperCase()
-                    : "??"}
-                </Avatar>
-                <ListItemText
-                  sx={{ pl: 1.5 }}
-                  primary={user?.fullName || 'No Name'}
-                  secondary={
-                    (() => {
-                      const msg = user.latestMessage;
-                      if (!msg) return null;
-                      const isYou = msg.senderId === userId;
-                      if (msg.attachment) {
-                        let typeLabel = 'attachment';
-                        if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
-                        else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
+                  <Avatar
+                    src={contactAvatarUrl}
+                    sx={{ width: 40, height: 40, fontSize: 15 }}
+                  >
+                    {user?.fullName
+                      ? user.fullName.slice(0, 2).toUpperCase()
+                      : "??"}
+                  </Avatar>
+                  <ListItemText
+                    sx={{ pl: 1.5 }}
+                    primary={user?.fullName || 'No Name'}
+                    secondary={
+                      (() => {
+                        const msg = user.latestMessage;
+                        if (!msg) return null;
+                        const isYou = msg.senderId === userId;
+                        if (msg.attachment) {
+                          let typeLabel = 'attachment';
+                          if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
+                          else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
+                          return (
+                            <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {isYou ? 'you: send' : 'send'} {typeLabel}
+                            </span>
+                          );
+                        }
+                        if (isYou) {
+                          return (
+                            <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              you: {msg.text}
+                            </span>
+                          );
+                        }
                         return (
                           <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {isYou ? 'you: send' : 'send'} {typeLabel}
+                            {msg.text}
                           </span>
                         );
-                      }
-                      if (isYou) {
-                        return (
-                          <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            you: {msg.text}
-                          </span>
-                        );
-                      }
-                      return (
-                        <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {msg.text}
-                        </span>
-                      );
-                    })()
-                  }
-                />
-              </ListItem>
-            </React.Fragment>
-          ))}
+                      })()
+                    }
+                  />
+                </ListItem>
+              </React.Fragment>
+            );
+          })}
         </List>
       </CardContent>
     </Card>

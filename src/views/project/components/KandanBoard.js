@@ -328,6 +328,11 @@ const KandanBoard = ({ projectId }) => {
                         value={addData.due || null}
                         onChange={date => setAddData({ ...addData, due: date })}
                         renderInput={(params) => <TextField {...params} fullWidth />}
+                        slotProps={{
+                        popper: {
+                           sx: { zIndex: 4001 },
+                        }
+                     }}
                      />
                   </LocalizationProvider>
                   <input
@@ -451,6 +456,11 @@ const KandanBoard = ({ projectId }) => {
                         value={editData.due || null}
                         onChange={date => setEditData({ ...editData, due: date })}
                         renderInput={(params) => <TextField {...params} fullWidth />}
+                        slotProps={{
+                        popper: {
+                           sx: { zIndex: 4001 },
+                        }
+                     }}
                      />
                   </LocalizationProvider>
                   <>

@@ -93,6 +93,7 @@
     "signin_link": "Sign in",
     "error_duplicate_user": "Email already in use",
     "error_pasword_not_match": "Passwords do not match",
+    "error_signup": "Registration failed. Please check your information again.",
     "success": "Registration successful!"
   }
 }

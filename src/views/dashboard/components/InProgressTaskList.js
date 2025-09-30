@@ -17,11 +17,24 @@ import {
 } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 
-const InProgessTaskList = ({ tasks = [], loading = false }) => {
+const InProgessTaskList = ({
+  tasks = [],
+  loading = false,
+  titleFontSize = 18,
+  taskFontSize = 16,
+  projectFontSize = 12,
+}) => {
   const { t } = useTranslation();
   return (
     <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
-      <CardHeader title={t('dashboard.inprogress_list')} sx={{ pb: 0 }} />
+      <CardHeader
+        title={
+          <Typography sx={{ fontSize: titleFontSize, fontWeight: 700 }}>
+            {t('dashboard.inprogress_list')}
+          </Typography>
+        }
+        sx={{ pb: 0 }}
+      />
       <CardContent sx={{ pt: 1 }}>
         <Timeline
           className="theme-timeline"
@@ -75,8 +88,10 @@ const InProgessTaskList = ({ tasks = [], loading = false }) => {
                   {idx < tasks.length - 1 && <TimelineConnector />}
                 </TimelineSeparator>
                 <TimelineContent>
-                  <Typography fontWeight="600">{task.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography fontWeight="600" sx={{ fontSize: taskFontSize }}>
+                    {task.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: projectFontSize }}>
                     {task.projectName}
                   </Typography>
                 </TimelineContent>

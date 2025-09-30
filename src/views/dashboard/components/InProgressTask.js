@@ -1,11 +1,16 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
-import { Stack, Typography, Card, CardContent, Box } from '@mui/material'; // เพิ่ม Box
+import { Stack, Typography, Card, CardContent, Box } from '@mui/material';
 
 import { useTranslation } from 'react-i18next';
 
-const InProgessTask = ({ taskInProgressCount }) => {
+const InProgessTask = ({
+  taskInProgressCount,
+  titleFontSize = 18,
+  countFontSize = 36,
+}) => {
+
   // chart color
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
@@ -57,11 +62,20 @@ const InProgessTask = ({ taskInProgressCount }) => {
     <Card variant="outlined" sx={{ borderRadius: '10px', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" fontWeight="700">
+          <Typography
+            variant="h5"
+            fontWeight="700"
+            sx={{ fontSize: titleFontSize }}
+          >
             {t('dashboard.inprogress')}
           </Typography>
         </Stack>
-        <Typography variant="h1" fontWeight="700" mt="-20px">
+        <Typography
+          variant="h1"
+          fontWeight="700"
+          mt="-20px"
+          sx={{ fontSize: countFontSize }}
+        >
           {taskInProgressCount || 0} {t('dashboard.task_ea')}
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
