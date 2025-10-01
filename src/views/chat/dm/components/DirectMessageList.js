@@ -26,7 +26,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for DM List ---
   useSSE(
-    userId ? 'http://192.168.1.36:3000/api/dm/getDMList' : null,
+    userId ? 'http://192.168.68.53:3000/api/dm/getDMList' : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -56,7 +56,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
     setAnchorEl(event.currentTarget);
     setLoadingPeople(true);
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/getUserToCreateDM', {
+      const res = await fetch('http://192.168.68.53:3000/api/dm/getUserToCreateDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
@@ -78,7 +78,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   const handleSelectPerson = async (person) => {
     handleCloseMenu();
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/createDM', {
+      const res = await fetch('http://192.168.68.53:3000/api/dm/createDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

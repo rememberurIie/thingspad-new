@@ -38,7 +38,7 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
 
   // --- SSE: Real-time room list ---
   useSSE(
-    projectId ? 'http://192.168.1.36:3000/api/project/chat/getRoomList' : null,
+    projectId ? 'http://192.168.68.53:3000/api/project/chat/getRoomList' : null,
     (evt) => {
       // กรณี 1: { type: 'rooms', payload: [...] }
       if (Array.isArray(evt)) {
@@ -62,7 +62,7 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   const handleAddRoom = async () => {
     if (!newRoomName.trim()) return;
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/project/chat/createRoom', {
+      const res = await fetch('http://192.168.68.53:3000/api/project/chat/createRoom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomName: newRoomName }),
@@ -87,7 +87,7 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   const handleEditNameSave = async () => {
     if (!editName.trim()) return;
     try {
-      await fetch('http://192.168.1.36:3000/api/project/chat/updateRoomName', {
+      await fetch('http://192.168.68.53:3000/api/project/chat/updateRoomName', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomId: editingId, newName: editName }),
@@ -107,7 +107,7 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
 
   const handleDeleteRoom = async (roomId) => {
     try {
-      await fetch('http://192.168.1.36:3000/api/project/chat/deleteRoom', {
+      await fetch('http://192.168.68.53:3000/api/project/chat/deleteRoom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, roomId }),

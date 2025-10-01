@@ -4,6 +4,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import { useTheme } from "@mui/material/styles";
+
+//logo
+//logo
+import logoicn_dark from "../../assets/images/logos/ThingsPad-small.svg";
+import logoicn from "../../assets/images/logos/ThingsPad-small-dark.svg";
+
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { ColorModeContext } from 'src/theme/ColorModeContext';
@@ -32,7 +38,7 @@ const AuthRegister = ({ title, subtitle, subtext, loading: loadingProp, error: e
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/account/register', {
+      const res = await fetch('http://192.168.68.53:3000/api/account/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -212,13 +218,23 @@ const Register2 = (props) => {
                   {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
               </Tooltip>
-              <Box display="flex" alignItems="center" justifyContent="center" mt={1}>
-                <Logo />
+
+              <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
+                <img
+                  src={theme.palette.mode === 'dark' ? logoicn_dark : logoicn}
+                  alt="Logo"
+                  style={{
+                    width: 'auto',
+                    height: '50',
+                    objectFit: 'contain'
+                  }}
+                />
               </Box>
+
               <AuthRegister
                 {...props} // เพิ่มตรงนี้ เพื่อรับ props จาก Storybook
                 subtext={
-                  <Typography variant="subtitle1" textAlign="center" mb={1}>
+                  <Typography variant="subtitle1" textAlign="center" my={2}>
                     {t('register.description')}
                   </Typography>
                 }

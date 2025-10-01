@@ -6,6 +6,10 @@ import { useTheme } from "@mui/material/styles";
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 
+//logo
+import logoicn_dark from "../../assets/images/logos/ThingsPad-small.svg";
+import logoicn from "../../assets/images/logos/ThingsPad-small-dark.svg";
+
 // components
 import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
@@ -32,7 +36,7 @@ const AuthLogin = ({ title, subtitle, subtext, error: errorProp, loading: loadin
     setLoading(true);
 
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/account/login', {
+      const res = await fetch('http://192.168.68.53:3000/api/account/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -209,14 +213,22 @@ const Login2 = (props) => {
                 </IconButton>
               </Tooltip>
 
-              <Box display="flex" alignItems="center" justifyContent="center" mt={1}>
-                <Logo />
+              <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
+                <img
+                  src={theme.palette.mode === 'dark' ? logoicn_dark : logoicn}
+                  alt="Logo"
+                  style={{
+                    width: 'auto',
+                    height: '50',
+                    objectFit: 'contain'
+                  }}
+                />
               </Box>
 
               <AuthLogin
                 {...props} // ส่ง props จาก Storybook มาที่ AuthLogin
                 subtext={
-                  <Typography variant="subtitle1" textAlign="center" mb={1}>
+                  <Typography variant="subtitle1" textAlign="center" my={2}>
                     {t('login.description')}
                   </Typography>
                 }

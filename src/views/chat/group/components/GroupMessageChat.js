@@ -62,7 +62,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   const messages = messagesByGroupId[selectedGroupId] || [];
 
   useSSE(
-    selectedGroupId ? 'http://192.168.1.36:3000/api/group/getMessage' : null,
+    selectedGroupId ? 'http://192.168.68.53:3000/api/group/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
@@ -122,7 +122,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.36:3000/api/group/sendMessage';
+      const endpoint = 'http://192.168.68.53:3000/api/group/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -155,7 +155,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   // Add this function for delete (implement your own logic)
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.36:3000/api/group/deleteMessage', {
+      await fetch('http://192.168.68.53:3000/api/group/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,7 +180,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     setEditNameLoading(true);
     setEditNameError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/updateGroupName', {
+      const res = await fetch('http://192.168.68.53:3000/api/group/updateGroupName', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -208,7 +208,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     setLeaveLoading(true);
     setLeaveError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
+      const res = await fetch('http://192.168.68.53:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

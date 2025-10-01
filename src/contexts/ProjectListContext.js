@@ -11,7 +11,7 @@ export const ProjectListProvider = ({ children }) => {
   const user = useSelector(state => state.auth.user);
 
   useSSE(
-    user ? "http://192.168.1.36:3000/api/project/chat/getProjectList" : null,
+    user ? "http://192.168.68.53:3000/api/project/chat/getProjectList" : null,
     (data) => {
       setProjects(prev => {
         if (JSON.stringify(prev) !== JSON.stringify(data)) {

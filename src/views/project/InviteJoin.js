@@ -9,7 +9,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 
-const ADD_MEMBER_URL = "http://192.168.1.36:3000/api/project/invite/inviteLink";
+const ADD_MEMBER_URL = "http://192.168.68.53:3000/api/project/invite/inviteLink";
 
 const InviteJoin = () => {
   const { projectId } = useParams();

@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import Register from './Register';
+import Register from '../../views/authentication/Register';
 
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { baselightTheme, basedarkTheme } from '../../theme/DefaultColors';
