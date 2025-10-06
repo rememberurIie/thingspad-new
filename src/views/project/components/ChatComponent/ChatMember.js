@@ -6,6 +6,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
 import { useTheme } from '@mui/material/styles'; // Add this import
+import { useSelector } from 'react-redux';
 
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,6 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const { t } = useTranslation();
     const theme = useTheme(); // Add this line
+  const user = useSelector(state => state.auth.user); // เพิ่มบรรทัดนี้
   
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true); // <-- เพิ่ม state loading
@@ -149,31 +151,35 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
             {t('project.members') || 'Users'}
           </Typography>
-          <IconButton
-            color={editMode ? "primary" : "inherit"}
-            onClick={() => {
-              setEditMode(!editMode);
-              setConfirmRemoveId(null);
-            }}
-            sx={{ mr: '-10px', mt: '-5px' }}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            color={showAdd ? "primary" : "inherit"}
-            onClick={() => {
-              if (showAdd) {
-                setShowAdd(false);
-                setAddList([]);
-                setAddError('');
-              } else {
-                handleOpenAdd();
-              }
-            }}
-            sx={{ mr: '-10px', mt: '-5px' }}
-          >
-            <AddIcon />
-          </IconButton>
+          {(user?.role === 'root' || user?.role === 'admin') && (
+            <>
+              <IconButton
+                color={editMode ? "primary" : "inherit"}
+                onClick={() => {
+                  setEditMode(!editMode);
+                  setConfirmRemoveId(null);
+                }}
+                sx={{ mr: '-10px', mt: '-5px' }}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                color={showAdd ? "primary" : "inherit"}
+                onClick={() => {
+                  if (showAdd) {
+                    setShowAdd(false);
+                    setAddList([]);
+                    setAddError('');
+                  } else {
+                    handleOpenAdd();
+                  }
+                }}
+                sx={{ mr: '-10px', mt: '-5px' }}
+              >
+                <AddIcon />
+              </IconButton>
+            </>
+          )}
         </Box>
 
         {/* Add User Modal */}

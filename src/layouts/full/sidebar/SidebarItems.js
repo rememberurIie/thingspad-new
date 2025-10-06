@@ -210,37 +210,39 @@ const SidebarItems = ({ isMinimized }) => {
           width: isMinimized ? '100%' : 'auto',
         }}
       >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenCreate}
-          sx={{
-            width: isMinimized ? 45 : '100%',
-            minWidth: 45,
-            height: 40,
-            borderRadius: '7px',
-            p: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
-            boxShadow: 'none',
-            background: theme.palette.grey[800],
-            color: theme.palette.grey[100],
-            display: 'flex',
-            gap: 1,
-            '& .MuiButton-startIcon': {
-              margin: 0,
-              display: 'flex',
+        {(user?.role === 'root' || user?.role === 'admin') && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenCreate}
+            sx={{
+              width: isMinimized ? 45 : '100%',
+              minWidth: 45,
+              height: 40,
+              borderRadius: '7px',
+              p: 0,
+              justifyContent: 'center',
               alignItems: 'center',
-            },
-            '& span': {
-              display: isMinimized ? 'none' : 'inline',
-            },
-          }}
-          disabled={false}
-          startIcon={<AddIcon />}
-        >
-          <span>{!isMinimized && t('menu.create_project', 'Create Project')}</span>
-        </Button>
+              boxShadow: 'none',
+              background: theme.palette.grey[800],
+              color: theme.palette.grey[100],
+              display: 'flex',
+              gap: 1,
+              '& .MuiButton-startIcon': {
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+              },
+              '& span': {
+                display: isMinimized ? 'none' : 'inline',
+              },
+            }}
+            disabled={false}
+            startIcon={<AddIcon />}
+          >
+            <span>{!isMinimized && t('menu.create_project', 'Create Project')}</span>
+          </Button>
+        )}
       </Box>
       {/* Create Project Dialog */}
       {openCreate && (

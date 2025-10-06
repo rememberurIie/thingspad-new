@@ -86,7 +86,7 @@ const Header = ({ projectId, projectName, view, setView }) => {
          textArea.select();
          try {
             document.execCommand('copy');
-         } catch (err) {}
+         } catch (err) { }
          document.body.removeChild(textArea);
       }
       setCopied(true);
@@ -106,40 +106,47 @@ const Header = ({ projectId, projectName, view, setView }) => {
 
    return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
-         <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', "&:last-child": { pb: 2 }}}>
+         <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', "&:last-child": { pb: 2 } }}>
             <Typography sx={{ mr: 2, fontSize: '25px', fontWeight: 700 }}>{projectName}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                {/* Invite Link Section */}
                <Tooltip title={isCanInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
                   <span>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
-                      onClick={handleCopyInviteLink}
-                      disabled={!isCanInvite}
-                      sx={{
-                        mr: 1,
-                        color: copied ? 'success.main' : undefined,
-                        borderColor: copied ? 'success.main' : undefined,
-                        // '&:hover': copied
-                        //   ? { borderColor: 'success.dark', backgroundColor: 'success.light' }
-                        //   : undefined,
-                      }}
-                    >
-                      {copied ? "Copied" : "Copy Invite Link"}
-                    </Button>
+                     <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                        onClick={handleCopyInviteLink}
+                        disabled={!isCanInvite}
+                        sx={{
+                           mr: 1,
+                           color: copied ? 'success.main' : undefined,
+                           borderColor: copied ? 'success.main' : undefined,
+                           // '&:hover': copied
+                           //   ? { borderColor: 'success.dark', backgroundColor: 'success.light' }
+                           //   : undefined,
+                        }}
+                     >
+                        {copied ? "Copied" : "Copy Invite Link"}
+                     </Button>
                   </span>
                </Tooltip>
-               <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                  <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
-                  <Switch
-                     checked={isCanInvite}
-                     onChange={handleToggleInvite}
-                     color="primary"
-                     inputProps={{ 'aria-label': 'toggle invite link' }}
-                  />
-               </Box>
+
+               {(user?.role === 'root' || user?.role === 'admin') && (
+                  <>
+                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+
+                        <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
+                        <Switch
+                           checked={isCanInvite}
+                           onChange={handleToggleInvite}
+                           color="primary"
+                           inputProps={{ 'aria-label': 'toggle invite link' }}
+                        />
+                     </Box>
+                  </>
+               )}
+
                {/* View Switch */}
                <ToggleButtonGroup
                   value={view}
@@ -182,5 +189,5 @@ const Header = ({ projectId, projectName, view, setView }) => {
       </Card>
    );
 }
- 
+
 export default Header;

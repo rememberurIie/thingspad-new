@@ -3,34 +3,38 @@ import { uniqueId } from 'lodash';
 import {
   IconLayoutDashboard,
   IconAlignBoxLeftBottom,
-  IconTable
+  IconTable,
+  IconUserEdit,
+  IconTableOptions
 } from '@tabler/icons-react';
 import { useSelector } from 'react-redux';
 
 export const useMenuItems = () => {
   const user = useSelector(state => state.auth.user);
+  console.log('Current user from Redux:', user);
 
   const menu = [
-    {
-      navlabel: true,
-      subheader: 'Root',
-    },
-    // เฉพาะกรณี user ไม่เป็น null
-    ...(user
+    // เฉพาะกรณี user.role เป็น root
+    ...(user?.role === 'root'
       ? [
-          {
-            id: uniqueId(),
-            title: 'User Management',
-            icon: IconLayoutDashboard,
-            href: '/user_management',
-          },
-          {
-            id: uniqueId(),
-            title: 'Project Management',
-            icon: IconLayoutDashboard,
-            href: '/project_management',
-          },
-        ]
+        {
+          navlabel: true,
+          subheader: 'Root',
+        },
+
+        {
+          id: uniqueId(),
+          title: 'User Management',
+          icon: IconUserEdit,
+          href: '/user_management',
+        },
+        {
+          id: uniqueId(),
+          title: 'Project Management',
+          icon: IconTableOptions,
+          href: '/project_management',
+        },
+      ]
       : []),
     {
       navlabel: true,
