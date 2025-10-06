@@ -25,7 +25,7 @@ const STATUS_OPTIONS = [
    'Completed'
 ];
 
-const API_BASE = 'http://192.168.68.53:3000/api/project/task';
+const API_BASE = 'http://192.168.1.36:3000/api/project/task';
 
 const getStatusColor = (task, col, theme) => {
    if (task.cardColor) return task.cardColor;
@@ -60,8 +60,6 @@ const KandanBoard = ({ projectId }) => {
    // --- Load all user API (for assigned )---
    const [allUsers, setAllUsers] = useState([]);
 
-   console.log(allUsers);
-
    // Drag state
    const [draggedTask, setDraggedTask] = useState(null);
    const [draggedFromCol, setDraggedFromCol] = useState(null);
@@ -95,7 +93,7 @@ const KandanBoard = ({ projectId }) => {
 
    useEffect(() => {
       if (!projectId) return;
-      fetch('http://192.168.68.53:3000/api/project/chat/getMemberListNonSSE', {
+      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย

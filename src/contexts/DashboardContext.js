@@ -22,7 +22,7 @@ export const DashboardProvider = ({ children }) => {
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
       try {
-        const res = await fetch('http://192.168.68.53:3000/api/dashboard/getInProgressAllTask', {
+        const res = await fetch('http://192.168.1.36:3000/api/dashboard/getInProgressAllTask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.uid, month, year }),
@@ -46,7 +46,7 @@ export const DashboardProvider = ({ children }) => {
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
       try {
-        const res = await fetch('http://192.168.68.53:3000/api/dashboard/getFinishedAllTask', {
+        const res = await fetch('http://192.168.1.36:3000/api/dashboard/getFinishedAllTask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.uid, month, year }),
@@ -70,7 +70,7 @@ export const DashboardProvider = ({ children }) => {
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
       try {
-        const res = await fetch('http://192.168.68.53:3000/api/dashboard/getFinishedTaskin8MonthBack', {
+        const res = await fetch('http://192.168.1.36:3000/api/dashboard/getFinishedTaskin8MonthBack', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.uid, month, year }),

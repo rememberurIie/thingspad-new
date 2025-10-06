@@ -146,7 +146,7 @@ const defaultAvatar = userId
       formData.append("avatar", "");
     }
 
-    const res = await fetch("http://192.168.68.53:3000/api/account/updateProfile", {
+    const res = await fetch("http://192.168.1.36:3000/api/account/updateProfile", {
       method: "POST",
       body: formData,
     });

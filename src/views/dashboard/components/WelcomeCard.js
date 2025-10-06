@@ -6,8 +6,6 @@ import { getCachedAvatarUrl } from '../../../utils/avatarCache';
 
 const WelcomeCard = ({ fullName, userId, avatarSize = 75, welcomeFontSize = 22, nameFontSize = 30 }) => {
 
-  console.log(fullName, userId);
-
   const theme = useTheme();
   const { t } = useTranslation();
 

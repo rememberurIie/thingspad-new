@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from "react-mui-sidebar";
 import { IconPoint } from "@tabler/icons-react";
-import Menuitems from "./MenuItems";
+import useMenuItems from './MenuItems';
 import logoicn_dark from "../../../assets/images/logos/ThingsPad-small.svg";
 import logoicn from "../../../assets/images/logos/ThingsPad-small-dark.svg";
 import logoicn_small from "../../../assets/images/logos/ThingsPad-square-dark.svg";
@@ -30,7 +30,6 @@ const renderMenuItems = (items, pathDirect, isMinimized) => {
 
   return items.map((item) => {
     const Icon = item.icon ? item.icon : IconPoint;
-
     const itemIcon = <Icon stroke={1.5} size="1.3rem" />;
 
     if (item.subheader) {
@@ -93,7 +92,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateError('');
     try {
       // ไม่ต้องส่ง body หรือ header ใดๆ
-      const res = await fetch('http://192.168.68.53:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
       });
       const data = await res.json();
@@ -131,7 +130,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.68.53:3000/api/project/chat/createProject', {
+      const res = await fetch('http://192.168.1.36:3000/api/project/chat/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,20 +151,6 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(false);
   };
 
-  // // Use SSE hook to fetch projects
-  // useSSE(
-  //   user ? "http://192.168.68.53:3000/api/project/chat/getProjectList" : null,
-  //   (data) => {
-  //     setProjects(prev => {
-  //       if (JSON.stringify(prev) !== JSON.stringify(data)) {
-  //         return data;
-  //       }
-  //       return prev;
-  //     });
-  //   },
-  //   user ? { uid: user.uid } : undefined
-  // );
-
   // สร้างเมนูโปรเจกต์จากข้อมูล projects state
   const projectMenuItems = projects.map((project) => ({
     id: project.id,
@@ -176,7 +161,7 @@ const SidebarItems = ({ isMinimized }) => {
 
   // รวมเมนูหลักและเมนูโปรเจกต์
   const combinedMenu = [
-    ...Menuitems,
+    ...useMenuItems(),
     { subheader: t('menu.projects', 'Projects') },
     ...projectMenuItems,
   ];

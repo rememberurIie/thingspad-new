@@ -32,7 +32,7 @@ const STATUS_OPTIONS = [
    'Completed'
 ];
 
-const API_BASE = 'http://192.168.68.53:3000/api/project/task';
+const API_BASE = 'http://192.168.1.36:3000/api/project/task';
 
 const statusColor = (status) => {
    switch (status) {
@@ -96,7 +96,7 @@ const TableView = ({ projectId }) => {
 
    useEffect(() => {
       if (!projectId) return;
-      fetch('http://192.168.68.53:3000/api/project/chat/getMemberListNonSSE', {
+      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย
@@ -480,7 +480,6 @@ const TableView = ({ projectId }) => {
                   getOptionLabel={option => option.fullName || option.username || 'Unknown User'}
                   value={allUsers.find(u => u.userId === editData.assigneeId) || null}
                   onChange={(_, value) => {
-                     console.log('Selected user:', value); // Add debugging
                      setEditData({ ...editData, assigneeId: value ? value.userId : '' })
                   }}
                   renderInput={(params) => (
@@ -1075,7 +1074,7 @@ const TableView = ({ projectId }) => {
                               onDoubleClick={() => setFullTask(row)}
                               sx={{ cursor: 'pointer' }}
                            >
-                              <TableCell sx={{ width: '50%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell sx={{ width: '50%', py: 1 , borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Stack direction="row" alignItems="center" spacing={1}>
                                     <Typography fontWeight={500}>{row.name}</Typography>
                                  </Stack>
@@ -1124,7 +1123,7 @@ const TableView = ({ projectId }) => {
                                     onDelete={e => handleStatusMenuOpen(e, row)}
                                  />
                               </TableCell>
-                              <TableCell sx={{ width: '15%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell sx={{ width: '15%', py: 1 , borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  {row.due && (
 
                                     <Chip
@@ -1145,7 +1144,7 @@ const TableView = ({ projectId }) => {
                                  )}
 
                               </TableCell>
-                              <TableCell sx={{ width: '15%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell sx={{ width: '15%', py: 1 , borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Avatar
                                        src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg?${Date.now()}`}
@@ -1154,7 +1153,7 @@ const TableView = ({ projectId }) => {
                                     <Typography fontSize={14}>{row.assigneeFullName}</Typography>
                                  </Box>
                               </TableCell>
-                              <TableCell align="right" sx={{ width: '5%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell align="right" sx={{ width: '5%', py: 1 , borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <IconButton size="small" onClick={e => handleMenuOpen(e, row)}>
                                     <MoreVertIcon fontSize="small" />
                                  </IconButton>

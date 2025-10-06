@@ -7,6 +7,10 @@ import PublicRoute from '../session/publicRoute';
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
 const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 
+/* ****Root***** */
+const UserManagement = lazy(() => import('../views/root/UserManagement'));
+const ProjectManagement = lazy(() => import('../views/root/ProjectManagement'));
+
 /* ****Pages***** */
 const Dashboard = lazy(() => import('../views/dashboard/Dashboard'));
 const DirectMessage = lazy(() => import('../views/chat/dm/DirectMessage'));
@@ -43,6 +47,22 @@ const Router = [
       {
         path: '/',
         element: <Navigate to="/dashboard" />,
+      },
+            {
+        path: '/user_management',
+        element: (
+          <ProtectedRoute>
+            <UserManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/project_management',
+        element: (
+          <ProtectedRoute>
+            <ProjectManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/dashboard',
