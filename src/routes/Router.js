@@ -1,6 +1,7 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import ProtectedRoute from '../session/protectedRoute';
+import ProtectedRouteRoot from '../session/protectedRouteRoot';
 import PublicRoute from '../session/publicRoute';
 
 /* ***Layouts**** */
@@ -51,17 +52,17 @@ const Router = [
             {
         path: '/user_management',
         element: (
-          <ProtectedRoute>
+          <ProtectedRouteRoot>
             <UserManagement />
-          </ProtectedRoute>
+          </ProtectedRouteRoot>
         ),
       },
       {
         path: '/project_management',
         element: (
-          <ProtectedRoute>
+          <ProtectedRouteRoot>
             <ProjectManagement />
-          </ProtectedRoute>
+          </ProtectedRouteRoot>
         ),
       },
       {

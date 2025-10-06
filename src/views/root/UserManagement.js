@@ -126,16 +126,16 @@ const Dashboard = () => {
                   <Table stickyHeader sx={{ minWidth: 650 }}>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ width: '30%', backgroundColor: theme.palette.grey[100] }}>
+                        <TableCell sx={{ width: '30%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                           <Typography fontWeight={700}>Full Name</Typography>
                         </TableCell>
-                        <TableCell sx={{ width: '25%', backgroundColor: theme.palette.grey[100] }}>
+                        <TableCell sx={{ width: '25%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                           <Typography fontWeight={700}>Email</Typography>
                         </TableCell>
-                        <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100] }}>
+                        <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                           <Typography fontWeight={700}>Username</Typography>
                         </TableCell>
-                        <TableCell sx={{ width: '15%', backgroundColor: theme.palette.grey[100] }}>
+                        <TableCell sx={{ width: '15%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                           <Typography fontWeight={700}>Role</Typography>
                         </TableCell>
                       </TableRow>
@@ -143,19 +143,19 @@ const Dashboard = () => {
                     <TableBody>
                       {filteredUsers.map((user, idx) => (
                         <TableRow key={user.username} hover>
-                          <TableCell sx={{ py: 0 }}>
+                          <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Avatar sx={{ width: 32, height: 32 }} src={user.avatar} alt={user.fullName} />
                               <Typography fontWeight={500}>{user.fullName}</Typography>
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                             <Typography>{user.email}</Typography>
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                             <Typography>{user.username}</Typography>
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                             <Select
                               value={user.role}
                               size="small"

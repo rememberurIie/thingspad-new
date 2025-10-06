@@ -275,13 +275,13 @@ const Dashboard = () => {
                      <Table stickyHeader sx={{ minWidth: 650 }}>
                         <TableHead>
                            <TableRow>
-                              <TableCell sx={{ width: '60%', backgroundColor: theme.palette.grey[100] }}>
+                              <TableCell sx={{ width: '60%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Typography fontWeight={700}>Project Name</Typography>
                               </TableCell>
-                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100] }}>
+                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Typography fontWeight={700}>Members</Typography>
                               </TableCell>
-                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100] }} align="right">
+                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }} align="right">
                                  <Typography fontWeight={700}></Typography>
                               </TableCell>
                            </TableRow>
@@ -290,7 +290,7 @@ const Dashboard = () => {
                            {filteredProjects.map((project) => (
                               <TableRow key={project.id} hover>
                                  {/* Project Name (click to edit) */}
-                                 <TableCell sx={{ py: 1 }}>
+                                 <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}`}}>
                                     {editId === project.id ? (
                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                           <TextField
@@ -316,7 +316,7 @@ const Dashboard = () => {
                                     )}
                                  </TableCell>
                                  {/* Members (click to see/add/delete) */}
-                                 <TableCell sx={{ py: 1 }}>
+                                 <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                     <Stack direction="row" spacing={1} alignItems="center">
                                        {project.members.slice(0, 7).map(member => (
                                           <Avatar
@@ -353,7 +353,7 @@ const Dashboard = () => {
                                     </Stack>
                                  </TableCell>
                                  {/* Actions */}
-                                 <TableCell align="right" sx={{ py: 1 }}>
+                                 <TableCell align="right" sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                     <IconButton onClick={e => handleOpenMenu(e, project)}>
                                        <MoreVertIcon />
                                     </IconButton>
