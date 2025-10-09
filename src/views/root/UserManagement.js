@@ -15,6 +15,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { useUserManagement } from 'src/contexts/UserManagementContext';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -261,8 +263,12 @@ const Dashboard = () => {
                               autoFocus
                               sx={{ width: 180 }}
                             />
-                            <Button size="small" onClick={() => handleSaveFullName(idx)}>Save</Button>
-                            <Button size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>Cancel</Button>
+                            <IconButton size="small" color="success" onClick={() => handleSaveFullName(idx)}>
+                              <CheckIcon />
+                            </IconButton>
+                            <IconButton size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>
+                              <CloseIcon />
+                            </IconButton>
                           </Box>
                         ) : (
                           <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditFullName(idx, user.fullName)}>
@@ -292,8 +298,12 @@ const Dashboard = () => {
                             autoFocus
                             sx={{ width: 180 }}
                           />
-                          <Button size="small" onClick={() => handleSaveUsername(idx)}>Save</Button>
-                          <Button size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>Cancel</Button>
+                          <IconButton size="small" color="success" onClick={() => handleSaveUsername(idx)}>
+                            <CheckIcon />
+                          </IconButton>
+                          <IconButton size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>
+                            <CloseIcon />
+                          </IconButton>
                         </Box>
                       ) : (
                         <Typography fontSize={14} color="text.secondary" fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditUsername(idx, user.username)}>
@@ -557,8 +567,12 @@ const Dashboard = () => {
                               autoFocus
                               sx={{ width: 180 }}
                             />
-                            <Button size="small" onClick={() => handleSaveFullName(idx)}>Save</Button>
-                            <Button size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>Cancel</Button>
+                            <IconButton size="small" color="success" onClick={() => handleSaveFullName(idx)}>
+                              <CheckIcon />
+                            </IconButton>
+                            <IconButton size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>
+                              <CloseIcon />
+                            </IconButton>
                           </Box>
                         ) : (
                           <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditFullName(idx, user.fullName)}>
@@ -586,8 +600,12 @@ const Dashboard = () => {
                             autoFocus
                             sx={{ width: 180 }}
                           />
-                          <Button size="small" onClick={() => handleSaveUsername(idx)}>Save</Button>
-                          <Button size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>Cancel</Button>
+                          <IconButton size="small" color="success" onClick={() => handleSaveUsername(idx)}>
+                            <CheckIcon />
+                          </IconButton>
+                          <IconButton size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>
+                            <CloseIcon />
+                          </IconButton>
                         </Box>
                       ) : (
                         <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditUsername(idx, user.username)}>
