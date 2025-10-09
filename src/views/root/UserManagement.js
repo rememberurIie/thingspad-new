@@ -14,6 +14,7 @@ import ReactDOM from 'react-dom';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import TableSortLabel from '@mui/material/TableSortLabel';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { useUserManagement } from 'src/contexts/UserManagementContext';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -56,10 +57,7 @@ const Dashboard = () => {
   } = useUserManagement();
 
   const theme = useTheme();
-  const [roleFilterAnchorEl, setRoleFilterAnchorEl] = useState(null);
-  // const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
-  // const isXsUp = useMediaQuery(theme.breakpoints.up('sm'));
-  const user = useSelector(state => state.auth.user);
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
   // state สำหรับแก้ไขแต่ละ field แยกกัน
   const [editFullNameIdx, setEditFullNameIdx] = useState(null);
@@ -71,6 +69,7 @@ const Dashboard = () => {
   const [confirmDeleteIdx, setConfirmDeleteIdx] = useState(null);
   const [sortBy, setSortBy] = useState('');
   const [sortDir, setSortDir] = useState('asc');
+  const [roleFilterAnchorEl, setRoleFilterAnchorEl] = useState(null);
 
   console.log('users', users);
 
@@ -159,6 +158,237 @@ const Dashboard = () => {
     }
     return arr;
   }, [filteredUsers, sortBy, sortDir]);
+
+  if (isMobile) {
+    // แสดงแบบ Card list สำหรับ mobile/tablet
+    return (
+      <PageContainer title="Dashboard" description="this is Dashboard">
+        <Card variant="outlined" sx={{ height: '100%', minHeight: 400, overflowY: 'auto', borderRadius: '10px', width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
+          <CardContent sx={{ height: '100%', p: 0, "&:last-child": { pb: 0 }, width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
+            <Box sx={{ p: 2 }}>
+              {/* Search & Filter Controls */}
+              <Stack direction="column" spacing={2}>
+                <Paper
+                  variant="outlined"
+                  component="form"
+                  sx={{
+                    borderRadius: 2,
+                    p: '2px 4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    minWidth: 0,
+                    height: 40
+                  }}
+                >
+                  <InputBase
+                    sx={{ ml: 1, flex: 1 }}
+                    placeholder="Search users"
+                    inputProps={{ 'aria-label': 'search users' }}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </Paper>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ minWidth: 120, textTransform: 'none' }}
+                  onClick={e => setRoleFilterAnchorEl(e.currentTarget)}
+                >
+                  {roleFilter.length === 0
+                    ? 'All Roles'
+                    : roleFilter.map(r => r.charAt(0).toUpperCase() + r.slice(1)).join(', ')}
+                </Button>
+                <Menu
+                  anchorEl={roleFilterAnchorEl}
+                  open={Boolean(roleFilterAnchorEl)}
+                  onClose={() => setRoleFilterAnchorEl(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setRoleFilter([]);
+                      setRoleFilterAnchorEl(null);
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Checkbox checked={roleFilter.length === 0} />
+                    </ListItemIcon>
+                    All Roles
+                  </MenuItem>
+                  {ROLE_OPTIONS.map(role => (
+                    <MenuItem
+                      key={role}
+                      onClick={() => {
+                        if (roleFilter.includes(role)) {
+                          setRoleFilter(roleFilter.filter(r => r !== role));
+                        } else {
+                          setRoleFilter([...roleFilter, role]);
+                        }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Checkbox checked={roleFilter.includes(role)} />
+                      </ListItemIcon>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Stack>
+            </Box>
+            <Stack spacing={2} sx={{ p: 2 }}>
+              {sortedUsers.map((user, idx) => (
+                <Card key={user.username} variant="outlined" sx={{ borderRadius: 2 }}>
+                  <CardContent sx={{ p: 2 }}>
+                    <Stack spacing={1}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Avatar
+                          sx={{ width: 32, height: 32 }}
+                          src={getCachedAvatarUrl(user.uid || user.userId)}
+                          alt={user.fullName}
+                        />
+                        {/* Full Name (edit inline) */}
+                        {editFullNameIdx === idx ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <TextField
+                              value={editFullName}
+                              size="small"
+                              onChange={e => setEditFullName(e.target.value)}
+                              onBlur={() => handleSaveFullName(idx)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSaveFullName(idx);
+                              }}
+                              autoFocus
+                              sx={{ width: 180 }}
+                            />
+                            <Button size="small" onClick={() => handleSaveFullName(idx)}>Save</Button>
+                            <Button size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>Cancel</Button>
+                          </Box>
+                        ) : (
+                          <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditFullName(idx, user.fullName)}>
+                            {user.fullName} <EditIcon sx={{ ml: 1, width: 12, height: 12 }} />
+                          </Typography>
+                        )}
+                        <Box sx={{ flex: 1 }} />
+                        <IconButton size="small" onClick={e => {
+                          setMenuAnchorEl(e.currentTarget);
+                          setMenuIdx(idx);
+                        }}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                      <Typography fontSize={14} color="text.secondary">{user.email}</Typography>
+                      {/* Username (edit inline) */}
+                      {editUsernameIdx === idx ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TextField
+                            value={editUsername}
+                            size="small"
+                            onChange={e => setEditUsername(e.target.value)}
+                            onBlur={() => handleSaveUsername(idx)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleSaveUsername(idx);
+                            }}
+                            autoFocus
+                            sx={{ width: 180 }}
+                          />
+                          <Button size="small" onClick={() => handleSaveUsername(idx)}>Save</Button>
+                          <Button size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>Cancel</Button>
+                        </Box>
+                      ) : (
+                        <Typography fontSize={14} color="text.secondary" fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditUsername(idx, user.username)}>
+                          {user.username} <EditIcon sx={{ ml: 1, width: 12, height: 12 }} />
+                        </Typography>
+                      )}
+                      <Box sx={{ mt: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            bgcolor: ROLE_COLORS[user.role],
+                            color: ROLE_TEXT_COLORS[user.role],
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 2,
+                            fontWeight: 500,
+                            gap: 1,
+                            width: 130,
+                            justifyContent: 'flex-start',
+                          }}
+                        >
+                          {ROLE_ICONS[user.role]}
+                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </Box>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+            {/* เมนู More */}
+            <Menu
+              anchorEl={menuAnchorEl}
+              open={Boolean(menuAnchorEl)}
+              onClose={() => { setMenuAnchorEl(null); setMenuIdx(null); }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem
+                onClick={() => {
+                  setConfirmDeleteIdx(menuIdx);
+                  setMenuAnchorEl(null);
+                }}
+              >
+                <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                Delete User
+              </MenuItem>
+            </Menu>
+            {/* Confirm Delete Popup */}
+            {confirmDeleteIdx !== null &&
+              ReactDOM.createPortal(
+                <Box
+                  sx={{
+                    position: 'fixed',
+                    inset: 0,
+                    bgcolor: 'rgba(0,0,0,0.25)',
+                    zIndex: 3000,
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 350,
+                      bgcolor: 'background.paper',
+                      borderRadius: 3,
+                      boxShadow: 24,
+                      p: 3,
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2
+                    }}
+                  >
+                    <Typography variant="h6" mb={2}>Confirm Delete</Typography>
+                    <Typography mb={3}>
+                      Are you sure you want to delete user <b>{users[confirmDeleteIdx]?.fullName}</b>?
+                    </Typography>
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
+                      <Button onClick={() => setConfirmDeleteIdx(null)}>Cancel</Button>
+                      <Button variant="contained" color="error" onClick={() => handleDeleteUser(confirmDeleteIdx)}>
+                        Delete
+                      </Button>
+                    </Stack>
+                  </Box>
+                </Box>,
+                document.body
+              )
+            }
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
@@ -325,9 +555,10 @@ const Dashboard = () => {
                                 if (e.key === 'Enter') handleSaveFullName(idx);
                               }}
                               autoFocus
-                              sx={{ width: 120 }}
+                              sx={{ width: 180 }}
                             />
                             <Button size="small" onClick={() => handleSaveFullName(idx)}>Save</Button>
+                            <Button size="small" color="inherit" onClick={() => { setEditFullNameIdx(null); setEditFullName(''); }}>Cancel</Button>
                           </Box>
                         ) : (
                           <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditFullName(idx, user.fullName)}>
@@ -353,9 +584,10 @@ const Dashboard = () => {
                               if (e.key === 'Enter') handleSaveUsername(idx);
                             }}
                             autoFocus
-                            sx={{ width: 120 }}
+                            sx={{ width: 180 }}
                           />
                           <Button size="small" onClick={() => handleSaveUsername(idx)}>Save</Button>
+                          <Button size="small" color="inherit" onClick={() => { setEditUsernameIdx(null); setEditUsername(''); }}>Cancel</Button>
                         </Box>
                       ) : (
                         <Typography fontWeight={500} sx={{ cursor: 'pointer' }} onClick={() => handleEditUsername(idx, user.username)}>
