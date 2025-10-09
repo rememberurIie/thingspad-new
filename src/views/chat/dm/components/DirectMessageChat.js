@@ -5,6 +5,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material'; // เพิ่มการนำเข้า useMediaQuery
 
 import { useSelector } from 'react-redux';
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
@@ -14,6 +15,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete'; // Add this import
+import PersonIcon from '@mui/icons-material/Person'; // Import ChatIcon
 
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
-const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUserId }) => {
+const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUserId, onOpenChatList }) => {
   const { messagesByDmId, setMessagesForDm } = useDirectMessageList();
 
   // Use messages from context
@@ -41,9 +43,10 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
 
   const { t, i18n } = useTranslation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
 
   useSSE(
-    selectedDmId ? 'http://192.168.1.36:3000/api/dm/getMessage' : null,
+    selectedDmId ? 'http://192.168.68.79:3000/api/dm/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
@@ -103,7 +106,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.36:3000/api/dm/sendMessage';
+      const endpoint = 'http://192.168.68.79:3000/api/dm/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -136,7 +139,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   // Add this function for delete (implement your own logic)
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.36:3000/api/dm/deleteMessage', {
+      await fetch('http://192.168.68.79:3000/api/dm/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -239,7 +242,21 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     <Card variant="outlined" sx={{ height: '89vh', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <Box display="flex" alignItems="center" mb={2}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="flex-start"
+          mb={2}
+        >
+          {/* เพิ่ม IconButton สำหรับเปลี่ยนแชท */}
+          {isMobile && (
+            <IconButton
+              sx={{ mr: 2 }}
+              onClick={onOpenChatList} // ส่ง prop นี้จาก DirectMessage.js
+            >
+              <PersonIcon />
+            </IconButton>
+          )}
           <Avatar
             src={getCachedAvatarUrl(otherUserId)}
             sx={{ width: 40, height: 40, fontSize: 15 }}>

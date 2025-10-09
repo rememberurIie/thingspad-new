@@ -49,20 +49,7 @@ const DirectMessage = () => {
     <PageContainer title="Chat App" description="Responsive chat UI">
       {/* เปลี่ยน 90vh เป็น 89vh ให้ตรงกับ Dashboard */}
       <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }}>
-        {isMobile && (
-          <AppBar position="static" color="default" elevation={0}>
-            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <IconButton
-                color="inherit"
-                aria-label="open chat list"
-                edge="start"
-                onClick={handleDrawerToggleLeft}
-              >
-                <ChatIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        )}
+
 
         <Box sx={{ flex: 0, display: 'flex', flexGrow: 1 }}>
           {/* Left drawer / column */}
@@ -90,7 +77,7 @@ const DirectMessage = () => {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              pl: 1 
+              pl: 1
             }}
           >
             <DirectMessageChat
@@ -98,7 +85,8 @@ const DirectMessage = () => {
               otherUserId={selectedDm?.userId}
               otherFullName={selectedDm?.fullName}
               currentUserId={user?.uid}
-              avatarUrl={avatarUrl} // ใช้ avatarUrl แทน URL เดิมใน Avatar component
+              avatarUrl={avatarUrl}
+              onOpenChatList={handleDrawerToggleLeft} // เพิ่ม prop นี้
             />
           </Box>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState,} from 'react';
+import React, { useEffect, useMemo, useRef, useState, } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
@@ -6,6 +6,12 @@ import {
   CircularProgress, Button, Menu, MenuItem
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
+
+import ChatIcon from '@mui/icons-material/Chat';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PersonIcon from '@mui/icons-material/Person';
+
 
 import { useSelector } from 'react-redux';
 
@@ -21,10 +27,12 @@ import { useTranslation } from 'react-i18next';
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
 import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
+
+
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
 
-const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUserId }) => {
+const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUserId, onOpenChatList, onOpenMemberList }) => {
   const { messagesByGroupId, setMessagesForGroup } = useGroupMessageList();
 
   // Use messages from context
@@ -51,6 +59,9 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
+
+
   const [groupName, setGroupName] = useState(groupNameProp || '');
 
   // Sync with prop if parent changes groupName
@@ -62,7 +73,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   const messages = messagesByGroupId[selectedGroupId] || [];
 
   useSSE(
-    selectedGroupId ? 'http://192.168.1.36:3000/api/group/getMessage' : null,
+    selectedGroupId ? 'http://192.168.68.79:3000/api/group/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
@@ -84,7 +95,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     },
     currentUserId && selectedGroupId ? { groupId: selectedGroupId } : null
   );
-  
+
   const clearFile = () => {
     if (previewURL) URL.revokeObjectURL(previewURL);
     setFile(null);
@@ -122,7 +133,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.1.36:3000/api/group/sendMessage';
+      const endpoint = 'http://192.168.68.79:3000/api/group/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -155,7 +166,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   // Add this function for delete (implement your own logic)
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.36:3000/api/group/deleteMessage', {
+      await fetch('http://192.168.68.79:3000/api/group/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,7 +191,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     setEditNameLoading(true);
     setEditNameError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/updateGroupName', {
+      const res = await fetch('http://192.168.68.79:3000/api/group/updateGroupName', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -208,7 +219,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
     setLeaveLoading(true);
     setLeaveError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
+      const res = await fetch('http://192.168.68.79:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -247,9 +258,9 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
   }, [selectedGroupId]);
 
   useEffect(() => {
-      // Always exit loading when messages are loaded, even if empty
-      setLoading(false);
-    }, [messages]);
+    // Always exit loading when messages are loaded, even if empty
+    setLoading(false);
+  }, [messages]);
 
   if (loading) {
     return (
@@ -332,22 +343,65 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box display="flex" alignItems="center" mb={2}>
-          <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
-            {groupName
-              ? groupName.slice(0, 2).toUpperCase()
-              : "??"}
-          </Avatar>
-          <Box ml={1.5} flex={1}>
-            <Typography variant="h6">
-              {groupName || ""}
-            </Typography>
-          </Box>
-          <IconButton
-            onClick={e => setMenuAnchor(e.currentTarget)}
-            sx={{ ml: 1 }}
-          >
-            <MoreVertIcon />
-          </IconButton>
+          {isMobile && (
+            <IconButton
+              sx={{ mr: 1 }}
+              onClick={onOpenChatList}
+            >
+              <ChatIcon />
+            </IconButton>
+          )}
+
+            {/* <Avatar sx={{ display: 'flex', width: 40, height: 40, fontSize: 15, justifyContent: 'center' }}>
+              {groupName
+                ? groupName.slice(0, 2).toUpperCase()
+                : "??"}
+            </Avatar> */}
+            <Box
+              ml={1.5}
+              flex={1}
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // ให้เนื้อหาอยู่กลางแนวตั้ง
+                justifyContent: isMobile ? 'center' : 'flex-start',
+              }}
+            >
+              <Avatar sx={{ width: 40, height: 40, fontSize: 15 }}>
+                {groupName
+                  ? groupName.slice(0, 2).toUpperCase()
+                  : "??"}
+              </Avatar>
+              <Box sx={{ ml: 1.5,display: 'flex', alignItems: 'center'}}>
+                <Typography variant="h6" sx={{ textAlign: 'center' }}>
+                  {groupName || ""}
+                </Typography>
+                <IconButton
+                  onClick={e => setMenuAnchor(e.currentTarget)}
+                  sx={{ 
+                    ml: 1,
+                    display: isMobile ? 'flex' : 'none',
+                  }}
+                >
+                  <MoreVertIcon sx={{ width: '18px', height: '18px' }} />
+                </IconButton>
+              </Box>
+            </Box>
+         
+          {isMobile ? (
+            <IconButton
+              onClick={onOpenMemberList} 
+            >
+              <PersonIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={e => setMenuAnchor(e.currentTarget)}
+              sx={{ ml: 1, }}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          )}
+
           <Menu
             anchorEl={menuAnchor}
             open={Boolean(menuAnchor)}
@@ -474,7 +528,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                 <Typography variant="subtitle1" mb={1} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
                   {t('group.popup_chat_leave_header')}
                 </Typography>
-                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '14px'}}>
+                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '14px' }}>
                   {t('group.popup_chat_leave_description')}
                 </Typography>
                 {leaveError && <Typography color="error" variant="body2" mb={1}>{leaveError}</Typography>}
@@ -543,7 +597,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                   {showDate && (
                     <ListItem sx={{ justifyContent: 'center', py: 0 }}>
                       <Divider sx={{ flex: 1, mr: 2 }} />
-                      <Typography variant="caption" sx={{ color: 'text.secondary'}}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {new Date(
                           (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
                         ).toLocaleDateString(i18n.language === 'th' ? 'th' : 'en', {
@@ -588,7 +642,7 @@ const GroupMessageChat = ({ selectedGroupId, groupName: groupNameProp, currentUs
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                           {msg.fullName || msg.senderId}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2 , fontSize: '11px' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2, fontSize: '11px' }}>
                           {msg.createdAt &&
                             new Date(
                               (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000

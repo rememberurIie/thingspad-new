@@ -14,13 +14,16 @@ import { useTheme } from '@mui/material/styles';
 import { useSelector } from 'react-redux';
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext';
 import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
+
 
 
 const GroupMessageList = ({ onSelect, userId }) => {
   const theme = useTheme(); // <-- get theme
   const { t } = useTranslation();
   const user = useSelector(state => state.auth.user);
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
 
   const { groups, setGroups, selectedGroup, setSelectedGroup } = useGroupMessageList();
   const [groupSearch, setGroupSearch] = useState('');
@@ -36,7 +39,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for Group List ---
   useSSE(
-    userId ? 'http://192.168.1.36:3000/api/group/getGroupList' : null,
+    userId ? 'http://192.168.68.79:3000/api/group/getGroupList' : null,
     (data) => {
       if (data.type === 'groupList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -65,10 +68,10 @@ const GroupMessageList = ({ onSelect, userId }) => {
 
   // Filter groups by search
   const filteredGroups = (groups || []).filter(group =>
-  (group.fullName || group.name || group.username || '')
-    .toLowerCase()
-    .includes(groupSearch.toLowerCase())
-);
+    (group.fullName || group.name || group.username || '')
+      .toLowerCase()
+      .includes(groupSearch.toLowerCase())
+  );
 
   // Auto-select the first group in the filtered list
   React.useEffect(() => {
@@ -79,9 +82,9 @@ const GroupMessageList = ({ onSelect, userId }) => {
   }, [filteredGroups, selectedGroup, setSelectedGroup, onSelect]);
 
   // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
-    React.useEffect(() => {
-      if (filteredGroups.length > 0) setLoading(false);
-    }, [filteredGroups]);
+  React.useEffect(() => {
+    if (filteredGroups.length > 0) setLoading(false);
+  }, [filteredGroups]);
 
   // ถ้ายัง loading ให้โชว์ spinner
   if (loading) {
@@ -98,16 +101,16 @@ const GroupMessageList = ({ onSelect, userId }) => {
     setCreateError('');
     setLoadingUsers(true);
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToCreateGroup', {
+      const res = await fetch('http://192.168.68.79:3000/api/group/getUserToCreateGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       });
       const data = await res.json();
       setUserList((data.users || []).map(u => ({
-          ...u,
-          id: u.userId, // เพิ่ม id สำหรับใช้ใน UI
-        })));
+        ...u,
+        id: u.userId, // เพิ่ม id สำหรับใช้ใน UI
+      })));
     } catch (err) {
       setUserList([]);
     }
@@ -140,7 +143,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
     }
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/createGroup', {
+      const res = await fetch('http://192.168.68.79:3000/api/group/createGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -171,7 +174,14 @@ const GroupMessageList = ({ onSelect, userId }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
+    <Card
+      variant="outlined"
+      sx={{
+        height: isMobile ? '100vh' : '89vh',
+        overflowY: 'auto',
+        borderRadius: isMobile ? 0 : '10px'
+      }}
+    >
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>

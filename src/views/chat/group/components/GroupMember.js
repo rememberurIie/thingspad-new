@@ -13,10 +13,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+
 
 import { useGroupMessageList } from '../../../../contexts/GroupMessageListContext'; // <-- import context
 
 const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
+  const theme = useTheme(); // <-- get theme
   const { t } = useTranslation();
   const {
     membersByGroupId,
@@ -26,6 +30,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const members = membersByGroupId[selectedGroup] || []; // <-- get from context
   const [editMode, setEditMode] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
 
   // Add user modal state
   const [showAdd, setShowAdd] = useState(false);
@@ -42,7 +47,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
 
   // Use SSE for users and user events
   useSSE(
-    selectedGroup ? 'http://192.168.1.36:3000/api/group/getGroupMember' : null,
+    selectedGroup ? 'http://192.168.68.79:3000/api/group/getGroupMember' : null,
     (evt) => {
       if (evt.type === 'members' && Array.isArray(evt.payload)) {
         setMembersForGroup(
@@ -69,7 +74,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
     setAddLoading(true);
     setAddError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/group/getUserToAdd', {
+      const res = await fetch('http://192.168.68.79:3000/api/group/getUserToAdd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup }),
@@ -93,7 +98,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const handleAddUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
+      await fetch('http://192.168.68.79:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: false }),
@@ -110,7 +115,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   const handleRemoveUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.36:3000/api/group/toggleUserinGroup', {
+      await fetch('http://192.168.68.79:3000/api/group/toggleUserinGroup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId: selectedGroup, userId, isMember: true }),
@@ -124,8 +129,14 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ height: '89vh', overflowY: 'auto', borderRadius: '10px' }}>
-      <CardContent>
+    <Card
+      variant="outlined"
+      sx={{
+        height: isMobile ? '100vh' : '89vh',
+        overflowY: 'auto',
+        borderRadius: isMobile ? 0 : '10px'
+      }}
+    >      <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
             {t('project.members') || 'Users'}
@@ -307,8 +318,8 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
                 }
               >
                 <ListItemAvatar>
-                  <Avatar 
-                    src={memberAvatarUrl} 
+                  <Avatar
+                    src={memberAvatarUrl}
                     alt={initials.toUpperCase()}>
                     {(!u.avatarUrl || u.avatarUrl === '') && (
                       <Typography

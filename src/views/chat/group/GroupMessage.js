@@ -47,10 +47,10 @@ const GroupMessage = () => {
   );
 
   const GroupMemberDrawer = (
-      <Box sx={{ width: rightWidth, height: '85vh' }}>
-        <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
-      </Box>
-    );
+    <Box sx={{ width: rightWidth, height: '85vh' }}>
+      <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
+    </Box>
+  );
 
   // เพิ่ม useMemo สำหรับ avatar URL ใน component
   const avatarUrl = useMemo(() => getCachedAvatarUrl(user.uid), [user.uid]);
@@ -58,20 +58,6 @@ const GroupMessage = () => {
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
       <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }}>
-        {isMobile && (
-          <AppBar position="static" color="default" elevation={0}>
-            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <IconButton
-                color="inherit"
-                aria-label="open chat list"
-                edge="start"
-                onClick={handleDrawerToggleLeft}
-              >
-                <ChatIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        )}
 
         <Box sx={{ flex: 0, display: 'flex', flexGrow: 1 }}>
           {/* Left drawer / column */}
@@ -98,34 +84,36 @@ const GroupMessage = () => {
               flexGrow: 1,
               overflow: 'hidden',
               display: 'flex',
-              flexDirection: 'column', 
-              px: 1 
+              flexDirection: 'column',
+              px: 1
             }}
           >
             <GroupMessageChat
               selectedGroupId={selectedGroup?.id}
               groupName={selectedGroup?.groupName}
               currentUserId={user?.uid}
+              onOpenChatList={handleDrawerToggleLeft}
+              onOpenMemberList={handleDrawerToggleRight} // เพิ่ม prop นี้
             />
           </Box>
 
           {/* Right drawer / column */}
-            {isMobile ? (
-              <Drawer
-                anchor="right"
-                variant="temporary"
-                open={mobileOpenRight}
-                onClose={handleDrawerToggleRight}
-                ModalProps={{ keepMounted: true }}
-                sx={{ '& .MuiDrawer-paper': { width: rightWidth } }}
-              >
-                {GroupMemberDrawer}
-              </Drawer>
-            ) : (
-              <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' }}}>
-                {GroupMemberDrawer}
-              </Box>
-            )}
+          {isMobile ? (
+            <Drawer
+              anchor="right"
+              variant="temporary"
+              open={mobileOpenRight}
+              onClose={handleDrawerToggleRight}
+              ModalProps={{ keepMounted: true }}
+              sx={{ '& .MuiDrawer-paper': { width: rightWidth } }}
+            >
+              {GroupMemberDrawer}
+            </Drawer>
+          ) : (
+            <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' } }}>
+              {GroupMemberDrawer}
+            </Box>
+          )}
 
         </Box>
       </Box>

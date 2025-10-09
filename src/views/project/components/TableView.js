@@ -32,7 +32,7 @@ const STATUS_OPTIONS = [
    'Completed'
 ];
 
-const API_BASE = 'http://192.168.1.36:3000/api/project/task';
+const API_BASE = 'http://192.168.68.79:3000/api/project/task';
 
 const statusColor = (status) => {
    switch (status) {
@@ -96,7 +96,7 @@ const TableView = ({ projectId }) => {
 
    useEffect(() => {
       if (!projectId) return;
-      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
+      fetch('http://192.168.68.79:3000/api/project/chat/getMemberListNonSSE', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย

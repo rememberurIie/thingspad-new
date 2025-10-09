@@ -7,14 +7,16 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE'; // Add this import
-import { useTheme } from '@mui/material/styles';
 import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
 
 
 const DirectMessageList = ({ onSelect, userId }) => {
-  const theme = useTheme(); // <-- get theme
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
   const { t } = useTranslation();
   const { dms, setDms, selectedDm, setSelectedDm } = useDirectMessageList();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -26,7 +28,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
 
   // --- SSE for DM List ---
   useSSE(
-    userId ? 'http://192.168.1.36:3000/api/dm/getDMList' : null,
+    userId ? 'http://192.168.68.79:3000/api/dm/getDMList' : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
         // แทนที่ทั้ง array เลย ไม่ต้อง merge
@@ -56,7 +58,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
     setAnchorEl(event.currentTarget);
     setLoadingPeople(true);
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/getUserToCreateDM', {
+      const res = await fetch('http://192.168.68.79:3000/api/dm/getUserToCreateDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
@@ -78,7 +80,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   const handleSelectPerson = async (person) => {
     handleCloseMenu();
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/createDM', {
+      const res = await fetch('http://192.168.68.79:3000/api/dm/createDM', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -134,7 +136,14 @@ const DirectMessageList = ({ onSelect, userId }) => {
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '89vh',overflowY: 'auto', borderRadius: '10px' }}>
+    <Card
+      variant="outlined"
+      sx={{
+        height: isMobile ? '100vh' : '89vh',
+        overflowY: 'auto',
+        borderRadius: isMobile ? 0 : '10px'
+      }}
+    >
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>

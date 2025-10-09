@@ -25,6 +25,8 @@ const Login = lazy(() => import('../views/authentication/Login'));
 const Error = lazy(() => import('../views/authentication/Error'));
 
 // *****context*****
+import { UserManagementProvider } from '../contexts/UserManagementContext';
+import { ProjectManagementProvider } from '../contexts/ProjectManagementContext';
 import { ProjectListProvider } from '../contexts/ProjectListContext';
 import { DirectMessageListProvider } from '../contexts/DirectMessageListContext';
 import { GroupMessageListProvider } from '../contexts/GroupMessageListContext';
@@ -34,15 +36,19 @@ const Router = [
   {
     path: '/',
     element: (
-      <DashboardProvider>
-        <DirectMessageListProvider>
-          <GroupMessageListProvider>
-            <ProjectListProvider>
-              <FullLayout />
-            </ProjectListProvider>
-          </GroupMessageListProvider>
-        </DirectMessageListProvider>
-      </DashboardProvider>
+      <UserManagementProvider>
+        <ProjectManagementProvider>
+          <DashboardProvider>
+            <DirectMessageListProvider>
+              <GroupMessageListProvider>
+                <ProjectListProvider>
+                  <FullLayout />
+                </ProjectListProvider>
+              </GroupMessageListProvider>
+            </DirectMessageListProvider>
+          </DashboardProvider>
+         </ProjectManagementProvider>
+       </UserManagementProvider>
     ),
     children: [
       {

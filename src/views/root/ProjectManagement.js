@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import {
    Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
    Typography, Avatar, Box, Stack, Button, Paper, InputBase, IconButton, Dialog, DialogTitle,
@@ -8,12 +9,13 @@ import {
 import { useTheme } from '@mui/material/styles';
 import PageContainer from 'src/components/container/PageContainer';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { useSelector } from 'react-redux';
 
-import { useDashboard } from 'src/contexts/DashboardContext'; // Add this import
+import { useProjectManagement } from 'src/contexts/ProjectManagementContext'; // Add this import
 
 const mockProjects = [
    {
@@ -49,12 +51,12 @@ const Dashboard = () => {
    const user = useSelector(state => state.auth.user);
 
    // Use context instead of local state
-   const {
-      inProgressTasks,
-      finishedTasks,
-      finishedTasks8MonthsBack,
-      loadingTasks,
-   } = useDashboard();
+   // const {
+   //    inProgressTasks,
+   //    finishedTasks,
+   //    finishedTasks8MonthsBack,
+   //    loadingTasks,
+   // } = useProjectManagement();
 
    const [projects, setProjects] = useState(mockProjects);
    const [search, setSearch] = useState('');
@@ -171,7 +173,7 @@ const Dashboard = () => {
       setAddLoading(true);
       setAddError('');
       try {
-         const res = await fetch('http://192.168.1.36:3000/api/project/chat/getUserNotInProject', {
+         const res = await fetch('http://192.168.68.79:3000/api/project/chat/getUserNotInProject', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId: project.id }),
@@ -195,7 +197,7 @@ const Dashboard = () => {
    const handleAddUserToProject = async (userId) => {
       setAddingUserId(userId);
       try {
-         await fetch('http://192.168.1.36:3000/api/project/chat/toggleUser', {
+         await fetch('http://192.168.68.79:3000/api/project/chat/toggleUser', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId: showAddMember.id, uid: userId, isMember: false }),
@@ -275,13 +277,13 @@ const Dashboard = () => {
                      <Table stickyHeader sx={{ minWidth: 650 }}>
                         <TableHead>
                            <TableRow>
-                              <TableCell sx={{ width: '60%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell sx={{ width: '60%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Typography fontWeight={700}>Project Name</Typography>
                               </TableCell>
-                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Typography fontWeight={700}>Members</Typography>
                               </TableCell>
-                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }} align="right">
+                              <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }} align="right">
                                  <Typography fontWeight={700}></Typography>
                               </TableCell>
                            </TableRow>
@@ -290,7 +292,7 @@ const Dashboard = () => {
                            {filteredProjects.map((project) => (
                               <TableRow key={project.id} hover>
                                  {/* Project Name (click to edit) */}
-                                 <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}`}}>
+                                 <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                     {editId === project.id ? (
                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                           <TextField
@@ -306,17 +308,20 @@ const Dashboard = () => {
                                           <Button size="small" onClick={() => handleSaveName(project.id)}>Save</Button>
                                        </Box>
                                     ) : (
-                                       <Typography
-                                          fontWeight={500}
-                                          sx={{ cursor: 'pointer' }}
-                                          onClick={() => handleEditName(project.id, project.name)}
-                                       >
-                                          {project.name}
-                                       </Typography>
+                                       <>
+                                          <Typography
+                                             fontWeight={500}
+                                             sx={{ cursor: 'pointer' }}
+                                             onClick={() => handleEditName(project.id, project.name)}
+                                          >
+                                             {project.name} <EditIcon sx={{ ml: 1, width: 12, height: 12 }} />
+                                          </Typography>
+
+                                       </>
                                     )}
                                  </TableCell>
                                  {/* Members (click to see/add/delete) */}
-                                 <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                                 <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                     <Stack direction="row" spacing={1} alignItems="center">
                                        {project.members.slice(0, 7).map(member => (
                                           <Avatar
@@ -353,7 +358,7 @@ const Dashboard = () => {
                                     </Stack>
                                  </TableCell>
                                  {/* Actions */}
-                                 <TableCell align="right" sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                                 <TableCell align="right" sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                     <IconButton onClick={e => handleOpenMenu(e, project)}>
                                        <MoreVertIcon />
                                     </IconButton>
@@ -374,170 +379,175 @@ const Dashboard = () => {
 
 
          {/* Member Dialog */}
-         {memberDialog.open && (
-            <Box
-               sx={{
-
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 3000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
+         {memberDialog.open &&
+            ReactDOM.createPortal(
                <Box
                   sx={{
-                     width: 450,
-                     maxHeight: '80vh', // เพิ่มบรรทัดนี้
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
                      display: 'flex',
-                     flexDirection: 'column',
-                     gap: 2,
-                     overflowY: 'auto', // เพิ่มให้ scroll ได้
+                     alignItems: 'center',
+                     justifyContent: 'center'
                   }}
                >
-                  <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Project Members
-                  </Typography>
-                  <List
+                  <Box
                      sx={{
-                        maxHeight: '60vh', // กำหนดความสูงสูงสุดของรายชื่อสมาชิก
-                        overflowY: 'auto', // ให้ scroll เฉพาะตรงนี้
-                        mb: 2,
-                        '&::-webkit-scrollbar': { width: '6px' },
-                        '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
-                        '&::-webkit-scrollbar-thumb': { backgroundColor: (t) => t.palette.grey[400], borderRadius: '3px' },
-                        '&::-webkit-scrollbar-thumb:hover': { backgroundColor: (t) => t.palette.grey[500] },
+                        width: 450,
+                        maxHeight: '80vh',
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        overflowY: 'auto',
                      }}
                   >
-                     {memberDialog.project?.members.map(member => (
-                        <ListItem key={member.username}>
-                           <ListItemAvatar>
-                              <Avatar src={member.avatar} alt={member.fullName} />
-                           </ListItemAvatar>
-                           <ListItemText primary={member.fullName} secondary={member.username} />
-                           <ListItemSecondaryAction>
-                              <IconButton edge="end" onClick={() => handleDeleteMember(member.username)}>
-                                 <DeleteIcon />
-                              </IconButton>
-                           </ListItemSecondaryAction>
-                        </ListItem>
-                     ))}
-                  </List>
-                  <Button
-                     variant="outlined"
-                     startIcon={<AddIcon />}
-                     onClick={() => handleOpenAddMember(memberDialog.project)}
-                     sx={{ mt: 2 }}
-                  >
-                     Add Member
-                  </Button>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>Close</Button>
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Project Members
+                     </Typography>
+                     <List
+                        sx={{
+                           maxHeight: '60vh',
+                           overflowY: 'auto',
+                           mb: 2,
+                           '&::-webkit-scrollbar': { width: '6px' },
+                           '&::-webkit-scrollbar-track': { backgroundColor: (t) => t.palette.background.default, borderRadius: '3px' },
+                           '&::-webkit-scrollbar-thumb': { backgroundColor: (t) => t.palette.grey[400], borderRadius: '3px' },
+                           '&::-webkit-scrollbar-thumb:hover': { backgroundColor: (t) => t.palette.grey[500] },
+                        }}
+                     >
+                        {memberDialog.project?.members.map(member => (
+                           <ListItem key={member.username}>
+                              <ListItemAvatar>
+                                 <Avatar src={member.avatar} alt={member.fullName} />
+                              </ListItemAvatar>
+                              <ListItemText primary={member.fullName} secondary={member.username} />
+                              <ListItemSecondaryAction>
+                                 <IconButton edge="end" onClick={() => handleDeleteMember(member.username)}>
+                                    <DeleteIcon />
+                                 </IconButton>
+                              </ListItemSecondaryAction>
+                           </ListItem>
+                        ))}
+                     </List>
+                     <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenAddMember(memberDialog.project)}
+                        sx={{ mt: 2 }}
+                     >
+                        Add Member
+                     </Button>
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>Close</Button>
+                     </Box>
                   </Box>
-               </Box>
-            </Box>
-         )}
+               </Box>,
+               document.body
+            )}
 
          {/* Delete Dialog */}
-         {deleteDialog.open && (
-            <Box
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 3000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
+         {deleteDialog.open &&
+            ReactDOM.createPortal(
                <Box
                   sx={{
-                     width: 450,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
                      display: 'flex',
-                     flexDirection: 'column',
-                     gap: 2
+                     alignItems: 'center',
+                     justifyContent: 'center'
                   }}
                >
-                  <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Delete Project
-                  </Typography>
-                  <Typography>
-                     Are you sure you want to delete project <b>{deleteDialog.project?.name}</b>?
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>Delete</Button>
+                  <Box
+                     sx={{
+                        width: 450,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                     }}
+                  >
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Delete Project
+                     </Typography>
+                     <Typography>
+                        Are you sure you want to delete project <b>{deleteDialog.project?.name}</b>?
+                     </Typography>
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>Cancel</Button>
+                        <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>Delete</Button>
+                     </Box>
                   </Box>
-               </Box>
-            </Box>
-         )}
+               </Box>,
+               document.body
+            )}
 
          {/* Create Project Dialog */}
-         {newProjectDialog && (
-            <Box
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 3000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
+         {newProjectDialog &&
+            ReactDOM.createPortal(
                <Box
                   sx={{
-                     maxHeight: '90vh',
-                     width: 450,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
                      display: 'flex',
-                     flexDirection: 'column',
-                     gap: 2
+                     alignItems: 'center',
+                     justifyContent: 'center'
                   }}
                >
-                  <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Create Project
-                  </Typography>
-                  <TextField
-                     fullWidth
-                     label="Project Name"
-                     value={newProjectName}
-                     onChange={e => setNewProjectName(e.target.value)}
-                     autoFocus
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleCloseNewProject} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" onClick={handleCreateProject} startIcon={<AddIcon />}>Create</Button>
+                  <Box
+                     sx={{
+                        maxHeight: '90vh',
+                        width: 450,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                     }}
+                  >
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Create Project
+                     </Typography>
+                     <TextField
+                        fullWidth
+                        label="Project Name"
+                        value={newProjectName}
+                        onChange={e => setNewProjectName(e.target.value)}
+                        autoFocus
+                     />
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseNewProject} startIcon={<CloseIcon />}>Cancel</Button>
+                        <Button variant="contained" onClick={handleCreateProject} startIcon={<AddIcon />}>Create</Button>
+                     </Box>
                   </Box>
-               </Box>
-            </Box>
-         )}
+               </Box>,
+               document.body
+            )}
 
          <Menu
             anchorEl={anchorEl}
@@ -551,98 +561,100 @@ const Dashboard = () => {
          </Menu>
 
          {/* Add Member Popup */}
-         {showAddMember && (
-            <Box
-               sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'rgba(0,0,0,0.25)',
-                  zIndex: 3000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-            >
+         {showAddMember &&
+            ReactDOM.createPortal(
                <Box
                   sx={{
-                     width: 350,
-                     height: 350,
-                     bgcolor: 'background.paper',
-                     borderRadius: 3,
-                     boxShadow: 24,
-                     p: 3,
-                     position: 'relative',
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
                      display: 'flex',
-                     flexDirection: 'column',
+                     alignItems: 'center',
+                     justifyContent: 'center'
                   }}
                >
-                  <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Add member
-                  </Typography>
-                  <TextField
-                     fullWidth
-                     size="small"
-                     placeholder="Search user"
-                     value={addSearch}
-                     onChange={e => setAddSearch(e.target.value)}
-                     sx={{ mb: 2 }}
-                  />
-                  {addLoading ? (
-                     <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <CircularProgress size={18} /> Loading...
-                     </Box>
-                  ) : addList.length === 0 ? (
-                     <Typography variant="body2" color="text.secondary">No users to add</Typography>
-                  ) : (
-                     <List>
-                        {addList
-                           .filter(u =>
-                              (u.fullName || u.username || '')
-                                 .toLowerCase()
-                                 .includes(addSearch.toLowerCase())
-                           )
-                           .map(u => (
-                              <ListItem key={u.id} secondaryAction={
-                                 <Button
-                                    variant="contained"
-                                    size="small"
-                                    onClick={() => handleAddUserToProject(u.id)}
-                                    disabled={addingUserId === u.id}
-                                 >
-                                    {addingUserId === u.id ? 'Adding...' : 'Add'}
-                                 </Button>
-                              }>
-                                 <ListItemAvatar>
-                                    <Avatar src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`}>
-                                       {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
-                                    </Avatar>
-                                 </ListItemAvatar>
-                                 <ListItemText
-                                    primary={u.fullName || u.username || u.id}
-                                    secondary={u.username ? `@${u.username}` : null}
-                                 />
-                              </ListItem>
-                           ))}
-                     </List>
-                  )}
-                  {addError && <Typography color="error" variant="body2" mt={1}>{addError}</Typography>}
-                  <IconButton
-                     onClick={() => {
-                        setShowAddMember(false);
-                        setAddList([]);
-                        setAddError('');
-                        setAddSearch('');
+                  <Box
+                     sx={{
+                        width: 350,
+                        height: 350,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
                      }}
-                     sx={{ position: 'absolute', top: 8, right: 8 }}
                   >
-                     <CloseIcon />
-                  </IconButton>
-               </Box>
-            </Box>
-         )}
+                     <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Add member
+                     </Typography>
+                     <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Search user"
+                        value={addSearch}
+                        onChange={e => setAddSearch(e.target.value)}
+                        sx={{ mb: 2 }}
+                     />
+                     {addLoading ? (
+                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                           <CircularProgress size={18} /> Loading...
+                        </Box>
+                     ) : addList.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary">No users to add</Typography>
+                     ) : (
+                        <List>
+                           {addList
+                              .filter(u =>
+                                 (u.fullName || u.username || '')
+                                    .toLowerCase()
+                                    .includes(addSearch.toLowerCase())
+                              )
+                              .map(u => (
+                                 <ListItem key={u.id} secondaryAction={
+                                    <Button
+                                       variant="contained"
+                                       size="small"
+                                       onClick={() => handleAddUserToProject(u.id)}
+                                       disabled={addingUserId === u.id}
+                                    >
+                                       {addingUserId === u.id ? 'Adding...' : 'Add'}
+                                    </Button>
+                                 }>
+                                    <ListItemAvatar>
+                                       <Avatar src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${u.id}/avatar.jpg?${Date.now()}`}>
+                                          {(u.fullName || u.username || '??').slice(0, 2).toUpperCase()}
+                                       </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                       primary={u.fullName || u.username || u.id}
+                                       secondary={u.username ? `@${u.username}` : null}
+                                    />
+                                 </ListItem>
+                              ))}
+                        </List>
+                     )}
+                     {addError && <Typography color="error" variant="body2" mt={1}>{addError}</Typography>}
+                     <IconButton
+                        onClick={() => {
+                           setShowAddMember(false);
+                           setAddList([]);
+                           setAddError('');
+                           setAddSearch('');
+                        }}
+                        sx={{ position: 'absolute', top: 8, right: 8 }}
+                     >
+                        <CloseIcon />
+                     </IconButton>
+                  </Box>
+               </Box>,
+               document.body
+            )}
       </PageContainer>
    );
 };
