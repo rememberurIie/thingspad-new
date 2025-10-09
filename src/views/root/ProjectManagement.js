@@ -173,7 +173,7 @@ const Dashboard = () => {
       setAddLoading(true);
       setAddError('');
       try {
-         const res = await fetch('http://192.168.68.79:3000/api/project/chat/getUserNotInProject', {
+         const res = await fetch('http://192.168.1.36:3000/api/project/chat/getUserNotInProject', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId: project.id }),
@@ -197,7 +197,7 @@ const Dashboard = () => {
    const handleAddUserToProject = async (userId) => {
       setAddingUserId(userId);
       try {
-         await fetch('http://192.168.68.79:3000/api/project/chat/toggleUser', {
+         await fetch('http://192.168.1.36:3000/api/project/chat/toggleUser', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId: showAddMember.id, uid: userId, isMember: false }),
@@ -235,9 +235,6 @@ const Dashboard = () => {
                   {/* Search & Create */}
                   <Box sx={{ position: 'sticky', top: 0, zIndex: 12, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', p: 2 }}>
                      <Stack direction="row" spacing={2}>
-                        <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpenNewProject}>
-                           Create project
-                        </Button>
                         <Paper
                            variant="outlined"
                            component="form"
@@ -493,56 +490,6 @@ const Dashboard = () => {
                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>Cancel</Button>
                         <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>Delete</Button>
-                     </Box>
-                  </Box>
-               </Box>,
-               document.body
-            )}
-
-         {/* Create Project Dialog */}
-         {newProjectDialog &&
-            ReactDOM.createPortal(
-               <Box
-                  sx={{
-                     position: 'fixed',
-                     top: 0,
-                     left: 0,
-                     width: '100vw',
-                     height: '100vh',
-                     bgcolor: 'rgba(0,0,0,0.25)',
-                     zIndex: 3000,
-                     display: 'flex',
-                     alignItems: 'center',
-                     justifyContent: 'center'
-                  }}
-               >
-                  <Box
-                     sx={{
-                        maxHeight: '90vh',
-                        width: 450,
-                        bgcolor: 'background.paper',
-                        borderRadius: 3,
-                        boxShadow: 24,
-                        p: 3,
-                        position: 'relative',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2
-                     }}
-                  >
-                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                        Create Project
-                     </Typography>
-                     <TextField
-                        fullWidth
-                        label="Project Name"
-                        value={newProjectName}
-                        onChange={e => setNewProjectName(e.target.value)}
-                        autoFocus
-                     />
-                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                        <Button onClick={handleCloseNewProject} startIcon={<CloseIcon />}>Cancel</Button>
-                        <Button variant="contained" onClick={handleCreateProject} startIcon={<AddIcon />}>Create</Button>
                      </Box>
                   </Box>
                </Box>,

@@ -1,8 +1,7 @@
-import React, { useEffect, useState, } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Typography, Chip, Avatar, Box, Stack, Button, TextField, Paper, InputBase, useMediaQuery,
-  Select, MenuItem, IconButton
+  Typography, Avatar, Box, Stack, Button, TextField, Paper, InputBase,Select, MenuItem, IconButton
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import PageContainer from 'src/components/container/PageContainer';
@@ -14,46 +13,53 @@ import Menu from '@mui/material/Menu';
 import ReactDOM from 'react-dom';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
+import TableSortLabel from '@mui/material/TableSortLabel';
 
-import { useUserManagement } from 'src/contexts/UserManagementContext'; // Add this import
-import { width } from '@mui/system';
-
-const mockUsers = [
-  {
-    email: 'm@gmail.com',
-    fullName: 'TEST',
-    role: 'unverified',
-    username: 'test3sadasd',
-    avatar: 'https://i.pravatar.cc/100?u=test3sadasd',
-  },
-  {
-    email: 'a@gmail.com',
-    fullName: 'Netipong Sanklar',
-    role: 'admin',
-    username: 'netipong',
-    avatar: 'https://i.pravatar.cc/100?u=netipong',
-  },
-];
-
-const roleColor = {
-  admin: 'success',
-  unverified: 'warning',
-  user: 'info',
-};
+import { useUserManagement } from 'src/contexts/UserManagementContext';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { getCachedAvatarUrl } from 'src/utils/avatarCache';
 
 const ROLE_OPTIONS = ['root', 'admin', 'verified', 'unverified'];
 
-const Dashboard = () => {
-  const theme = useTheme();
-  const [search, setSearch] = React.useState('');
-  const [roleFilterAnchorEl, setRoleFilterAnchorEl] = useState(null);
-  // เปลี่ยน roleFilter เป็น array
-  const [roleFilter, setRoleFilter] = useState([]);
-  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
-  const isXsUp = useMediaQuery(theme.breakpoints.up('sm'));
-  const user = useSelector(state => state.auth.user);
+const ROLE_ICONS = {
+  root: <AdminPanelSettingsIcon fontSize="small" sx={{ mr: 1, color: '#C2185B' }} />,
+  admin: <AdminPanelSettingsIcon fontSize="small" sx={{ mr: 1, color: '#d39117ff' }} />,
+  verified: <VerifiedUserIcon fontSize="small" sx={{ mr: 1, color: '#0fb972ff' }} />,
+  unverified: <WarningAmberIcon fontSize="small" sx={{ mr: 1, color: '#757575' }} />,
+};
 
-  const [users, setUsers] = useState(mockUsers);
+const ROLE_COLORS = {
+  root: '#F3E5F5',        // orange
+  admin: '#ffefd2ff',       // magenta (ใช้สีม่วงอ่อนแทน magenta)
+  verified: '#e3fdf0ff',    // blue
+  unverified: '#F5F5F5',  // grey
+};
+
+const ROLE_TEXT_COLORS = {
+  root: '#C2185B',        // orange
+  admin: '#d39117ff',       // magenta
+  verified: '#0fb972ff',    // blue
+  unverified: '#757575',  // grey
+};
+
+const Dashboard = () => {
+  const {
+    users,
+    setUsers,
+    search,
+    setSearch,
+    roleFilter,
+    setRoleFilter,
+    filteredUsers,
+  } = useUserManagement();
+
+  const theme = useTheme();
+  const [roleFilterAnchorEl, setRoleFilterAnchorEl] = useState(null);
+  // const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
+  // const isXsUp = useMediaQuery(theme.breakpoints.up('sm'));
+  const user = useSelector(state => state.auth.user);
 
   // state สำหรับแก้ไขแต่ละ field แยกกัน
   const [editFullNameIdx, setEditFullNameIdx] = useState(null);
@@ -63,20 +69,13 @@ const Dashboard = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuIdx, setMenuIdx] = useState(null);
   const [confirmDeleteIdx, setConfirmDeleteIdx] = useState(null);
+  const [sortBy, setSortBy] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
-  // filter users ใหม่
-  const filteredUsers = users.filter(
-    u =>
-      (u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.username.toLowerCase().includes(search.toLowerCase())) &&
-      (roleFilter.length === 0 || roleFilter.includes(u.role))
-  );
+  console.log('users', users);
 
-  const handleRoleChange = (idx, newRole) => {
-    setUsers(prev =>
-      prev.map((u, i) => (i === idx ? { ...u, role: newRole } : u))
-    );
+  const handleRoleChange = async (idx, newRole) => {
+    await handleUpdateUser(idx, 'role', newRole);
   };
 
   // ฟังก์ชันแก้ไขชื่อ
@@ -84,12 +83,8 @@ const Dashboard = () => {
     setEditFullNameIdx(idx);
     setEditFullName(fullName);
   };
-  const handleSaveFullName = (idx) => {
-    setUsers(prev =>
-      prev.map((u, i) =>
-        i === idx ? { ...u, fullName: editFullName } : u
-      )
-    );
+  const handleSaveFullName = async (idx) => {
+    await handleUpdateUser(idx, 'fullName', editFullName);
     setEditFullNameIdx(null);
     setEditFullName('');
   };
@@ -99,12 +94,8 @@ const Dashboard = () => {
     setEditUsernameIdx(idx);
     setEditUsername(username);
   };
-  const handleSaveUsername = (idx) => {
-    setUsers(prev =>
-      prev.map((u, i) =>
-        i === idx ? { ...u, username: editUsername } : u
-      )
-    );
+  const handleSaveUsername = async (idx) => {
+    await handleUpdateUser(idx, 'username', editUsername);
     setEditUsernameIdx(null);
     setEditUsername('');
   };
@@ -116,6 +107,58 @@ const Dashboard = () => {
     setMenuAnchorEl(null);
     setMenuIdx(null);
   };
+
+  const handleUpdateUser = async (idx, field, value) => {
+    const targetUser = users[idx];
+    if (!targetUser || !user?.uid) return;
+
+    try {
+      const res = await fetch('http://192.168.1.36:3000/api/root/userManage/updateAccount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid, // คนที่กำลังแก้ไข
+          targetUserId: targetUser.uid || targetUser.userId, // คนที่ถูกแก้ไข
+          [field]: value,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(prev =>
+          prev.map((u, i) =>
+            i === idx ? { ...u, [field]: value } : u
+          )
+        );
+      } else {
+        alert(data.error || 'Update failed');
+      }
+    } catch (err) {
+      alert('Update failed');
+    }
+  };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedUsers = React.useMemo(() => {
+    let arr = [...filteredUsers];
+    if (sortBy) {
+      arr.sort((a, b) => {
+        let va = (a[sortBy] || '').toString().toLowerCase();
+        let vb = (b[sortBy] || '').toString().toLowerCase();
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return arr;
+  }, [filteredUsers, sortBy, sortDir]);
 
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
@@ -209,29 +252,68 @@ const Dashboard = () => {
             <Table stickyHeader sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: '30%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                    <Typography fontWeight={700}>Full Name</Typography>
+                  <TableCell
+                    sx={{ width: '30%', backgroundColor: theme.palette.grey[100] }}
+                    sortDirection={sortBy === 'fullName' ? sortDir : false}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'fullName'}
+                      direction={sortBy === 'fullName' ? sortDir : 'asc'}
+                      onClick={() => handleSort('fullName')}
+                    >
+                      <Typography fontWeight={700}>Full Name</Typography>
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                    <Typography fontWeight={700}>Email</Typography>
+                  <TableCell
+                    sx={{ width: '20%', backgroundColor: theme.palette.grey[100] }}
+                    sortDirection={sortBy === 'email' ? sortDir : false}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'email'}
+                      direction={sortBy === 'email' ? sortDir : 'asc'}
+                      onClick={() => handleSort('email')}
+                    >
+                      <Typography fontWeight={700}>Email</Typography>
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                    <Typography fontWeight={700}>Username</Typography>
+                  <TableCell
+                    sx={{ width: '20%', backgroundColor: theme.palette.grey[100] }}
+                    sortDirection={sortBy === 'username' ? sortDir : false}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'username'}
+                      direction={sortBy === 'username' ? sortDir : 'asc'}
+                      onClick={() => handleSort('username')}
+                    >
+                      <Typography fontWeight={700}>Username</Typography>
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '15%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                    <Typography fontWeight={700}>Role</Typography>
+                  <TableCell
+                    sx={{ width: '15%', backgroundColor: theme.palette.grey[100] }}
+                    sortDirection={sortBy === 'role' ? sortDir : false}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'role'}
+                      direction={sortBy === 'role' ? sortDir : 'asc'}
+                      onClick={() => handleSort('role')}
+                    >
+                      <Typography fontWeight={700}>Role</Typography>
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '5%', backgroundColor: theme.palette.grey[100],  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                  </TableCell>
+                  <TableCell sx={{ width: '5%', backgroundColor: theme.palette.grey[100] }} />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredUsers.map((user, idx) => (
+                {sortedUsers.map((user, idx) => (
                   <TableRow key={user.username} hover>
                     {/* Full Name (edit inline) */}
-                    <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                    <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ width: 32, height: 32 }} src={user.avatar} alt={user.fullName} />
+                        <Avatar
+                          sx={{ width: 32, height: 32 }}
+                          src={getCachedAvatarUrl(user.uid || user.userId)}
+                          alt={user.fullName}
+                        />
                         {editFullNameIdx === idx ? (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <TextField
@@ -255,11 +337,11 @@ const Dashboard = () => {
                       </Box>
                     </TableCell>
                     {/* Email */}
-                    <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                    <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                       <Typography>{user.email}</Typography>
                     </TableCell>
                     {/* Username (edit inline) */}
-                    <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                    <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                       {editUsernameIdx === idx ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <TextField
@@ -282,16 +364,62 @@ const Dashboard = () => {
                       )}
                     </TableCell>
                     {/* Role */}
-                    <TableCell sx={{ py: 1,  borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
+                    <TableCell sx={{ py: 1, borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                       <Select
                         value={user.role}
                         size="small"
                         onChange={e => handleRoleChange(idx, e.target.value)}
-                        sx={{ minWidth: 120, fontWeight: 500 }}
+                        variant="standard"
+                        disableUnderline
+                        sx={{
+                          minWidth: 140,
+                          fontWeight: 500,
+                          background: 'none',
+                          boxShadow: 'none',
+                          '& .MuiSelect-standard': { background: 'none' },
+                          '& fieldset': { border: 'none' },
+                        }}
+                        renderValue={role => (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              bgcolor: ROLE_COLORS[role],
+                              color: ROLE_TEXT_COLORS[role],
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: 2,
+                              fontWeight: 500,
+                              gap: 1,
+                              width: 110,
+                              justifyContent: 'flex-start',
+                            }}
+                          >
+                            {ROLE_ICONS[role]}
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </Box>
+                        )}
                       >
                         {ROLE_OPTIONS.map(role => (
                           <MenuItem key={role} value={role}>
-                            {role}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                bgcolor: ROLE_COLORS[role],
+                                color: ROLE_TEXT_COLORS[role],
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 2,
+                                fontWeight: 500,
+                                gap: 1,
+                                width: 130,
+                                justifyContent: 'flex-start',
+                              }}
+                            >
+                              {ROLE_ICONS[role]}
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </Box>
                           </MenuItem>
                         ))}
                       </Select>

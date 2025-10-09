@@ -46,7 +46,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
 
   useSSE(
-    selectedDmId ? 'http://192.168.68.79:3000/api/dm/getMessage' : null,
+    selectedDmId ? 'http://192.168.1.36:3000/api/dm/getMessage' : null,
     (data) => {
       switch (data.type) {
         case 'messages': {
@@ -106,7 +106,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     if (!input.trim() && !file) return;
 
     try {
-      const endpoint = 'http://192.168.68.79:3000/api/dm/sendMessage';
+      const endpoint = 'http://192.168.1.36:3000/api/dm/sendMessage';
 
       if (file) {
         const form = new FormData();
@@ -139,7 +139,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   // Add this function for delete (implement your own logic)
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.68.79:3000/api/dm/deleteMessage', {
+      await fetch('http://192.168.1.36:3000/api/dm/deleteMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

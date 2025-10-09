@@ -11,7 +11,6 @@ import { useSelector } from 'react-redux';
 
 export const useMenuItems = () => {
   const user = useSelector(state => state.auth.user);
-  console.log('Current user from Redux:', user);
 
   const menu = [
     // เฉพาะกรณี user.role เป็น root

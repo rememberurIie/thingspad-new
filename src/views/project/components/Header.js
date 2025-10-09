@@ -15,9 +15,9 @@ import { useSelector } from 'react-redux';
 import TableView from './TableView';
 import KandanBoard from './KandanBoard';
 
-const API_URL = "http://192.168.68.79:3000/api/project/invite/toggleInviteLink";
-const STATUS_URL = "http://192.168.68.79:3000/api/project/invite/getInviteLinkStatus";
-const FRONTEND_URL = "http://192.168.68.79:5173";
+const API_URL = "http://192.168.1.36:3000/api/project/invite/toggleInviteLink";
+const STATUS_URL = "http://192.168.1.36:3000/api/project/invite/getInviteLinkStatus";
+const FRONTEND_URL = "http://192.168.1.36:5173";
 
 const Header = ({ projectId, projectName, view, setView }) => {
    const user = useSelector(state => state.auth.user);

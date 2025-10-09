@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import ReactDOM from 'react-dom'; // เพิ่มบรรทัดนี้
+import ReactDOM from 'react-dom';
 import {
    Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
    Typography, Chip, Avatar, Box, Stack, useMediaQuery, IconButton, InputBase, Paper, Menu, MenuItem, Button, TextField, Dialog, DialogContent, DialogActions, DialogTitle,
@@ -18,7 +18,6 @@ import useSSE from 'src/hook/useSSE';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useTranslation } from 'react-i18next';
 
-
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -32,7 +31,7 @@ const STATUS_OPTIONS = [
    'Completed'
 ];
 
-const API_BASE = 'http://192.168.68.79:3000/api/project/task';
+const API_BASE = 'http://192.168.1.36:3000/api/project/task';
 
 const statusColor = (status) => {
    switch (status) {
@@ -96,7 +95,7 @@ const TableView = ({ projectId }) => {
 
    useEffect(() => {
       if (!projectId) return;
-      fetch('http://192.168.68.79:3000/api/project/chat/getMemberListNonSSE', {
+      fetch('http://192.168.1.36:3000/api/project/chat/getMemberListNonSSE', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId }) // ส่ง projectId ไปด้วย
