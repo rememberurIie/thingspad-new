@@ -16,25 +16,24 @@ export const UserManagementProvider = ({ children }) => {
   useSSE(
     user?.uid ? 'http://192.168.1.36:3000/api/root/userManage/getAllUser' : null,
     (data) => {
-      setUsers(prev => {
-        if (!data?.uid) return prev;
-        if (prev.some(u => u.uid === data.uid)) return prev;
-        return [...prev, data];
-      });
+      setUsers(data);
+      return data;
     },
     { userId: user?.uid }
   );
 
   // Filtered users
   const filteredUsers = useMemo(() => (
-    users.filter(
-      u =>
-        (u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-          u.email?.toLowerCase().includes(search.toLowerCase()) ||
-          u.username?.toLowerCase().includes(search.toLowerCase())) &&
-        (roleFilter.length === 0 || roleFilter.includes(u.role))
-    )
-  ), [users, search, roleFilter]);
+  Array.isArray(users)
+    ? users.filter(
+        u =>
+          (u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+            u.email?.toLowerCase().includes(search.toLowerCase()) ||
+            u.username?.toLowerCase().includes(search.toLowerCase())) &&
+          (roleFilter.length === 0 || roleFilter.includes(u.role))
+      )
+    : []
+), [users, search, roleFilter]);
 
   return (
     <UserManagementContext.Provider value={{

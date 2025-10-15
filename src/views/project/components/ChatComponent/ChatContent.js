@@ -180,10 +180,29 @@ const ChatContent = ({
   }
 
   if (!selectedRoomId) {
-    return (
-      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
-        <CardContent>
-          <Typography variant="h6">{t('project.room_select')}</Typography>
+   return (
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+        <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', p: 0 }}>
+          {/* Header */}
+          {isMobile && (
+            <>
+              <Box display="flex" alignItems="center" sx={{ p: 2, pb: 0 }} mb={2}>
+                <IconButton onClick={onOpenChatList} sx={{ mr: 2 }}>
+                  <ChatIcon />
+                </IconButton>
+              </Box>
+              <Divider />
+            </>
+          )}
+          {/* Centered message */}
+          <Box sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Typography variant="h6">{t('group.chat_header')}</Typography>
+          </Box>
         </CardContent>
       </Card>
     );

@@ -1,32 +1,40 @@
-import React, { useEffect, useRef, useState,} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Card, CardContent, Typography, Avatar, Box, Divider,
-  List, ListItem, ListItemText, Paper, TextField, IconButton, Tooltip,
-  CircularProgress
+  List, ListItem, TextField, IconButton, Tooltip, CircularProgress
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material'; // เพิ่มการนำเข้า useMediaQuery
-
-import { useSelector } from 'react-redux';
-import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
-import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
-
+import useMediaQuery from '@mui/material/useMediaQuery';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
-import DeleteIcon from '@mui/icons-material/Delete'; // Add this import
-import PersonIcon from '@mui/icons-material/Person'; // Import ChatIcon
-
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonIcon from '@mui/icons-material/Person';
 import useSSE from '../../../../hook/useSSE';
 import { useTranslation } from 'react-i18next';
+import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
+import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 
 const MAX_BYTES = 1_000_000; // 1 MB hard cap
 
+//api
+const API_ENDPOINTS = {
+  getMessage: 'http://192.168.1.36:3000/api/dm/getMessage',
+  sendMessage: 'http://192.168.1.36:3000/api/dm/sendMessage',
+  deleteMessage: 'http://192.168.1.36:3000/api/dm/deleteMessage',
+};
 
-const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUserId, onOpenChatList }) => {
+const DirectMessageChat = ({
+  selectedDmId,
+  otherUserId,
+  otherFullName,
+  currentUserId,
+  onOpenChatList
+}) => {
+  // Context
   const { messagesByDmId, setMessagesForDm } = useDirectMessageList();
 
-  // Use messages from context
+  // State
   const [input, setInput] = useState('');
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
@@ -34,41 +42,38 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   const [loading, setLoading] = useState(false);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
+  // Refs
   const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Use context messages or empty array
+  // Messages
   const messages = messagesByDmId[selectedDmId] || [];
 
+  // Theme & i18n
   const { t, i18n } = useTranslation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
+  // SSE: Get messages
   useSSE(
-    selectedDmId ? 'http://192.168.1.36:3000/api/dm/getMessage' : null,
+    selectedDmId ? API_ENDPOINTS.getMessage : null,
     (data) => {
-      switch (data.type) {
-        case 'messages': {
-          if (data.dmId === selectedDmId) {
-            const sorted = data.payload.sort((a, b) => {
-              const getSec = (msg) =>
-                msg.createdAt?.seconds ??
-                msg.createdAt?._seconds ??
-                (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
-              return getSec(a) - getSec(b);
-            });
-            setMessagesForDm(selectedDmId, sorted); // Save to context
-          }
-          break;
-        }
-        default:
-          console.warn('Unknown SSE type:', data.type);
+      if (data.type === 'messages' && data.dmId === selectedDmId) {
+        const sorted = data.payload.sort((a, b) => {
+          const getSec = (msg) =>
+            msg.createdAt?.seconds ??
+            msg.createdAt?._seconds ??
+            (typeof msg.createdAt === 'number' ? msg.createdAt : 0);
+          return getSec(a) - getSec(b);
+        });
+        setMessagesForDm(selectedDmId, sorted);
       }
     },
     currentUserId && selectedDmId ? { directMessageId: selectedDmId } : null
   );
-  
+
+  // File handlers
   const clearFile = () => {
     if (previewURL) URL.revokeObjectURL(previewURL);
     setFile(null);
@@ -80,9 +85,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
   const onPickFile = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-
     if (f.size > MAX_BYTES) {
-      // ล้างไฟล์ แต่ไม่ล้าง error
       if (previewURL) URL.revokeObjectURL(previewURL);
       setFile(null);
       setPreviewURL('');
@@ -90,10 +93,8 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
       setFileError('File is larger than 1 MB.');
       return;
     }
-
     setFileError('');
     setFile(f);
-
     if (f.type.startsWith('image/') || f.type.startsWith('video/')) {
       setPreviewURL(URL.createObjectURL(f));
     } else {
@@ -101,20 +102,17 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     }
   };
 
-
+  // Send message
   const handleSend = async () => {
     if (!input.trim() && !file) return;
-
     try {
-      const endpoint = 'http://192.168.1.36:3000/api/dm/sendMessage';
-
+      const endpoint = API_ENDPOINTS.sendMessage;
       if (file) {
         const form = new FormData();
         form.append('directMessageId', selectedDmId);
         form.append('senderId', currentUserId);
         form.append('text', input || '');
         form.append('file', file);
-
         await fetch(endpoint, { method: 'POST', body: form });
       } else {
         await fetch(endpoint, {
@@ -127,7 +125,6 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
           }),
         });
       }
-
       setInput('');
       clearFile();
       scrollToBottom();
@@ -136,10 +133,10 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     }
   };
 
-  // Add this function for delete (implement your own logic)
+  // Delete message
   const handleDeleteMessage = async (msgId) => {
     try {
-      await fetch('http://192.168.1.36:3000/api/dm/deleteMessage', {
+      await fetch(API_ENDPOINTS.deleteMessage, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,7 +144,6 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
           messageId: msgId,
         }),
       });
-      // Remove from context
       setMessagesForDm(selectedDmId, messages.filter(m => m.id !== msgId));
     } catch (err) {
       alert('Delete failed');
@@ -155,82 +151,56 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     }
   };
 
+  // Scroll to bottom
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
         top: messagesContainerRef.current.scrollHeight,
-        behavior: 'auto', // changed from 'smooth' to 'auto'
+        behavior: 'auto',
       });
     }
   };
 
   useEffect(() => { scrollToBottom(); }, [messages]);
+  useEffect(() => { if (selectedDmId) setLoading(true); }, [selectedDmId]);
+  useEffect(() => { setLoading(false); }, [messages]);
 
-  useEffect(() => {
-    if (selectedDmId) setLoading(true);
-  }, [selectedDmId]);
-
-  useEffect(() => {
-      // Always exit loading when messages are loaded, even if empty
-      setLoading(false);
-    }, [messages]);
-
-  if (loading) {
-    return (
-      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
-      </Card>
-    );
-  }
-
-  if (!selectedDmId) {
-    return (
-      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
-        <CardContent>
-          <Typography variant="h6">{t('dm.chat_header')}</Typography>
-        </CardContent>
-      </Card>
-    );
-  }
-
+  // Render attachment
   const renderAttachment = (msg) => {
-      const att = msg.attachment;
-      if (!att || !att.url) return null;
-  
-      if (att.contentType?.startsWith('image/')) {
-        return (
-          <Box mt={0.5}>
-            <img
-              src={att.url}
-              alt={att.name || 'image'}
-              style={{ maxWidth: '100%', borderRadius: 8 }}
-              loading="lazy" // เพิ่มบรรทัดนี้
-            />
-          </Box>
-        );
-      } 
-  
-      // generic file
+    const att = msg.attachment;
+    if (!att || !att.url) return null;
+    if (att.contentType?.startsWith('image/')) {
       return (
         <Box mt={0.5}>
-          <Typography variant="body2">
-            <a
-              href={att.url}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
-            >
-              {att.name || 'Download file'}
-            </a>
-            {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
-          </Typography>
+          <img
+            src={att.url}
+            alt={att.name || 'image'}
+            style={{ maxWidth: '100%', borderRadius: 8 }}
+            loading="lazy"
+          />
         </Box>
       );
-    };
+    }
+    return (
+      <Box mt={0.5}>
+        <Typography variant="body2">
+          <a
+            href={att.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: theme.palette.secondary.dark, fontWeight: 500 }}
+          >
+            {att.name || 'Download file'}
+          </a>
+          {att.size ? ` • ${(att.size / 1024).toFixed(0)} KB` : ''}
+        </Typography>
+      </Box>
+    );
+  };
 
+  // Linkify text
   function linkify(text) {
     if (!text) return '';
-    // Use inline style for color
     return text.replace(
       /(https?:\/\/[^\s]+)/g,
       (url) =>
@@ -238,22 +208,88 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
     );
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+        <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box display="flex" alignItems="center" mb={2}>
+            {isMobile && (
+              <IconButton sx={{ mr: 2 }} onClick={onOpenChatList}>
+                <PersonIcon />
+              </IconButton>
+            )}
+            <Avatar
+              src={getCachedAvatarUrl(otherUserId)}
+              sx={{ width: 40, height: 40, fontSize: 15 }}>
+              {otherFullName
+                ? otherFullName.slice(0, 2).toUpperCase()
+                : "??"}
+            </Avatar>
+            <Box ml={1.5}>
+              <Typography variant="h6">
+                {otherFullName || ""}
+              </Typography>
+            </Box>
+          </Box>
+          <Divider />
+          {/* Loading spinner and text */}
+          <Box sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <CircularProgress size="30px" sx={{ color: theme.palette.grey[500], mb: 2 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Loading messages...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // No DM selected
+  if (!selectedDmId) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+        <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', p: 0 }}>
+          {/* Header */}
+          {isMobile && (
+            <>
+              <Box display="flex" alignItems="center" sx={{ p: 2, pb: 0 }} mb={2}>
+                <IconButton onClick={onOpenChatList} sx={{ mr: 2 }}>
+                  <PersonIcon />
+                </IconButton>
+              </Box>
+              <Divider />
+            </>
+          )}
+          {/* Centered message */}
+          <Box sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Typography variant="h6">{t('dm.chat_header')}</Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Main chat UI
   return (
     <Card variant="outlined" sx={{ height: '89vh', display: 'flex', flexDirection: 'column', borderRadius: '10px' }}>
       <CardContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="flex-start"
-          mb={2}
-        >
-          {/* เพิ่ม IconButton สำหรับเปลี่ยนแชท */}
+        <Box display="flex" alignItems="center" mb={2}>
           {isMobile && (
-            <IconButton
-              sx={{ mr: 2 }}
-              onClick={onOpenChatList} // ส่ง prop นี้จาก DirectMessage.js
-            >
+            <IconButton sx={{ mr: 2 }} onClick={onOpenChatList}>
               <PersonIcon />
             </IconButton>
           )}
@@ -295,12 +331,10 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
               const showDate =
                 !prevMsg ||
                 new Date(
-                  (prevMsg.createdAt?.seconds ?? prevMsg.createdAt?._seconds ?? prevMsg.createdAt)
-                  * 1000
+                  (prevMsg.createdAt?.seconds ?? prevMsg.createdAt?._seconds ?? prevMsg.createdAt) * 1000
                 ).toDateString() !==
                 new Date(
-                  (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt)
-                  * 1000
+                  (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
                 ).toDateString();
 
               return (
@@ -308,7 +342,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                   {showDate && (
                     <ListItem sx={{ justifyContent: 'center', py: 0 }}>
                       <Divider sx={{ flex: 1, mr: 2 }} />
-                      <Typography variant="caption" sx={{ color: 'text.secondary'}}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {new Date(
                           (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
                         ).toLocaleDateString(i18n.language === 'th' ? 'th' : 'en', {
@@ -327,9 +361,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                       position: 'relative',
                       bgcolor: hoveredMsgId === msg.id ? theme.palette.action.hover : 'inherit',
                       transition: 'background 0.2s',
-                      '&:hover': {
-                        bgcolor: theme.palette.action.hover,
-                      },
+                      '&:hover': { bgcolor: theme.palette.action.hover },
                       borderRadius: 2,
                     }}
                     onMouseEnter={() => setHoveredMsgId(msg.id)}
@@ -353,14 +385,11 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                           {msg.displayName || (msg.senderId === currentUserId ? msg.fullName : otherFullName) || msg.senderId}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2 , fontSize: '11px' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.2, fontSize: '11px' }}>
                           {msg.createdAt &&
                             new Date(
                               (msg.createdAt?.seconds ?? msg.createdAt?._seconds ?? msg.createdAt) * 1000
                             ).toLocaleString(undefined, {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
@@ -378,7 +407,7 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
                       />
                       {renderAttachment(msg)}
                     </Box>
-                    {/* 3. Show delete button on hover and only for your own messages */}
+                    {/* Show delete button on hover and only for your own messages */}
                     {hoveredMsgId === msg.id && msg.senderId === currentUserId && (
                       <IconButton
                         size="small"
@@ -404,13 +433,15 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
         </Box>
 
         {/* Composer */}
-        <Box variant="outlined" sx={(theme) => ({
-          display: 'flex',
-          alignItems: 'center',
-          pt: 3,
-          gap: 1,
-          borderTop: `1px solid ${theme.palette.divider}`,
-        })}
+        <Box
+          variant="outlined"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            pt: 3,
+            gap: 1,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
         >
           <input
             ref={fileInputRef}
@@ -426,17 +457,15 @@ const DirectMessageChat = ({ selectedDmId, otherUserId, otherFullName, currentUs
               </IconButton>
             </span>
           </Tooltip>
-
           <TextField
             fullWidth
             placeholder="Type message..."
             variant="outlined"
             size="small"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSend()}
           />
-
           <IconButton color="primary" onClick={handleSend} disabled={!input.trim() && !file}>
             <SendIcon />
           </IconButton>

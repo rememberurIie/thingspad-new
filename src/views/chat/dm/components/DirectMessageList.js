@@ -1,37 +1,43 @@
-import React, { useState, useMemo } from 'react';
-import AddIcon from '@mui/icons-material/Add';
+import React, { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, Avatar,
-  List, ListItem, ListItemText, Divider, IconButton, Box,
+  List, ListItem, ListItemText, IconButton, Box,
   Menu, MenuItem, CircularProgress, TextField
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { useTranslation } from 'react-i18next';
-import useSSE from '../../../../hook/useSSE'; // Add this import
+import useSSE from '../../../../hook/useSSE';
 import { getCachedAvatarUrl } from '../../../../utils/avatarCache';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
 import { useDirectMessageList } from '../../../../contexts/DirectMessageListContext';
 
+//api
+const API_ENDPOINTS = {
+  getDMList: 'http://192.168.1.36:3000/api/dm/getDMList',
+  getUserToCreateDM: 'http://192.168.1.36:3000/api/dm/getUserToCreateDM',
+  createDM: 'http://192.168.1.36:3000/api/dm/createDM',
+};
 
 const DirectMessageList = ({ onSelect, userId }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const { t } = useTranslation();
   const { dms, setDms, selectedDm, setSelectedDm } = useDirectMessageList();
+
+  // State
   const [anchorEl, setAnchorEl] = useState(null);
   const [people, setPeople] = useState([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
   const [search, setSearch] = useState('');
-  const [dmSearch, setDmSearch] = useState(''); // Add this above the DM list rendering
-  const [loading, setLoading] = useState(true); // เพิ่ม state loading
+  const [dmSearch, setDmSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // --- SSE for DM List ---
+  // SSE: DM List
   useSSE(
-    userId ? 'http://192.168.1.36:3000/api/dm/getDMList' : null,
+    userId ? API_ENDPOINTS.getDMList : null,
     (data) => {
       if (data.type === 'dmList' && Array.isArray(data.payload)) {
-        // แทนที่ทั้ง array เลย ไม่ต้อง merge
         const merged = data.payload.map(dm => ({
           id: dm.dmId,
           name: dm.username,
@@ -58,14 +64,14 @@ const DirectMessageList = ({ onSelect, userId }) => {
     setAnchorEl(event.currentTarget);
     setLoadingPeople(true);
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/getUserToCreateDM', {
+      const res = await fetch(API_ENDPOINTS.getUserToCreateDM, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       });
       const data = await res.json();
       setPeople(data.users || []);
-    } catch (err) {
+    } catch {
       setPeople([]);
     }
     setLoadingPeople(false);
@@ -80,7 +86,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   const handleSelectPerson = async (person) => {
     handleCloseMenu();
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/dm/createDM', {
+      const res = await fetch(API_ENDPOINTS.createDM, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,12 +95,10 @@ const DirectMessageList = ({ onSelect, userId }) => {
         }),
       });
       const data = await res.json();
-      // Optionally, you can refresh the DM list or auto-select the new DM
       if (onSelect && data.dm) {
         onSelect(data.dm);
       }
     } catch (err) {
-      // Handle error (optional)
       console.error('Failed to create DM:', err);
     }
   };
@@ -114,7 +118,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
   );
 
   // Auto-select the first DM in the filtered list
-  React.useEffect(() => {
+  useEffect(() => {
     if (filteredDms.length > 0 && !selectedDm) {
       setSelectedDm(filteredDms[0]);
       onSelect?.(filteredDms[0]);
@@ -122,14 +126,21 @@ const DirectMessageList = ({ onSelect, userId }) => {
   }, [filteredDms, selectedDm, setSelectedDm, onSelect]);
 
   // เมื่อ rooms เปลี่ยน (เช่นหลังโหลดเสร็จ) ให้ setLoading(false)
-    React.useEffect(() => {
-      if (filteredDms.length > 0) setLoading(false);
-    }, [filteredDms]);
+  useEffect(() => {
+    if (filteredDms.length > 0) setLoading(false);
+  }, [filteredDms]);
 
-  // ถ้ายัง loading ให้โชว์ spinner
+  // Loading spinner
   if (loading) {
     return (
-      <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card variant="outlined" sx={{
+        height: '100%',
+        overflowY: 'auto',
+        borderRadius: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <CircularProgress size="30px" sx={{ color: theme.palette.grey[500] }} />
       </Card>
     );
@@ -145,6 +156,7 @@ const DirectMessageList = ({ onSelect, userId }) => {
       }}
     >
       <CardContent>
+        {/* Header */}
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
             {t('dm.list_header')}
@@ -152,18 +164,19 @@ const DirectMessageList = ({ onSelect, userId }) => {
           <IconButton
             color="inherit"
             onClick={handleOpenMenu}
-            sx={{ mr: '-10px'}}
+            sx={{ mr: '-10px' }}
           >
             <AddIcon />
           </IconButton>
         </Box>
 
+        {/* Menu for creating DM */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
           PaperProps={{
-            sx: { minWidth: 300, py: 1 , px: 2, borderRadius: 2}
+            sx: { minWidth: 300, py: 1, px: 2, borderRadius: 2 }
           }}
         >
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>
@@ -205,78 +218,77 @@ const DirectMessageList = ({ onSelect, userId }) => {
           )}
         </Menu>
 
+        {/* Search DM */}
         <TextField
           fullWidth
           size="small"
           placeholder={t('dm.search_chat_box')}
           value={dmSearch}
           onChange={e => setDmSearch(e.target.value)}
-          sx={{ my: 1}}
+          sx={{ my: 1 }}
         />
 
+        {/* DM List */}
         <List>
-          {filteredDms.map((user, idx) => {
-            // แก้ไขตรงนี้: ไม่ต้องใช้ useMemo ใน map
+          {filteredDms.map((user) => {
             const contactAvatarUrl = getCachedAvatarUrl(user.userId);
+            const msg = user.latestMessage;
+            const isYou = msg?.senderId === userId;
+            let secondary = null;
+            if (msg) {
+              if (msg.attachment) {
+                let typeLabel = 'attachment';
+                if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
+                else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
+                secondary = (
+                  <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {isYou ? 'you: send' : 'send'} {typeLabel}
+                  </span>
+                );
+              } else if (isYou) {
+                secondary = (
+                  <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    you: {msg.text}
+                  </span>
+                );
+              } else {
+                secondary = (
+                  <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {msg.text}
+                  </span>
+                );
+              }
+            }
             return (
-              <React.Fragment key={user.id}>
-                <ListItem
-                  sx={{
-                    bgcolor: selectedDm?.id === user.id ? theme.palette.action.hover : 'inherit',
-                    borderRadius: 2,
-                    transition: 'background 0.2s',
-                    pl: 1.5
-                  }}
-                  button
-                  selected={selectedDm?.id === user.id}
-                  onClick={() => {
-                    setSelectedDm(user);
-                    onSelect?.(user);
-                  }}
+              <ListItem
+                key={user.id}
+                sx={{
+                  bgcolor: selectedDm?.id === user.id ? theme.palette.action.hover : 'inherit',
+                  borderRadius: 2,
+                  transition: 'background 0.2s',
+                  pl: 1.5
+                }}
+                button
+                selected={selectedDm?.id === user.id}
+                onClick={() => {
+                  setSelectedDm(user);
+                  onSelect?.(user);
+                }}
+              >
+                <Avatar
+                  src={contactAvatarUrl}
+                  sx={{ width: 40, height: 40, fontSize: 15 }}
                 >
-                  <Avatar
-                    src={contactAvatarUrl}
-                    sx={{ width: 40, height: 40, fontSize: 15 }}
-                  >
-                    {user?.fullName
-                      ? user.fullName.slice(0, 2).toUpperCase()
-                      : "??"}
-                  </Avatar>
-                  <ListItemText
-                    sx={{ pl: 1.5 }}
-                    primary={user?.fullName || 'No Name'}
-                    secondary={
-                      (() => {
-                        const msg = user.latestMessage;
-                        if (!msg) return null;
-                        const isYou = msg.senderId === userId;
-                        if (msg.attachment) {
-                          let typeLabel = 'attachment';
-                          if (msg.attachment.contentType?.startsWith('image/')) typeLabel = 'photo';
-                          else if (msg.attachment.contentType?.startsWith('video/')) typeLabel = 'video';
-                          return (
-                            <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {isYou ? 'you: send' : 'send'} {typeLabel}
-                            </span>
-                          );
-                        }
-                        if (isYou) {
-                          return (
-                            <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              you: {msg.text}
-                            </span>
-                          );
-                        }
-                        return (
-                          <span style={{ color: '#888', fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {msg.text}
-                          </span>
-                        );
-                      })()
-                    }
-                  />
-                </ListItem>
-              </React.Fragment>
+                  {user?.fullName
+                    ? user.fullName.slice(0, 2).toUpperCase()
+                    : "??"}
+                </Avatar>
+                <ListItemText
+                  sx={{ pl: 1.5 }}
+                  primary={user?.fullName || 'No Name'}
+                  secondary={secondary}
+                />
+              </ListItem>
             );
           })}
         </List>

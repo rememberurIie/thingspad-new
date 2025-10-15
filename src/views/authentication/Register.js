@@ -2,7 +2,6 @@ import React, { useState, useContext } from 'react';
 import { Grid, Box, Card, Typography, Stack, IconButton, Tooltip, Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import PageContainer from 'src/components/container/PageContainer';
-import Logo from 'src/layouts/full/shared/logo/Logo';
 import { useTheme } from "@mui/material/styles";
 
 //logo
@@ -16,6 +15,10 @@ import { ColorModeContext } from 'src/theme/ColorModeContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitch from '../../language/LanguageSwitch';
 import CustomTextField from '../../components/forms/theme-elements/CustomTextField';
+
+const API_ENDPOINTS = {
+  register: 'http://192.168.1.36:3000/api/account/register',
+};
 
 const AuthRegister = ({ title, subtitle, subtext, loading: loadingProp, error: errorProp }) => {
   const navigate = useNavigate();
@@ -38,7 +41,7 @@ const AuthRegister = ({ title, subtitle, subtext, loading: loadingProp, error: e
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/account/register', {
+      const res = await fetch(API_ENDPOINTS.register, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

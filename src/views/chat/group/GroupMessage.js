@@ -37,20 +37,21 @@ const GroupMessage = () => {
   const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
   const handleDrawerToggleRight = () => setMobileOpenRight(!mobileOpenRight);
 
-  const GroupMessageListDrawer = (
-    <Box sx={{ width: drawerWidth, height: '85vh' }}>
-      <GroupMessageList
-        onSelect={setSelectedGroup}
-        userId={user.uid}
-      />
-    </Box>
-  );
+  
+  // const GroupMessageListDrawer = (
+  //   <Box sx={{ width: drawerWidth, height: '85vh' }}>
+  //     <GroupMessageList
+  //       onSelect={setSelectedGroup}
+  //       userId={user.uid}
+  //     />
+  //   </Box>
+  // );
 
-  const GroupMemberDrawer = (
-    <Box sx={{ width: rightWidth, height: '85vh' }}>
-      <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
-    </Box>
-  );
+  // const GroupMemberDrawer = (
+  //   <Box sx={{ width: rightWidth, height: '85vh' }}>
+  //     <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
+  //   </Box>
+  // );
 
   // เพิ่ม useMemo สำหรับ avatar URL ใน component
   const avatarUrl = useMemo(() => getCachedAvatarUrl(user.uid), [user.uid]);
@@ -58,7 +59,6 @@ const GroupMessage = () => {
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
       <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }}>
-
         <Box sx={{ flex: 0, display: 'flex', flexGrow: 1 }}>
           {/* Left drawer / column */}
           {isMobile ? (
@@ -69,11 +69,11 @@ const GroupMessage = () => {
               ModalProps={{ keepMounted: true }}
               sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
             >
-              {GroupMessageListDrawer}
+              <GroupMessageList onSelect={setSelectedGroup} userId={user.uid}/>
             </Drawer>
           ) : (
             <Box sx={{ width: drawerWidth, display: { xs: 'none', lg: 'block' } }}>
-              {GroupMessageListDrawer}
+              <GroupMessageList onSelect={setSelectedGroup} userId={user.uid}/>
             </Box>
           )}
 
@@ -93,7 +93,7 @@ const GroupMessage = () => {
               groupName={selectedGroup?.groupName}
               currentUserId={user?.uid}
               onOpenChatList={handleDrawerToggleLeft}
-              onOpenMemberList={handleDrawerToggleRight} // เพิ่ม prop นี้
+              onOpenMemberList={handleDrawerToggleRight}
             />
           </Box>
 
@@ -107,11 +107,11 @@ const GroupMessage = () => {
               ModalProps={{ keepMounted: true }}
               sx={{ '& .MuiDrawer-paper': { width: rightWidth } }}
             >
-              {GroupMemberDrawer}
+              <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
             </Drawer>
           ) : (
             <Box sx={{ width: rightWidth, display: { xs: 'none', lg: 'block' } }}>
-              {GroupMemberDrawer}
+              <GroupMember selectedGroup={selectedGroup?.id} currentUserId={user?.uid} />
             </Box>
           )}
 

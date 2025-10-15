@@ -12,12 +12,15 @@ import logoicn from "../../assets/images/logos/ThingsPad-small-dark.svg";
 
 // components
 import PageContainer from 'src/components/container/PageContainer';
-import Logo from 'src/layouts/full/shared/logo/Logo';
 import CustomTextField from '../../components/forms/theme-elements/CustomTextField';
 import { loginSuccess } from '../../session/authSlice';
 import { ColorModeContext } from 'src/theme/ColorModeContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitch from '../../language/LanguageSwitch';
+
+const API_ENDPOINTS = {
+  login: 'http://192.168.1.36:3000/api/account/login',
+};
 
 const AuthLogin = ({ title, subtitle, subtext, error: errorProp, loading: loadingProp }) => {
   const [email, setEmail] = useState('');
@@ -36,7 +39,7 @@ const AuthLogin = ({ title, subtitle, subtext, error: errorProp, loading: loadin
     setLoading(true);
 
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/account/login', {
+      const res = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

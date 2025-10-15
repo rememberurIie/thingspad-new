@@ -130,7 +130,7 @@ const SidebarItems = ({ isMinimized }) => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      const res = await fetch('http://192.168.1.36:3000/api/project/chat/createProject', {
+      const res = await fetch('http://192.168.1.36:3000/api/project/general/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

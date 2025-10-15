@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import useSSE from '../../../../hook/useSSE';
 import { useTheme } from '@mui/material/styles'; // Add this import
 import { useSelector } from 'react-redux';
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,8 +17,10 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const { t } = useTranslation();
-    const theme = useTheme(); // Add this line
+  const theme = useTheme(); // Add this line
   const user = useSelector(state => state.auth.user); // เพิ่มบรรทัดนี้
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
+
   
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true); // <-- เพิ่ม state loading
@@ -97,7 +100,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleAddUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.36:3000/api/project/chat/toggleUser', {
+      await fetch('http://192.168.1.36:3000/api/project/general/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: false }),
@@ -113,7 +116,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   const handleRemoveUser = async (userId) => {
     setAddingUserId(userId);
     try {
-      await fetch('http://192.168.1.36:3000/api/project/chat/toggleUser', {
+      await fetch('http://192.168.1.36:3000/api/project/general/toggleUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId : projectId, uid : userId, isMember: true }),
@@ -145,7 +148,7 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', overflowY: 'auto', borderRadius: { xs: 0, lg: '10px' } }}>
+    <Card variant="outlined" sx={{height: isMobile ? '100vh' : '89vh',overflowY: 'auto',borderRadius: isMobile ? 0 : '10px'}}>      
       <CardContent>
         <Box display="flex" alignItems="center" sx={{ mt: "-7px" }}>
           <Typography variant="h6" gutterBottom sx={{ flexGrow: 1 }}>

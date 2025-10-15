@@ -58,6 +58,7 @@ const Dashboard = () => {
     filteredUsers,
   } = useUserManagement();
 
+  const user = useSelector(state => state.auth.user);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
@@ -311,24 +312,64 @@ const Dashboard = () => {
                         </Typography>
                       )}
                       <Box sx={{ mt: 1 }}>
-                        <Box
+                        <Select
+                          value={user.role}
+                          size="small"
+                          onChange={e => handleRoleChange(idx, e.target.value)}
+                          variant="standard"
+                          disableUnderline
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            bgcolor: ROLE_COLORS[user.role],
-                            color: ROLE_TEXT_COLORS[user.role],
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 2,
+                            minWidth: 140,
                             fontWeight: 500,
-                            gap: 1,
-                            width: 130,
-                            justifyContent: 'flex-start',
+                            background: 'none',
+                            boxShadow: 'none',
+                            '& .MuiSelect-standard': { background: 'none' },
+                            '& fieldset': { border: 'none' },
                           }}
+                          renderValue={role => (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                bgcolor: ROLE_COLORS[role],
+                                color: ROLE_TEXT_COLORS[role],
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 2,
+                                fontWeight: 500,
+                                gap: 1,
+                                width: 110,
+                                justifyContent: 'flex-start',
+                              }}
+                            >
+                              {ROLE_ICONS[role]}
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </Box>
+                          )}
                         >
-                          {ROLE_ICONS[user.role]}
-                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                        </Box>
+                          {ROLE_OPTIONS.map(role => (
+                            <MenuItem key={role} value={role}>
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  bgcolor: ROLE_COLORS[role],
+                                  color: ROLE_TEXT_COLORS[role],
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: 2,
+                                  fontWeight: 500,
+                                  gap: 1,
+                                  width: 130,
+                                  justifyContent: 'flex-start',
+                                }}
+                              >
+                                {ROLE_ICONS[role]}
+                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </Box>
                     </Stack>
                   </CardContent>

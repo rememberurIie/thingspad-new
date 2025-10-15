@@ -928,7 +928,8 @@ const TableView = ({ projectId }) => {
                                        />
 
                                     )}
-
+                                 </Stack>
+                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
                                        <Avatar
                                            src={`https://storage.googleapis.com/thing-702bc.appspot.com/avatars/${row.assigneeId}/avatar.jpg?${Date.now()}`}
@@ -936,7 +937,6 @@ const TableView = ({ projectId }) => {
                                        />
                                        <Typography fontSize={14}>{row.assigneeFullName}</Typography>
                                     </Box>
-
                                  </Stack>
                               </Stack>
                            </CardContent>

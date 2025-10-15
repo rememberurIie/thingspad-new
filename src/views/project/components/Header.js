@@ -9,17 +9,28 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
+import useSSE from '../../../hook/useSSE';
 
-import TableView from './TableView';
-import KandanBoard from './KandanBoard';
 
-const API_URL = "http://192.168.1.36:3000/api/project/invite/toggleInviteLink";
-const STATUS_URL = "http://192.168.1.36:3000/api/project/invite/getInviteLinkStatus";
+const API_ENDPOINTS = {
+  toggleInviteLink: "http://192.168.1.36:3000/api/project/invite/toggleInviteLink",
+  getInviteLinkStatus: "http://192.168.1.36:3000/api/project/invite/getInviteLinkStatus",
+  deleteProject: "http://192.168.1.36:3000/api/project/general/deleteProject",
+  updateProjectName: "http://192.168.1.36:3000/api/project/general/updateProjectName",
+  exitProject: "http://192.168.1.36:3000/api/project/general/toggleUser",
+};
+
 const FRONTEND_URL = "http://192.168.1.36:5173";
 
 const Header = ({ projectId, projectName, view, setView }) => {
+
    const user = useSelector(state => state.auth.user);
 
    const [anchorEl, setAnchorEl] = useState(null);
@@ -30,26 +41,12 @@ const Header = ({ projectId, projectName, view, setView }) => {
    const [snackbarOpen, setSnackbarOpen] = useState(false);
    const [copied, setCopied] = useState(false); // เพิ่ม state
 
-   // ดึงสถานะ invite link จาก API
-   useEffect(() => {
-      const fetchStatus = async () => {
-         try {
-            const res = await fetch(STATUS_URL, {
-               method: 'POST',
-               headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify({ projectId })
-            });
-            const data = await res.json();
-            if (typeof data.isCanInvite === 'boolean') {
-               setIsCanInvite(data.isCanInvite);
-            }
-         } catch (e) {
-            // fallback: เปิดไว้
-            setIsCanInvite(true);
-         }
-      };
-      fetchStatus();
-   }, [projectId]);
+   const [deleteDialog, setDeleteDialog] = useState({ open: false });
+   const [renameDialog, setRenameDialog] = useState({ open: false, newName: '' });
+   const [exitDialog, setExitDialog] = useState({ open: false });
+
+   const theme = useTheme();
+   const isXsDown = useMediaQuery(theme.breakpoints.down('md'));
 
    const inviteLink = `${FRONTEND_URL}/project/invite/${projectId}`;
 
@@ -57,6 +54,7 @@ const Header = ({ projectId, projectName, view, setView }) => {
       if (nextView !== null) setView(nextView);
    };
 
+   // Menu handlers
    const handleMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
    };
@@ -64,14 +62,61 @@ const Header = ({ projectId, projectName, view, setView }) => {
       setAnchorEl(null);
    };
 
+   // Delete project
+   const handleDelete = () => {
+      setDeleteDialog({ open: true });
+      handleMenuClose();
+   };
+   const handleCloseDelete = () => setDeleteDialog({ open: false });
+   const handleConfirmDelete = async () => {
+      await fetch(API_ENDPOINTS.deleteProject, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ projectId }),
+      });
+      setDeleteDialog({ open: false });
+   };
+
+   // Rename project
    const handleRename = () => {
-      // TODO: Implement rename logic
+      setRenameDialog({ open: true, newName: projectName });
       handleMenuClose();
    };
+   const handleCloseRename = () => setRenameDialog({ open: false, newName: '' });
+   const handleConfirmRename = async () => {
+      await fetch(API_ENDPOINTS.updateProjectName, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ projectId, newName: renameDialog.newName }),
+      });
+      setRenameDialog({ open: false, newName: '' });
+   };
+
+   // Exit project
    const handleExit = () => {
-      // TODO: Implement exit project logic
+      setExitDialog({ open: true });
       handleMenuClose();
    };
+   const handleCloseExit = () => setExitDialog({ open: false });
+   const handleConfirmExit = async () => {
+      await fetch(API_ENDPOINTS.exitProject, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ projectId, uid: user.uid, isMember: true }),
+      });
+      setExitDialog({ open: false });
+   };
+
+   // ดึงสถานะ invite link จาก API
+   useSSE(
+      projectId ? API_ENDPOINTS.getInviteLinkStatus : null,
+      (data) => {
+         if (typeof data.isCanInvite === 'boolean') {
+            setIsCanInvite(data.isCanInvite);
+         }
+      },
+      { projectId }
+   );
 
    // Copy invite link
    const handleCopyInviteLink = async () => {
@@ -90,14 +135,14 @@ const Header = ({ projectId, projectName, view, setView }) => {
          document.body.removeChild(textArea);
       }
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500); // กลับเป็นปกติหลัง 1.5 วิ
+      setTimeout(() => setCopied(false), 1500);
    };
 
    // Toggle invite link
    const handleToggleInvite = async (event) => {
       const newValue = event.target.checked;
       setIsCanInvite(newValue);
-      await fetch(API_URL, {
+      await fetch(API_ENDPOINTS.toggleInviteLink, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ projectId, isCanInvite: newValue })
@@ -107,43 +152,40 @@ const Header = ({ projectId, projectName, view, setView }) => {
    return (
       <Card variant="outlined" sx={{ height: '100%', borderRadius: '10px' }}>
          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', "&:last-child": { pb: 2 } }}>
-            <Typography sx={{ mr: 2, fontSize: '25px', fontWeight: 700 }}>{projectName}</Typography>
+            <Typography sx={{ mr: 2, fontSize: '20px', fontWeight: 700 }}>{projectName}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-               {/* Invite Link Section */}
-               <Tooltip title={isCanInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
-                  <span>
-                     <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
-                        onClick={handleCopyInviteLink}
-                        disabled={!isCanInvite}
-                        sx={{
-                           mr: 1,
-                           color: copied ? 'success.main' : undefined,
-                           borderColor: copied ? 'success.main' : undefined,
-                           // '&:hover': copied
-                           //   ? { borderColor: 'success.dark', backgroundColor: 'success.light' }
-                           //   : undefined,
-                        }}
-                     >
-                        {copied ? "Copied" : "Copy Invite Link"}
-                     </Button>
-                  </span>
-               </Tooltip>
-
-               {(user?.role === 'root' || user?.role === 'admin') && (
+               {/* Invite Link Section (desktop only) */}
+               {!isXsDown && (
                   <>
-                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-
-                        <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
-                        <Switch
-                           checked={isCanInvite}
-                           onChange={handleToggleInvite}
-                           color="primary"
-                           inputProps={{ 'aria-label': 'toggle invite link' }}
-                        />
-                     </Box>
+                     <Tooltip title={isCanInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
+                        <span>
+                           <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                              onClick={handleCopyInviteLink}
+                              disabled={!isCanInvite}
+                              sx={{
+                                 mr: 1,
+                                 color: copied ? 'success.main' : undefined,
+                                 borderColor: copied ? 'success.main' : undefined,
+                              }}
+                           >
+                              {copied ? "Copied" : "Copy Invite Link"}
+                           </Button>
+                        </span>
+                     </Tooltip>
+                     {(user?.role === 'root' || user?.role === 'admin') && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                           <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
+                           <Switch
+                              checked={isCanInvite}
+                              onChange={handleToggleInvite}
+                              color="primary"
+                              inputProps={{ 'aria-label': 'toggle invite link' }}
+                           />
+                        </Box>
+                     )}
                   </>
                )}
 
@@ -165,9 +207,14 @@ const Header = ({ projectId, projectName, view, setView }) => {
                      <ViewKanbanIcon fontSize="small" />
                   </ToggleButton>
                </ToggleButtonGroup>
-               <IconButton onClick={handleMenuOpen} size="small">
-                  <MoreVertIcon />
-               </IconButton>
+
+               {/* More menu (always show on mobile, show for admin/root on desktop) */}
+               {(isXsDown || user?.role === 'root' || user?.role === 'admin') && (
+                  <IconButton onClick={handleMenuOpen} size="small">
+                     <MoreVertIcon />
+                  </IconButton>
+               )}
+
                <Menu
                   anchorEl={anchorEl}
                   open={open}
@@ -175,9 +222,50 @@ const Header = ({ projectId, projectName, view, setView }) => {
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                >
-                  <MenuItem onClick={handleRename}>Rename Project</MenuItem>
-                  <MenuItem onClick={handleExit}>Exit Project</MenuItem>
+                  {/* Show invite controls in menu if mdDown */}
+                  {isXsDown && (
+                     <>
+                        <MenuItem disabled={!isCanInvite} onClick={handleCopyInviteLink}>
+                           <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} />
+                           {copied ? "Copied" : "Copy Invite Link"}
+                        </MenuItem>
+                        {(user?.role === 'root' || user?.role === 'admin') && (
+                           <MenuItem>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                 <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
+                                 <Switch
+                                    checked={isCanInvite}
+                                    onChange={handleToggleInvite}
+                                    color="primary"
+                                    inputProps={{ 'aria-label': 'toggle invite link' }}
+                                    size="small"
+                                 />
+                              </Box>
+                           </MenuItem>
+                        )}
+                        <MenuItem divider />
+                     </>
+                  )}
+                  {/* Project actions */}
+                  {(user?.role === 'root' || user?.role === 'admin') && (
+                     <div>
+                        <MenuItem onClick={handleRename}>Rename Project</MenuItem>
+                        <MenuItem onClick={handleExit}>Exit Project</MenuItem>
+                        <MenuItem onClick={handleDelete}>Delete Project</MenuItem>
+
+                     </div>
+                  )}
+                  {user?.role === 'verified' && (
+                     <MenuItem onClick={handleExit}>
+                        <ExitToAppIcon fontSize="small" sx={{ mr: 1 }} />
+                        Exit Project
+                     </MenuItem>
+                  )}
                </Menu>
+
+               {user?.role === 'verified' && !isXsDown && (
+                  <ExitToAppIcon onClick={handleExit} fontSize="small" sx={{ mr: 1 }} />
+               )}
             </Box>
          </CardContent>
          <Snackbar
@@ -186,6 +274,145 @@ const Header = ({ projectId, projectName, view, setView }) => {
             onClose={() => setSnackbarOpen(false)}
             message="Invite link copied!"
          />
+         {deleteDialog.open &&
+            ReactDOM.createPortal(
+               <Box
+                  sx={{
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center'
+                  }}
+               >
+                  <Box
+                     sx={{
+                        width: 450,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                     }}
+                  >
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Delete Project
+                     </Typography>
+                     <Typography>
+                        Are you sure you want to delete project <b>{projectName}</b>?
+                     </Typography>
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>Cancel</Button>
+                        <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>Delete</Button>
+                     </Box>
+                  </Box>
+               </Box>,
+               document.body
+            )
+         }
+
+         {renameDialog.open &&
+            ReactDOM.createPortal(
+               <Box
+                  sx={{
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center'
+                  }}
+               >
+                  <Box
+                     sx={{
+                        width: 450,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                     }}
+                  >
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Rename Project
+                     </Typography>
+                     <Typography>
+                        Enter new project name:
+                     </Typography>
+                     <input
+                        value={renameDialog.newName}
+                        onChange={e => setRenameDialog(d => ({ ...d, newName: e.target.value }))}
+                        style={{ padding: 8, fontSize: 16, marginBottom: 16 }}
+                     />
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseRename} startIcon={<CloseIcon />}>Cancel</Button>
+                        <Button onClick={handleConfirmRename}>Update</Button>
+                     </Box>
+                  </Box>
+               </Box>,
+               document.body
+            )
+         }
+
+         {exitDialog.open &&
+            ReactDOM.createPortal(
+               <Box
+                  sx={{
+                     position: 'fixed',
+                     top: 0,
+                     left: 0,
+                     width: '100vw',
+                     height: '100vh',
+                     bgcolor: 'rgba(0,0,0,0.25)',
+                     zIndex: 3000,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center'
+                  }}
+               >
+                  <Box
+                     sx={{
+                        width: 450,
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        p: 3,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                     }}
+                  >
+                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        Exit Project
+                     </Typography>
+                     <Typography>
+                        Are you sure you want to exit project <b>{projectName}</b>?
+                     </Typography>
+                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button onClick={handleCloseExit} startIcon={<CloseIcon />}>Cancel</Button>
+                        <Button color="error" onClick={handleConfirmExit} startIcon={<ExitToAppIcon />}>Exit</Button>
+                     </Box>
+                  </Box>
+               </Box>,
+               document.body
+            )
+         }
       </Card>
    );
 }

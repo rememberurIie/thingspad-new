@@ -1,15 +1,5 @@
-import React, { useMemo } from 'react';
-import {
-  Box,
-  useMediaQuery,
-  Drawer,
-  IconButton,
-  AppBar,
-  Toolbar,
-  Typography
-} from '@mui/material';
-
-import ChatIcon from '@mui/icons-material/Chat';
+import React, { useMemo, useState } from 'react';
+import {Box, useMediaQuery, Drawer,} from '@mui/material';
 
 import PageContainer from 'src/components/container/PageContainer';
 import { useSelector } from 'react-redux';
@@ -22,35 +12,35 @@ import DirectMessageChat from './components/DirectMessageChat';
 const drawerWidth = 300;
 
 const DirectMessage = () => {
+  // Redux user
   const user = useSelector(state => state.auth.user);
 
-  // Remove local selectedDm state
+  // Context: selected DM
   const { selectedDm, setSelectedDm } = useDirectMessageList();
 
-  // Mobile drawers
-  const [mobileOpenLeft, setMobileOpenLeft] = React.useState(false);
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  // Mobile drawer state
+  const [mobileOpenLeft, setMobileOpenLeft] = useState(false);
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('lg'));
 
-  const handleDrawerToggleLeft = () => setMobileOpenLeft(!mobileOpenLeft);
+  // Drawer toggle
+  const handleDrawerToggleLeft = () => setMobileOpenLeft(v => !v);
 
-  const DirectMessageListDrawer = (
-    <Box sx={{ width: drawerWidth, height: '85vh' }}>
-      <DirectMessageList
-        onSelect={setSelectedDm}
-        userId={user.uid}
-      />
-    </Box>
-  );
-
-  // เพิ่ม useMemo สำหรับ avatar URL ใน component
+  // Memoized avatar URL
   const avatarUrl = useMemo(() => getCachedAvatarUrl(user.uid), [user.uid]);
+
+  // // Drawer content
+  // const DirectMessageListDrawer = (
+  //   <Box sx={{ width: drawerWidth, height: '85vh' }}>
+  //     <DirectMessageList
+  //       onSelect={setSelectedDm}
+  //       userId={user.uid}
+  //     />
+  //   </Box>
+  // );
 
   return (
     <PageContainer title="Chat App" description="Responsive chat UI">
-      {/* เปลี่ยน 90vh เป็น 89vh ให้ตรงกับ Dashboard */}
       <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }}>
-
-
         <Box sx={{ flex: 0, display: 'flex', flexGrow: 1 }}>
           {/* Left drawer / column */}
           {isMobile ? (
@@ -61,11 +51,11 @@ const DirectMessage = () => {
               ModalProps={{ keepMounted: true }}
               sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
             >
-              {DirectMessageListDrawer}
+              <DirectMessageList onSelect={setSelectedDm} userId={user.uid}/>
             </Drawer>
           ) : (
             <Box sx={{ width: drawerWidth, display: { xs: 'none', lg: 'block' } }}>
-              {DirectMessageListDrawer}
+              <DirectMessageList onSelect={setSelectedDm} userId={user.uid}/>
             </Box>
           )}
 
@@ -86,10 +76,9 @@ const DirectMessage = () => {
               otherFullName={selectedDm?.fullName}
               currentUserId={user?.uid}
               avatarUrl={avatarUrl}
-              onOpenChatList={handleDrawerToggleLeft} // เพิ่ม prop นี้
+              onOpenChatList={handleDrawerToggleLeft}
             />
           </Box>
-
         </Box>
       </Box>
     </PageContainer>
