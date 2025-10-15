@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import useSSE from 'src/hook/useSSE';
 
 const ProjectManagementContext = createContext();
 
@@ -11,22 +10,19 @@ export const ProjectManagementProvider = ({ children }) => {
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState('');
 
-  
-  // SSE for users
-  useSSE(
-    user?.uid ? 'http://192.168.1.36:3000/api/root/projectManage/getAllProject' : null,
-    (data) => {
+  useEffect(() => {
+    if (!user?.uid) return;
+    const fetchProjects = async () => {
+      const res = await fetch('http://192.168.1.36:3000/api/root/projectManage/getAllProject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?.uid }),
+      });
+      const data = await res.json();
       setProjects(data);
-      return data;
-      // setProjects(prev => {
-      //     return prev.map(p => p.projectId === data.projectId ? data : p);
-      //   }
-      //   // ถ้ายังไม่มี ให้เพิ่มใหม่
-      //   return [...prev, data];
-      // });
-    },
-    { userId: user?.uid }
-  );
+    };
+    fetchProjects();
+  }, [user?.uid]);
 
   return (
     <ProjectManagementContext.Provider value={{

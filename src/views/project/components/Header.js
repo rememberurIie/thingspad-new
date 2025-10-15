@@ -29,7 +29,8 @@ const API_ENDPOINTS = {
 
 const FRONTEND_URL = "http://192.168.1.36:5173";
 
-const Header = ({ projectId, projectName, view, setView }) => {
+// เพิ่ม inviteLink ใน props
+const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
 
    const user = useSelector(state => state.auth.user);
 
@@ -48,7 +49,7 @@ const Header = ({ projectId, projectName, view, setView }) => {
    const theme = useTheme();
    const isXsDown = useMediaQuery(theme.breakpoints.down('md'));
 
-   const inviteLink = `${FRONTEND_URL}/project/invite/${projectId}`;
+   const inviteLinkUrl = `${FRONTEND_URL}/project/invite/${projectId}`;
 
    const handleViewChange = (event, nextView) => {
       if (nextView !== null) setView(nextView);
@@ -107,9 +108,12 @@ const Header = ({ projectId, projectName, view, setView }) => {
       setExitDialog({ open: false });
    };
 
-   // ดึงสถานะ invite link จาก API
+   // ถ้าได้รับ prop inviteLink (จาก Storybook) ให้ override state
+   const canInvite = typeof inviteLink === 'boolean' ? inviteLink : isCanInvite;
+
+   // ดึงสถานะ invite link จาก API เฉพาะกรณีไม่ได้ใช้ prop inviteLink
    useSSE(
-      projectId ? API_ENDPOINTS.getInviteLinkStatus : null,
+      typeof inviteLink === 'undefined' && projectId ? API_ENDPOINTS.getInviteLinkStatus : null,
       (data) => {
          if (typeof data.isCanInvite === 'boolean') {
             setIsCanInvite(data.isCanInvite);
@@ -121,11 +125,11 @@ const Header = ({ projectId, projectName, view, setView }) => {
    // Copy invite link
    const handleCopyInviteLink = async () => {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-         await navigator.clipboard.writeText(inviteLink);
+         await navigator.clipboard.writeText(inviteLinkUrl);
       } else {
          // fallback สำหรับ browser ที่ไม่รองรับ clipboard API
          const textArea = document.createElement("textarea");
-         textArea.value = inviteLink;
+         textArea.value = inviteLinkUrl;
          document.body.appendChild(textArea);
          textArea.focus();
          textArea.select();
@@ -157,14 +161,14 @@ const Header = ({ projectId, projectName, view, setView }) => {
                {/* Invite Link Section (desktop only) */}
                {!isXsDown && (
                   <>
-                     <Tooltip title={isCanInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
+                     <Tooltip title={canInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
                         <span>
                            <Button
                               variant="outlined"
                               size="small"
                               startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
                               onClick={handleCopyInviteLink}
-                              disabled={!isCanInvite}
+                              disabled={!canInvite}
                               sx={{
                                  mr: 1,
                                  color: copied ? 'success.main' : undefined,
@@ -179,7 +183,7 @@ const Header = ({ projectId, projectName, view, setView }) => {
                         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                            <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
                            <Switch
-                              checked={isCanInvite}
+                              checked={canInvite}
                               onChange={handleToggleInvite}
                               color="primary"
                               inputProps={{ 'aria-label': 'toggle invite link' }}

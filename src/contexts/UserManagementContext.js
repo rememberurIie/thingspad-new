@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import useSSE from 'src/hook/useSSE';
 
 const UserManagementContext = createContext();
 
@@ -12,15 +11,20 @@ export const UserManagementProvider = ({ children }) => {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState([]);
 
-  // SSE for users
-  useSSE(
-    user?.uid ? 'http://192.168.1.36:3000/api/root/userManage/getAllUser' : null,
-    (data) => {
+  // Fetch users
+  useEffect(() => {
+    if (!user?.uid) return;
+    const fetchUsers = async () => {
+      const res = await fetch('http://192.168.1.36:3000/api/root/userManage/getAllUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?.uid }),
+      });
+      const data = await res.json();
       setUsers(data);
-      return data;
-    },
-    { userId: user?.uid }
-  );
+    };
+    fetchUsers();
+  }, [user?.uid]);
 
   // Filtered users
   const filteredUsers = useMemo(() => (

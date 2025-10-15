@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-const DirectMessageListContext = createContext();
+export const DirectMessageListContext = createContext();
 
 export const useDirectMessageList = () => useContext(DirectMessageListContext);
 

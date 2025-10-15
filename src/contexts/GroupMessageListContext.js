@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-const GroupMessageListContext = createContext();
+export const GroupMessageListContext = createContext();
 
 export const useGroupMessageList = () => useContext(GroupMessageListContext);
 
