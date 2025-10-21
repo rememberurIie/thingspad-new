@@ -29,3 +29,5 @@ export const ProjectListProvider = ({ children }) => {
     </ProjectListContext.Provider>
   );
 };
+
+export default ProjectListContext;

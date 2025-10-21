@@ -96,7 +96,9 @@
     "invite_disable": "Disable",
     "project_name": "Project Name",
     "is_can_invite": "can invite via link",
-    "add": "Add"
+    "add": "Add",
+    "popup_member_nouser": "No user to add.",
+    "popup_member_adding": "Adding..."
   },
   "user": {
     "full_name": "Full Name",

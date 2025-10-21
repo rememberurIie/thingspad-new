@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useState } from 'react';
 import { useTheme } from "@mui/material/styles";
+import useMenuItems from './MenuItems';
 
 
 
@@ -19,6 +20,8 @@ const Sidebar = (props) => {
   const expandedWidth = '270px';
   const minimizedWidth = '92px';
   const sidebarWidth = isMinimized ? minimizedWidth : expandedWidth;
+
+  const menuItems = props.menuItems || useMenuItems();
 
   if (lgUp) {
     return (
@@ -41,7 +44,7 @@ const Sidebar = (props) => {
         >
           <Scrollbar sx={{ height: "calc(100% - 40px)" }}>
             <Box>
-              <SidebarItems isMinimized={isMinimized} />
+              <SidebarItems isMinimized={isMinimized} menuItems={menuItems} />
             </Box>
           </Scrollbar>
         </Drawer>
@@ -67,7 +70,7 @@ const Sidebar = (props) => {
         {/* ------------------------------------------- */}
         {/* Sidebar For Mobile */}
         {/* ------------------------------------------- */}
-        <SidebarItems/>
+        <SidebarItems menuItems={menuItems} />
       </Scrollbar>
     </Drawer>
   );

@@ -56,7 +56,7 @@ const getCardColor = (task, col, theme) => {
    }
 };
 
-const KandanBoard = ({ projectId }) => {
+const KandanBoard = ({ projectId, initialTasks = [] }) => {
    const { t } = useTranslation();
    const theme = useTheme();
    const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
@@ -66,7 +66,7 @@ const KandanBoard = ({ projectId }) => {
    const STATUS_OPTIONS = STATUS_OPTION_KEYS.map(k => t(k));
 
    // --- Load tasks from API ---
-   const [tasks, setTasks] = useState([]);
+   const [tasks, setTasks] = useState(initialTasks);
    const [loading, setLoading] = useState(true);
 
    // --- Load all user API (for assigned )---
@@ -103,6 +103,13 @@ const KandanBoard = ({ projectId }) => {
        tasks: tasks.filter(task => task.status === STATUS_OPTION_EN[idx])
      })), [tasks, theme, t]
    );
+
+   useEffect(() => {
+      if (!projectId) {
+        setTasks(initialTasks);
+        setLoading(initialTasks.length === 0);
+      }
+   }, [initialTasks, projectId]);
 
    useEffect(() => {
       if (!projectId) return;

@@ -14,9 +14,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
+const ChatList = ({ onSelect, projectId, selectedRoomId, initialRooms = [] }) => {
   const { t } = useTranslation();
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useState(initialRooms); // เปลี่ยนจาก [] เป็น initialRooms
   const theme = useTheme(); // Add this line
   const [loading, setLoading] = useState(true); // เพิ่ม state loading
   const [showInput, setShowInput] = useState(false);
@@ -35,6 +35,14 @@ const ChatList = ({ onSelect, projectId, selectedRoomId }) => {
   useEffect(() => {
     setLoading(true);
   }, [projectId]);
+
+  // sync initialRooms เมื่อ prop เปลี่ยน (เช่นใน story)
+  useEffect(() => {
+    if (!projectId) {
+      setRooms(initialRooms);
+      setLoading(initialRooms.length === 0);
+    }
+  }, [initialRooms, projectId]);
 
   // --- SSE: Real-time room list ---
   useSSE(

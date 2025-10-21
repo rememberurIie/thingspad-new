@@ -25,11 +25,12 @@ const ChatContent = ({
   currentUserId,
   isMobile,
   onOpenChatList,
-  onOpenMemberList
+  onOpenMemberList,
+  initialMessages = [] // เพิ่ม prop
 }) => {
   const theme = useTheme(); // <-- Add this line
 
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(initialMessages); // ใช้ initialMessages
 
 
   const [userMap, setUserMap] = useState({});
@@ -59,6 +60,14 @@ const ChatContent = ({
     // Always exit loading when messages are loaded, even if empty
     setLoading(false);
   }, [messages]);
+
+  // sync initialMessages เมื่อ prop เปลี่ยน (เช่นใน story)
+  useEffect(() => {
+    if (!projectId) {
+      setMessages(initialMessages);
+      setLoading(false);
+    }
+  }, [initialMessages, projectId]);
 
   // --- SSE: Real-time messages ---
   useSSE(

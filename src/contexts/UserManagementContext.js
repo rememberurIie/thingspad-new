@@ -53,3 +53,5 @@ export const UserManagementProvider = ({ children }) => {
     </UserManagementContext.Provider>
   );
 };
+
+export default UserManagementContext;

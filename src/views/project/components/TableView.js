@@ -49,7 +49,7 @@ const getAllAssignees = (rows) => {
    return Array.from(new Set(names));
 };
 
-const TableView = ({ projectId }) => {
+const TableView = ({ projectId, initialTasks = [] }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -75,7 +75,7 @@ const TableView = ({ projectId }) => {
 
 
    // --- Load tasks from API ---
-   const [tasks, setTasks] = useState([]);
+   const [tasks, setTasks] = useState(initialTasks);
    const [loading, setLoading] = useState(true);
 
    // --- Load all user API (for assigned )---
@@ -104,6 +104,13 @@ const TableView = ({ projectId }) => {
    const [removeImage, setRemoveImage] = useState(false);
 
    const assigneeOptions = useMemo(() => getAllAssignees(tasks), [tasks]);
+
+   useEffect(() => {
+      if (!projectId) {
+         setTasks(initialTasks || []);
+         setLoading(initialTasks.length === 0);
+      }
+   }, [initialTasks, projectId]);
 
    useEffect(() => {
       if (!projectId) return;

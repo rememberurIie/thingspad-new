@@ -35,3 +35,5 @@ export const ProjectManagementProvider = ({ children }) => {
     </ProjectManagementContext.Provider>
   );
 };
+
+export default ProjectManagementContext;

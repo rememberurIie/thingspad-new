@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import Header from './Header';
+import Header from '../../views/project/components/Header';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../../language/i18n';
+import i18n from '../../language/i18n';
 
 const mockProjectId = 'project1';
 const mockProjectName = 'Demo Project';

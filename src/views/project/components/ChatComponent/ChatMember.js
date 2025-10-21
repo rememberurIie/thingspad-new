@@ -16,14 +16,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ChatMember = ({ onSelect, projectId, currentUserId }) => {
+const ChatMember = ({ onSelect, projectId, currentUserId, initialMembers = [] }) => {
   const { t } = useTranslation();
   const theme = useTheme(); // Add this line
   const user = useSelector(state => state.auth.user); // เพิ่มบรรทัดนี้
   const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // เพิ่มเช็ค mobile
 
   
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState(initialMembers);
   const [loading, setLoading] = useState(true); // <-- เพิ่ม state loading
   const [editMode, setEditMode] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
@@ -45,6 +45,14 @@ const ChatMember = ({ onSelect, projectId, currentUserId }) => {
   useEffect(() => {
     setLoading(true);
   }, [projectId]);
+
+  // sync initialMembers เมื่อ prop เปลี่ยน (เช่นใน story)
+  useEffect(() => {
+    if (!projectId) {
+      setMembers(initialMembers);
+      setLoading(initialMembers.length === 0);
+    }
+  }, [initialMembers, projectId]);
 
   // SSE for member list
   useSSE(

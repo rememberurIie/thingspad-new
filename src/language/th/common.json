@@ -120,7 +120,9 @@
     "invite_disable": "ปิดใช้งาน",
     "project_name": "ชื่อโปรเจกต์",
     "is_can_invite": "สามารถเชิญผ่านลิงก์",
-    "add": "เพิ่ม"
+    "add": "เพิ่ม",
+    "popup_member_nouser": "ไม่มีผู้ใช้งานที่จะเพิ่ม",
+    "popup_member_adding": "กำลังเพิ่ม..."
   },
   "user": {
     "full_name": "ชื่อ-นามสกุล",
