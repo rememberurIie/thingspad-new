@@ -5,6 +5,10 @@
     font-style: normal;
 }
 
+* {
+    font-family: 'Noto Sans Thai', 'Plus Jakarta Sans', sans-serif !important;
+}
+
 /* ใช้ฟอนต์ Noto Sans กับทุก element */
 body, .MuiTypography-root, .MuiListSubheader-root, .MuiChip-label {
     font-family: 'Noto Sans Thai', 'Plus Jakarta Sans', sans-serif !important;
