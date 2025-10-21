@@ -40,7 +40,8 @@ const Header = ({
   isSidebarMinimized,
   fullName,
   username,
-  userId
+  userId,
+  email
 }) => {
   const { isDarkMode, toggle } = useContext(ColorModeContext);
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -164,7 +165,14 @@ const Header = ({
             </IconButton>
           </Tooltip>
 
-          <Profile fullName={fullName} username={username} handleLogout={handleLogout} userId={userId} sx={{ px: '-10px'}} />
+          <Profile
+            email={email}
+            fullName={fullName} 
+            username={username} 
+            handleLogout={handleLogout} 
+            userId={userId} 
+            sx={{ px: '-10px'}} 
+          />
 
         </Stack>
       </ToolbarStyled>

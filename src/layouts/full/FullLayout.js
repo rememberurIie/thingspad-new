@@ -78,6 +78,7 @@ const FullLayout = () => {
           fullName={user?.fullName || "Guest"}
           username={user?.username || ""}
           userId={user?.uid || ""}
+          email={user?.email || ""}
         />
         {/* ------------------------------------------- */}
         {/* PageContent */}

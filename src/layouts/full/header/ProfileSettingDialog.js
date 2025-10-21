@@ -5,6 +5,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Cropper from 'react-easy-crop';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 
 const ProfileSettingDialog = ({
@@ -13,7 +14,8 @@ const ProfileSettingDialog = ({
   profile,
   onSave,
 }) => {
-   const user = useSelector(state => state.auth.user);
+  const { t } = useTranslation();
+  const user = useSelector(state => state.auth.user);
 const userId = user?.uid;
 
 // กำหนด default avatar จาก storage
@@ -187,7 +189,7 @@ const defaultAvatar = userId
           gap: 2
         }}
       >
-        <Typography variant="h6" mb={2}>Profile Setting</Typography>
+        <Typography variant="h6" mb={2}>{t('profile.setting')}</Typography>
         <Stack alignItems="center" mb={2}>
           <Avatar src={image === null ? undefined : (image || defaultAvatar)} sx={{ width: 90, height: 90, mb: 1 }} />
           <Stack direction="row" spacing={1}>
@@ -213,32 +215,34 @@ const defaultAvatar = userId
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
             />
-            <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={handleCropSave}>Crop</Button>
+            <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={handleCropSave}>
+              {t('profile.crop')}
+            </Button>
           </Box>
         )}
         <TextField
-          label="Full Name"
+          label={t('user.full_name')}
           value={fullName}
           onChange={e => setFullName(e.target.value)}
           fullWidth
           sx={{ mb: 2 }}
         />
         <TextField
-          label="Username"
+          label={t('user.username')}
           value={username}
           onChange={e => setUsername(e.target.value)}
           fullWidth
           sx={{ mb: 2 }}
         />
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={onClose} disabled={saving}>{t('common.cancel')}</Button>
           <Button
             variant="contained"
             onClick={() => handleSave({ fullName, username, image })}
             disabled={saving}
             sx={{ bgcolor: saving ? 'grey.400' : undefined }}
           >
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? t('common.saving') : t('common.save')}
           </Button>
         </Stack>
       </Box>

@@ -18,7 +18,15 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format } from 'date-fns';
 
-const STATUS_OPTIONS = [
+// ใช้ key สำหรับ status options
+const STATUS_OPTION_KEYS = [
+   'table.status_new_task',
+   'table.status_scheduled',
+   'table.status_in_progress',
+   'table.status_completed'
+];
+
+const STATUS_OPTION_EN = [
    'New task',
    'Scheduled',
    'In progress',
@@ -28,23 +36,24 @@ const STATUS_OPTIONS = [
 const API_BASE = 'http://192.168.1.36:3000/api/project/task';
 
 const getStatusColor = (task, col, theme) => {
-   if (task.cardColor) return task.cardColor;
    const isDark = theme.palette.mode === 'dark';
-   if (col.title === 'New task') return isDark ? '#71aaebff' : '#9dc5f3';
-   if (col.title === 'Scheduled') return isDark ? '#59c0b4ff' : '#7ccfc6';
-   if (col.title === 'In progress') return isDark ? '#eec46bff' : '#f8d68b';
-   if (col.title === 'Completed') return isDark ? '#5adb8eff' : '#74db9d';
-   return isDark ? theme.palette.background.paper : '#fff';
+   switch (col.key) {
+      case 'table.status_new_task': return isDark ? '#71aaebff' : '#9dc5f3';
+      case 'table.status_scheduled': return isDark ? '#59c0b4ff' : '#7ccfc6';
+      case 'table.status_in_progress': return isDark ? '#eec46bff' : '#f8d68b';
+      case 'table.status_completed': return isDark ? '#5adb8eff' : '#74db9d';
+      default: return isDark ? theme.palette.background.paper : '#fff';
+   }
 };
-
 const getCardColor = (task, col, theme) => {
-   if (task.cardColor) return task.cardColor;
    const isDark = theme.palette.mode === 'dark';
-   if (col.title === 'New task') return isDark ? '#94cbffff' : '#e0f0ffff';
-   if (col.title === 'Scheduled') return isDark ? '#7ad6cdff' : '#d6f5f2';
-   if (col.title === 'In progress') return isDark ? '#ffd392ff' : '#fdf1dfff';
-   if (col.title === 'Completed') return isDark ? '#74eca6ff' : '#d3fce4ff';
-   return isDark ? theme.palette.background.paper : '#fff';
+   switch (col.key) {
+      case 'table.status_new_task': return isDark ? '#94cbffff' : '#e0f0ffff';
+      case 'table.status_scheduled': return isDark ? '#7ad6cdff' : '#d6f5f2';
+      case 'table.status_in_progress': return isDark ? '#ffd392ff' : '#fdf1dfff';
+      case 'table.status_completed': return isDark ? '#74eca6ff' : '#d3fce4ff';
+      default: return isDark ? theme.palette.background.paper : '#fff';
+   }
 };
 
 const KandanBoard = ({ projectId }) => {
@@ -52,6 +61,9 @@ const KandanBoard = ({ projectId }) => {
    const theme = useTheme();
    const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
    const [tab, setTab] = useState(0);
+
+   // สร้าง status options ตามภาษา
+   const STATUS_OPTIONS = STATUS_OPTION_KEYS.map(k => t(k));
 
    // --- Load tasks from API ---
    const [tasks, setTasks] = useState([]);
@@ -83,12 +95,13 @@ const KandanBoard = ({ projectId }) => {
 
    // --- Group tasks by status ---
    const columns = useMemo(() =>
-      STATUS_OPTIONS.map(status => ({
-         title: status,
-         statusColor: getStatusColor({}, { title: status }, theme),
-         cardColor: getCardColor({}, { title: status }, theme),
-         tasks: tasks.filter(task => task.status === status)
-      })), [tasks, theme]
+     STATUS_OPTION_KEYS.map((key, idx) => ({
+       key, // เก็บ key เช่น 'table.status_new_task'
+       title: t(key), // label ภาษาไทย/อังกฤษ
+       statusColor: getStatusColor({}, { key }, theme),
+       cardColor: getCardColor({}, { key }, theme),
+       tasks: tasks.filter(task => task.status === STATUS_OPTION_EN[idx])
+     })), [tasks, theme, t]
    );
 
    useEffect(() => {
@@ -291,11 +304,11 @@ const KandanBoard = ({ projectId }) => {
                   }}
                >
                   <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Add Task
+                     {t('table.add_task')}
                   </Typography>
                   <TextField
                      fullWidth
-                     label="Task Name"
+                     label={t('table.task_name')}
                      value={addData.name}
                      onChange={e => setAddData({ ...addData, name: e.target.value })}
 
@@ -306,7 +319,7 @@ const KandanBoard = ({ projectId }) => {
                      value={allUsers.find(u => u.userId === addData.assigneeId) || null}
                      onChange={(_, value) => setAddData({ ...addData, assigneeId: value ? value.userId : '' })}
                      renderInput={(params) => (
-                        <TextField {...params} label="Assignee" />
+                        <TextField {...params} label={t('table.assignee')} />
                      )}
                      isOptionEqualToValue={(option, value) => option.userId === value.userId}
                      ListboxProps={{ style: { maxHeight: 200 } }} // scroll ถ้าเกิน 4 คน
@@ -322,15 +335,13 @@ const KandanBoard = ({ projectId }) => {
                   />
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                      <DatePicker
-                        label="Due"
+                        label={t('table.due')}
                         value={addData.due || null}
                         onChange={date => setAddData({ ...addData, due: date })}
                         renderInput={(params) => <TextField {...params} fullWidth />}
                         slotProps={{
-                        popper: {
-                           sx: { zIndex: 4001 },
-                        }
-                     }}
+                           popper: { sx: { zIndex: 4001 } }
+                        }}
                      />
                   </LocalizationProvider>
                   <input
@@ -383,8 +394,8 @@ const KandanBoard = ({ projectId }) => {
                      </Box>
                   )}
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleAddClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>Add</Button>
+                     <Button onClick={handleAddClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                     <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>{t('table.add')}</Button>
                   </Box>
                </Box>
             </Box>
@@ -419,11 +430,11 @@ const KandanBoard = ({ projectId }) => {
                   }}
                >
                   <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                     Edit Task
+                     {t('table.edit_task')}
                   </Typography>
                   <TextField
                      fullWidth
-                     label="Task Name"
+                     label={t('table.task_name')}
                      value={editData.name}
                      onChange={e => setEditData({ ...editData, name: e.target.value })}
                   />
@@ -434,7 +445,7 @@ const KandanBoard = ({ projectId }) => {
                      value={allUsers.find(u => u.userId === editData.assigneeId) || null}
                      onChange={(_, value) => setEditData({ ...editData, assigneeId: value ? value.userId : '' })}
                      renderInput={(params) => (
-                        <TextField {...params} label="Assignee" />
+                        <TextField {...params} label={t('table.assignee')} />
                      )}
                      isOptionEqualToValue={(option, value) => option.userId === value.userId}
                      ListboxProps={{ style: { maxHeight: 200 } }}
@@ -450,15 +461,13 @@ const KandanBoard = ({ projectId }) => {
                   />
                   <LocalizationProvider dateAdapter={AdapterDateFns} >
                      <DatePicker
-                        label="Due"
+                        label={t('table.due')}
                         value={editData.due || null}
                         onChange={date => setEditData({ ...editData, due: date })}
                         renderInput={(params) => <TextField {...params} fullWidth />}
                         slotProps={{
-                        popper: {
-                           sx: { zIndex: 4001 },
-                        }
-                     }}
+                           popper: { sx: { zIndex: 4001 } }
+                        }}
                      />
                   </LocalizationProvider>
                   <>
@@ -545,8 +554,8 @@ const KandanBoard = ({ projectId }) => {
                      />
                   </>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleEditClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>Save</Button>
+                     <Button onClick={handleEditClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                     <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>{t('table.save')}</Button>
                   </Box>
                </Box>
             </Box>
@@ -580,14 +589,14 @@ const KandanBoard = ({ projectId }) => {
                   }}
                >
                   <Typography variant="subtitle1" mb={2} sx={{ fontSize: '20px', fontWeight: 'bold' }}>
-                     Confirm Delete
+                     {t('table.confirm_delete')}
                   </Typography>
                   <Typography mb={3}>
-                     Are you sure you want to delete <b>{selectedTask?.name}</b>?
+                     {t('table.confirm_delete_text', { name: selectedTask?.name })}
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                     <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>Cancel</Button>
-                     <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>Delete</Button>
+                     <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                     <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>{t('table.delete')}</Button>
                   </Box>
                </Box>
             </Box>
@@ -688,7 +697,7 @@ const KandanBoard = ({ projectId }) => {
                         }}
                         onClick={() => handleAddOpen(tab)}
                      >
-                        Add new
+                        {t('table.add_new')}
                      </Button>
 
                      <Stack spacing={2} sx={{ pb: 7 }}>
@@ -781,10 +790,10 @@ const KandanBoard = ({ projectId }) => {
                   onClose={handleMenuClose}
                >
                   <MenuItem onClick={handleEditOpen}>
-                     <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+                     <EditIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.edit')}
                   </MenuItem>
                   <MenuItem onClick={handleDeleteOpen}>
-                     <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+                     <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.delete')}
                   </MenuItem>
                </Menu>
                {renderPopup()}
@@ -851,8 +860,10 @@ const KandanBoard = ({ projectId }) => {
                         >
                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, }}>
                               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000000' }}>{col.title} <Chip label={col.tasks.length} size="small" sx={{ ml: 1, color: '#000000', backgroundColor: 'rgba(0, 0, 0, 0.08)' }} /></Typography>
-                              {col.title === 'New task' && (
-                                 <Button onClick={() => handleAddOpen(colIdx)} startIcon={<AddIcon />} size="small" variant="contained" sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>Add new</Button>
+                              {col.key === 'table.status_new_task' && (
+                                 <Button onClick={() => handleAddOpen(colIdx)} startIcon={<AddIcon />} size="small" variant="contained" sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+                                    {t('table.add_new')}
+                                 </Button>
                               )}
                            </Box>
                            <Stack
@@ -958,10 +969,10 @@ const KandanBoard = ({ projectId }) => {
                   onClose={handleMenuClose}
                >
                   <MenuItem onClick={handleEditOpen}>
-                     <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+                     <EditIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.edit')}
                   </MenuItem>
                   <MenuItem onClick={handleDeleteOpen}>
-                     <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+                     <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.delete')}
                   </MenuItem>
                </Menu>
                {renderPopup()}

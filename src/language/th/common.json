@@ -6,9 +6,14 @@
     "finished": "งานที่เสร็จสิ้น",
     "finished_load": "กำลังโหลดงานที่เสร็จสิ้น...",
     "finished_graph": "กราฟงานที่เสร็จสิ้น (รายเดือน)",
-    "task_ea": " งาน"
+    "task_ea": " งาน",
+    "loading_tasks": "กำลังโหลดงาน...",
+    "no_tasks_found": "ไม่พบงานที่กำลังดำเนินการ"
   },
   "menu": {
+    "root": "สิทธิ์สูงสุด",
+    "user_management": "การจัดการผู้ใช้",
+    "project_management": "การจัดการโครงการ",
     "home": "หน้าแรก",
     "myTask": "งานของฉัน",
     "chats": "แชท",
@@ -61,12 +66,83 @@
     "popup_member_adding" : "กำลังเพิ่ม...",
     "popup_member_nouser" : "ไม่มีผู้ใช้งานที่จะเพิ่ม"
   },
+  "table": {
+    "add_new": "เพิ่มใหม่",
+    "search_tasks": "ค้นหางาน",
+    "status": "สถานะ",
+    "all": "ทั้งหมด",
+    "responsible": "ผู้รับผิดชอบ",
+    "task": "งาน",
+    "due_date": "วันครบกำหนด",
+    "add_task": "เพิ่มงาน",
+    "edit_task": "แก้ไขงาน",
+    "task_name": "ชื่องาน",
+    "assignee": "ผู้รับมอบหมาย",
+    "due": "ครบกำหนด",
+    "add": "เพิ่ม",
+    "save": "บันทึก",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "confirm_delete": "ยืนยันการลบ",
+    "confirm_delete_text": "คุณต้องการลบ {{name}} ใช่หรือไม่?",
+    "status_new_task": "งานใหม่",
+    "status_scheduled": "กำหนดเวลาแล้ว",
+    "status_in_progress": "กำลังดำเนินการ",
+    "status_completed": "เสร็จสิ้น"
+  },
   "project": {
     "rooms": "ห้องแชท",
     "room_select": "กรุณาเลือกห้องเพื่อเริ่มแชท!",
     "members": "สมาชิก",
     "newroom_name": "ชื่อห้องใหม่",
-    "newroom_create": "สร้าง"
+    "newroom_create": "สร้าง",
+    "popup_member_header": "สมาชิกโปรเจกต์",
+    "popup_member_searchbox": "ค้นหาสมาชิกโปรเจกต์",
+    "popup_member_add": "เพิ่ม",
+    "menu_rename": "เปลี่ยนชื่อโปรเจกต์",
+    "menu_exit": "ออกจากโปรเจกต์",
+    "menu_delete": "ลบโปรเจกต์",
+    "exit": "ออก",
+    "exit_confirm": "คุณแน่ใจหรือไม่ว่าต้องการออกจากโปรเจกต์นี้?",
+    "delete": "ลบ",
+    "delete_confirm": "คุณแน่ใจหรือไม่ว่าต้องการลบโปรเจกต์นี้? การกระทำนี้ไม่สามารถย้อนกลับได้",
+    "rename": "เปลี่ยนชื่อโปรเจกต์",
+    "rename_submit": "อัปเดต",
+    "rename_input": "ชื่อโปรเจกต์ใหม่",
+    "add_member": "เพิ่มสมาชิก",
+    "search_user": "ค้นหาผู้ใช้",
+    "no_users_to_add": "ไม่มีผู้ใช้ให้เพิ่ม",
+    "adding": "กำลังเพิ่ม...",
+    "delete_project": "ลบโปรเจกต์",
+    "confirm_delete_project": "คุณต้องการลบโปรเจกต์ {{name}} ใช่หรือไม่?",
+    "delete_this_project": "ลบโปรเจกต์นี้",
+    "invite_enable": "เปิดใช้งาน",
+    "invite_disable": "ปิดใช้งาน",
+    "project_name": "ชื่อโปรเจกต์",
+    "is_can_invite": "สามารถเชิญผ่านลิงก์",
+    "add": "เพิ่ม"
+  },
+  "user": {
+    "full_name": "ชื่อ-นามสกุล",
+    "username": "ชื่อผู้ใช้งาน",
+    "email": "อีเมล",
+    "search": "ค้นหาผู้ใช้",
+    "delete": "ลบผู้ใช้",
+    "confirm_delete": "ยืนยันการลบ",
+    "confirm_delete_text": "คุณต้องการลบ {{name}} ใช่หรือไม่?",
+    "edit": "แก้ไข",
+    "save": "บันทึก"
+  },
+  "role": {
+    "root": "สิทธิ์สูงสุด",
+    "admin": "ผู้ดูแล",
+    "verified": "ยืนยันแล้ว",
+    "unverified": "ยังไม่ยืนยัน",
+    "all": "ทั้งหมด"
+  },
+  "user_management": {
+    "title": "การจัดการผู้ใช้",
+    "description": "จัดการผู้ใช้ทั้งหมดในระบบ"
   },
   "login": {
     "description": "กรุณาล็อกอินก่อน",
@@ -95,5 +171,37 @@
     "error_pasword_not_match": "อีเมลหรือรหัสผ่านไม่ถูกต้อง.",
     "error_signup": "สมัครสมาชิกไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง",
     "success": "ลงทะเบียนสำเร็จ!"
+  },
+  "invite": {
+    "link": "ลิงก์เชิญ",
+    "copy": "คัดลอกลิงก์เชิญ",
+    "copied": "คัดลอกแล้ว",
+    "disabled": "ปิดใช้งานลิงก์เชิญ",
+    "toggle": "เปิดใช้งานลิงก์เชิญ"
+  },
+  "common": {
+    "loading": "กำลังโหลด...",
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "close": "ปิด",
+    "error": "เกิดข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "add": "เพิ่ม",
+    "edit": "แก้ไข",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก...",
+    "delete": "ลบ"
+  },
+  "profile": {
+    "setting": "ตั้งค่าบัญชี",
+    "edit_password": "เปลี่ยนรหัสผ่าน",
+    "logout": "ออกจากระบบ",
+    "change_password": "เปลี่ยนรหัสผ่าน",
+    "old_password": "รหัสผ่านเดิม",
+    "new_password": "รหัสผ่านใหม่",
+    "confirm_new_password": "ยืนยันรหัสผ่านใหม่",
+    "confirm_logout": "ยืนยันการออกจากระบบ",
+    "confirm_logout_text": "คุณต้องการออกจากระบบใช่หรือไม่?",
+    "crop": "ครอปรูปภาพ"
   }
 }

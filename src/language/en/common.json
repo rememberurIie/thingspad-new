@@ -6,9 +6,14 @@
     "finished": "Finished Tasks",
     "finished_load": "Finished Tasks Loading...",
     "finished_graph": "Finished Task Graph (Monthly)",
-    "task_ea": " tasks"
+    "task_ea": " tasks",
+    "loading_tasks": "Loading tasks...",
+    "no_tasks_found": "No in-progress tasks found"
   },
   "menu": {
+    "root": "Root",
+    "user_management": "User Management",
+    "project_management": "Project Management",
     "home": "Home",
     "myTask": "My Task",
     "chats": "Chats",
@@ -66,7 +71,78 @@
     "room_select": "Select room to start chat!",
     "members": "Members",
     "newroom_name": "New Room Name",
-    "newroom_create": "Create"
+    "newroom_create": "Create",
+    "popup_member_header": "Project Members",
+    "popup_member_searchbox": "Search project members...",
+    "popup_member_add": "Add",
+    "menu_rename": "Rename Project",
+    "menu_exit": "Exit Project",
+    "menu_delete": "Delete Project",
+    "exit": "Exit",
+    "exit_confirm": "Are you sure you want to exit this project?",
+    "delete": "Delete",
+    "delete_confirm": "Are you sure you want to delete this project? This action cannot be undone.",
+    "rename": "Rename Project",
+    "rename_submit": "Update",
+    "rename_input": "New Project Name",
+    "add_member": "Add Member",
+    "search_user": "Search user",
+    "no_users_to_add": "No users to add",
+    "adding": "Adding...",
+    "delete_project": "Delete Project",
+    "confirm_delete_project": "Are you sure you want to delete project {{name}}?",
+    "delete_this_project": "Delete this project",
+    "invite_enable": "Enable",
+    "invite_disable": "Disable",
+    "project_name": "Project Name",
+    "is_can_invite": "can invite via link",
+    "add": "Add"
+  },
+  "user": {
+    "full_name": "Full Name",
+    "username": "Username",
+    "email": "Email",
+    "search": "Search user",
+    "delete": "Delete User",
+    "confirm_delete": "Confirm Delete",
+    "confirm_delete_text": "Are you sure you want to delete {{name}}?",
+    "edit": "Edit",
+    "save": "Save"
+  },
+  "role": {
+    "root": "Root",
+    "admin": "Admin",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "all": "All"
+  },
+  "user_management": {
+    "title": "User Management",
+    "description": "Manage all users in the system"
+  },
+  "table": {
+    "add_new": "Add new",
+    "search_tasks": "Search tasks",
+    "status": "Status",
+    "all": "All",
+    "responsible": "Responsible",
+    "task": "Task",
+    "due_date": "Due date",
+    "add_task": "Add Task",
+    "edit_task": "Edit Task",
+    "task_name": "Task Name",
+    "assignee": "Assignee",
+    "due": "Due",
+    "add": "Add",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm_delete": "Confirm Delete",
+    "confirm_delete_text": "Are you sure you want to delete {{name}}?",
+    "status_new_task": "New task",
+    "status_scheduled": "Scheduled",
+    "status_in_progress": "In progress",
+    "status_completed": "Completed"
   },
   "login": {
     "description": "Please Login First",
@@ -95,5 +171,37 @@
     "error_pasword_not_match": "Passwords do not match",
     "error_signup": "Registration failed. Please check your information again.",
     "success": "Registration successful!"
+  },
+  "invite": {
+    "link": "Invite Link",
+    "copy": "Copy Invite Link",
+    "copied": "Copied",
+    "disabled": "Invite link is disabled",
+    "toggle": "Enable Invite Link"
+  },
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "error": "Error",
+    "success": "Success",
+    "add": "Add",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete"
+  },
+  "profile": {
+    "setting": "Account Settings",
+    "edit_password": "Change Password",
+    "logout": "Logout",
+    "change_password": "Change Password",
+    "old_password": "Old Password",
+    "new_password": "New Password",
+    "confirm_new_password": "Confirm New Password",
+    "confirm_logout": "Confirm Logout",
+    "confirm_logout_text": "Are you sure you want to logout?",
+    "crop": "Crop Image"
   }
 }

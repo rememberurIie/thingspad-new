@@ -53,12 +53,12 @@ const InProgessTaskList = ({
         >
           {loading ? (
             <TimelineItem>
-              <TimelineOppositeContent>Loading...</TimelineOppositeContent>
+              <TimelineOppositeContent>{t('common.loading')}</TimelineOppositeContent>
               <TimelineSeparator>
                 <TimelineDot color="primary" variant="outlined" />
               </TimelineSeparator>
               <TimelineContent>
-                <Typography>Loading tasks...</Typography>
+                <Typography>{t('dashboard.loading_tasks')}</Typography>
               </TimelineContent>
             </TimelineItem>
           ) : tasks.length === 0 ? (
@@ -68,7 +68,7 @@ const InProgessTaskList = ({
                 <TimelineDot color="primary" variant="outlined" />
               </TimelineSeparator>
               <TimelineContent>
-                <Typography>No tasks found</Typography>
+                <Typography>{t('dashboard.no_tasks_found')}</Typography>
               </TimelineContent>
             </TimelineItem>
           ) : (

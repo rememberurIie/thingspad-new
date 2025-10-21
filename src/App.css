@@ -1,3 +1,15 @@
+@font-face {
+    font-family: 'Noto Sans Thai';
+    src: url('./assets/fonts/NotoSansThai-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* ใช้ฟอนต์ Noto Sans กับทุก element */
+body, .MuiTypography-root, .MuiListSubheader-root, .MuiChip-label {
+    font-family: 'Noto Sans Thai', 'Plus Jakarta Sans', sans-serif !important;
+}
+
 .css-lpesjx-MuiPaper-root-MuiDrawer-paper{
     top: 65px !important;
 }
@@ -7,11 +19,5 @@
 
 .MuiOutlinedInput-notchedOutline {
     border-color: #efefef !important;
-}
-
-.MuiTypography-root,
-.MuiListSubheader-root,
-.MuiChip-label {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 

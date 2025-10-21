@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
    Card, CardContent, Typography,
-   Box, IconButton, Menu, MenuItem, Button, ToggleButton, ToggleButtonGroup, Switch, Tooltip, Snackbar
+   Box, IconButton, Menu, MenuItem, Button, ToggleButton, ToggleButtonGroup, Switch, Tooltip, Snackbar, TextField
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -17,6 +17,9 @@ import { useTheme } from '@mui/material/styles';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
 import useSSE from '../../../hook/useSSE';
+import { useTranslation } from 'react-i18next';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 
 const API_ENDPOINTS = {
@@ -32,6 +35,7 @@ const FRONTEND_URL = "http://192.168.1.36:5173";
 // เพิ่ม inviteLink ใน props
 const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
 
+   const { t } = useTranslation();
    const user = useSelector(state => state.auth.user);
 
    const [anchorEl, setAnchorEl] = useState(null);
@@ -161,35 +165,33 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                {/* Invite Link Section (desktop only) */}
                {!isXsDown && (
                   <>
-                     <Tooltip title={canInvite ? (copied ? "Copied!" : "Copy invite link") : "Invite link is disabled"}>
+                     <Tooltip title={canInvite ? (copied ? t('invite.copied') : t('invite.copy')) : t('invite.disabled')}>
                         <span>
-                           <Button
-                              variant="outlined"
-                              size="small"
-                              startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
-                              onClick={handleCopyInviteLink}
-                              disabled={!canInvite}
-                              sx={{
-                                 mr: 1,
-                                 color: copied ? 'success.main' : undefined,
-                                 borderColor: copied ? 'success.main' : undefined,
-                              }}
-                           >
-                              {copied ? "Copied" : "Copy Invite Link"}
-                           </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                            onClick={handleCopyInviteLink}
+                            disabled={!canInvite}
+                            sx={{
+                              mr: 1,
+                              color: copied ? 'success.main' : undefined,
+                              borderColor: copied ? 'success.main' : undefined,
+                            }}
+                          >
+                            {copied ? t('invite.copied') : t('invite.copy')}
+                          </Button>
                         </span>
                      </Tooltip>
-                     {(user?.role === 'root' || user?.role === 'admin') && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                           <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
-                           <Switch
-                              checked={canInvite}
-                              onChange={handleToggleInvite}
-                              color="primary"
-                              inputProps={{ 'aria-label': 'toggle invite link' }}
-                           />
-                        </Box>
-                     )}
+                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                        <Typography variant="body2" sx={{ mr: 1 }}>{t('invite.link')}</Typography>
+                        <Switch
+                          checked={canInvite}
+                          onChange={handleToggleInvite}
+                          color="primary"
+                          inputProps={{ 'aria-label': t('invite.toggle') }}
+                        />
+                     </Box>
                   </>
                )}
 
@@ -231,17 +233,17 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                      <>
                         <MenuItem disabled={!isCanInvite} onClick={handleCopyInviteLink}>
                            <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} />
-                           {copied ? "Copied" : "Copy Invite Link"}
+                           {copied ? t('invite.copied') : t('invite.copy')}
                         </MenuItem>
                         {(user?.role === 'root' || user?.role === 'admin') && (
                            <MenuItem>
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                 <Typography variant="body2" sx={{ mr: 1 }}>Invite Link</Typography>
+                                 <Typography variant="body2" sx={{ mr: 1 }}>{t('invite.link')}</Typography>
                                  <Switch
                                     checked={isCanInvite}
                                     onChange={handleToggleInvite}
                                     color="primary"
-                                    inputProps={{ 'aria-label': 'toggle invite link' }}
+                                    inputProps={{ 'aria-label': t('invite.toggle') }}
                                     size="small"
                                  />
                               </Box>
@@ -253,16 +255,24 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                   {/* Project actions */}
                   {(user?.role === 'root' || user?.role === 'admin') && (
                      <div>
-                        <MenuItem onClick={handleRename}>Rename Project</MenuItem>
-                        <MenuItem onClick={handleExit}>Exit Project</MenuItem>
-                        <MenuItem onClick={handleDelete}>Delete Project</MenuItem>
-
+                        <MenuItem onClick={handleRename}>
+                           <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                           {t('project.menu_rename') || 'Rename Project'}
+                        </MenuItem>
+                        <MenuItem onClick={handleExit}>
+                           <ExitToAppIcon fontSize="small" sx={{ mr: 1 }} />
+                           {t('project.menu_exit') || 'Exit Project'}
+                        </MenuItem>
+                        <MenuItem onClick={handleDelete}>
+                           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                           {t('project.menu_delete') || 'Delete Project'}
+                        </MenuItem>
                      </div>
-                  )}
+                     )}
                   {user?.role === 'verified' && (
                      <MenuItem onClick={handleExit}>
                         <ExitToAppIcon fontSize="small" sx={{ mr: 1 }} />
-                        Exit Project
+                        {t('project.exit') || 'Exit Project'}
                      </MenuItem>
                   )}
                </Menu>
@@ -308,14 +318,14 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                      }}
                   >
                      <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                        Delete Project
+                        {t('project.delete') || 'Delete Project'}
                      </Typography>
                      <Typography>
-                        Are you sure you want to delete project <b>{projectName}</b>?
+                        {t('project.delete_confirm', { name: projectName }) || `Are you sure you want to delete project ${projectName}?`}
                      </Typography>
                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                        <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>Cancel</Button>
-                        <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>Delete</Button>
+                        <Button onClick={handleCloseDelete} startIcon={<CloseIcon />}>{t('common.cancel') || 'Cancel'}</Button>
+                        <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>{t('project.delete') || 'Delete'}</Button>
                      </Box>
                   </Box>
                </Box>,
@@ -353,19 +363,22 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                      }}
                   >
                      <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                        Rename Project
+                        {t('project.rename') || 'Rename Project'}
                      </Typography>
                      <Typography>
-                        Enter new project name:
+                        {t('project.rename_input') || 'Enter new project name:'}
                      </Typography>
-                     <input
+                     <TextField
+
                         value={renameDialog.newName}
                         onChange={e => setRenameDialog(d => ({ ...d, newName: e.target.value }))}
-                        style={{ padding: 8, fontSize: 16, marginBottom: 16 }}
-                     />
+                        fullWidth
+                        size="small"
+                        sx={{ mb: 2 }}
+                        />
                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                        <Button onClick={handleCloseRename} startIcon={<CloseIcon />}>Cancel</Button>
-                        <Button onClick={handleConfirmRename}>Update</Button>
+                        <Button onClick={handleCloseRename} startIcon={<CloseIcon />}>{t('common.cancel') || 'Cancel'}</Button>
+                        <Button onClick={handleConfirmRename}>{t('project.rename_submit') || 'Update'}</Button>
                      </Box>
                   </Box>
                </Box>,
@@ -403,14 +416,14 @@ const Header = ({ projectId, projectName, view, setView, inviteLink }) => {
                      }}
                   >
                      <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                        Exit Project
+                        {t('project.exit') || 'Exit Project'}
                      </Typography>
                      <Typography>
-                        Are you sure you want to exit project <b>{projectName}</b>?
+                        {t('project.exit_confirm', { name: projectName }) || `Are you sure you want to exit project ${projectName}?`}
                      </Typography>
                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                        <Button onClick={handleCloseExit} startIcon={<CloseIcon />}>Cancel</Button>
-                        <Button color="error" onClick={handleConfirmExit} startIcon={<ExitToAppIcon />}>Exit</Button>
+                        <Button onClick={handleCloseExit} startIcon={<CloseIcon />}>{t('common.cancel') || 'Cancel'}</Button>
+                        <Button color="error" onClick={handleConfirmExit} startIcon={<ExitToAppIcon />}>{t('project.exit') || 'Exit'}</Button>
                      </Box>
                   </Box>
                </Box>,

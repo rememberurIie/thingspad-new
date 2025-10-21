@@ -176,7 +176,7 @@ const ChatMember = ({ onSelect, selectedGroup, currentUserId }) => {
                 position: 'fixed',
                 inset: 0,
                 bgcolor: 'rgba(0,0,0,0.25)',
-                zIndex: 1300,
+                zIndex: 4000,
                 display: 'grid',
                 placeItems: 'center'
               }}

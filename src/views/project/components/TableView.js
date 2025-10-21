@@ -24,11 +24,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { format } from 'date-fns';
 
-const STATUS_OPTIONS = [
-   'New task',
-   'Scheduled',
-   'In progress',
-   'Completed'
+// STATUS_OPTION_KEYS ใช้ key สำหรับแปล
+const STATUS_OPTION_KEYS = [
+  'table.status_new_task',
+  'table.status_scheduled',
+  'table.status_in_progress',
+  'table.status_completed'
 ];
 
 const API_BASE = 'http://192.168.1.36:3000/api/project/task';
@@ -49,8 +50,20 @@ const getAllAssignees = (rows) => {
 };
 
 const TableView = ({ projectId }) => {
-   const { t } = useTranslation();
-   const theme = useTheme();
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // สร้าง STATUS_OPTIONS หลังจากได้ t
+  const STATUS_OPTIONS = STATUS_OPTION_KEYS.map(k => t(k));
+
+  // ใช้ callback ใน useState เพื่อให้ STATUS_OPTIONS ถูกนิยามก่อน
+  const [addData, setAddData] = useState(() => ({
+    name: '',
+    assigneeId: '',
+    due: '',
+    status: STATUS_OPTIONS[0]
+  }));
+
    const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
    const [tab, setTab] = useState(0);
 
@@ -86,7 +99,6 @@ const TableView = ({ projectId }) => {
    const [deleteOpen, setDeleteOpen] = useState(false);
    const [selectedTask, setSelectedTask] = useState(null);
    const [addOpen, setAddOpen] = useState(false);
-   const [addData, setAddData] = useState({ name: '', assigneeId: '', due: '', status: STATUS_OPTIONS[0] }); const [fullImage, setFullImage] = useState(null); // State for full image view
    const [addImage, setAddImage] = useState(null);
    const [editImage, setEditImage] = useState(null);
    const [removeImage, setRemoveImage] = useState(false);
@@ -123,7 +135,11 @@ const TableView = ({ projectId }) => {
       tasks.filter(row =>
          (row.name?.toLowerCase().includes(search.toLowerCase()) ||
             row.assigneeFullName?.toLowerCase().includes(search.toLowerCase()))
-         && (statusFilter ? row.status === statusFilter : true)
+         && (
+            statusFilter
+            ? row.status === getStatusEn(statusFilter, STATUS_OPTIONS) // mapping ไทย -> อังกฤษ
+            : true
+         )
          && (assigneeFilter ? row.assigneeFullName === assigneeFilter : true)
       ), [tasks, search, statusFilter, assigneeFilter]
    );
@@ -173,7 +189,7 @@ const TableView = ({ projectId }) => {
          await fetch(`${API_BASE}/editTask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...statusMenuRow, status, projectId }),
+            body: JSON.stringify({ ...statusMenuRow, status: getStatusEn(status, STATUS_OPTIONS), projectId }),
          });
       }
       handleStatusMenuClose();
@@ -214,7 +230,7 @@ const TableView = ({ projectId }) => {
       formData.append('name', editData.name);
       formData.append('assigneeId', editData.assigneeId);
       formData.append('due', editData.due);
-      formData.append('status', editData.status);
+      formData.append('status', getStatusEn(editData.status, STATUS_OPTIONS));
 
       if (editImage) {
          formData.append('image', editImage);
@@ -270,7 +286,7 @@ const TableView = ({ projectId }) => {
       formData.append('assigneeId', addData.assigneeId);
       formData.append('due', addData.due);
       formData.append('projectId', projectId);
-      formData.append('status', addData.status);
+      formData.append('status', getStatusEn(addData.status, STATUS_OPTIONS));
       if (addImage) formData.append('image', addImage);
 
       await fetch(`${API_BASE}/addTask`, {
@@ -325,11 +341,11 @@ const TableView = ({ projectId }) => {
                }}
             >
                <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  Add Task
+                  {t('table.add_task')}
                </Typography>
                <TextField
                   fullWidth
-                  label="Task Name"
+                  label={t('table.task_name')}
                   value={addData.name}
                   onChange={e => setAddData({ ...addData, name: e.target.value })}
                />
@@ -340,7 +356,7 @@ const TableView = ({ projectId }) => {
                   value={allUsers.find(u => u.userId === addData.assigneeId) || null}
                   onChange={(_, value) => setAddData({ ...addData, assigneeId: value ? value.userId : '' })}
                   renderInput={(params) => (
-                     <TextField {...params} label="Assignee" />
+                     <TextField {...params} label={t('table.assignee')} />
                   )}
                   isOptionEqualToValue={(option, value) => option.userId === value.userId}
                   renderOption={(props, option) => (
@@ -357,7 +373,7 @@ const TableView = ({ projectId }) => {
                />
                <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DatePicker
-                     label="Due"
+                     label={t('table.due')}
                      value={addData.due}
                      onChange={date => setAddData({ ...addData, due: date })}
                      renderInput={(params) => <TextField {...params} fullWidth />}
@@ -416,21 +432,22 @@ const TableView = ({ projectId }) => {
                      </IconButton>
                   </Box>
                )}
-               <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                     label="Status"
-                     value={addData.status}
-                     onChange={e => setAddData({ ...addData, status: e.target.value })}
-                  >
-                     {STATUS_OPTIONS.map(option => (
-                        <MenuItem key={option} value={option}>{option}</MenuItem>
-                     ))}
-                  </Select>
-               </FormControl>
+               <Autocomplete
+                  disablePortal
+                  options={STATUS_OPTIONS}
+                  value={addData.status}
+                  onChange={(_, value) => setAddData({ ...addData, status: value || STATUS_OPTIONS[0] })}
+                  renderInput={(params) => (
+                     <TextField {...params} label={t('table.status')} fullWidth />
+                  )}
+                  sx={{ minWidth: 120 }}
+                  slotProps={{
+                     popper: { sx: { zIndex: 5001 } } // ให้ popper อยู่สูงกว่า popup
+                  }}
+               />
                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                  <Button onClick={handleAddClose} startIcon={<CloseIcon />}>Cancel</Button>
-                  <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>Add</Button>
+                  <Button onClick={handleAddClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                  <Button variant="contained" onClick={handleAddSubmit} startIcon={<AddIcon />}>{t('table.add')}</Button>
                </Box>
             </Box>
          </Box>
@@ -465,11 +482,11 @@ const TableView = ({ projectId }) => {
                }}
             >
                <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  Edit Task
+                  {t('table.edit_task')}
                </Typography>
                <TextField
                   fullWidth
-                  label="Task Name"
+                  label={t('table.task_name')}
                   value={editData.name}
                   onChange={e => setEditData({ ...editData, name: e.target.value })}
                />
@@ -484,7 +501,7 @@ const TableView = ({ projectId }) => {
                   renderInput={(params) => (
                      <TextField
                         {...params}
-                        label="Assignee"
+                        label={t('table.assignee')}
                         placeholder="Select an assignee..."
                      />
                   )}
@@ -505,7 +522,7 @@ const TableView = ({ projectId }) => {
                />
                <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DatePicker
-                     label="Due"
+                     label={t('table.due')}
                      value={editData.due ? new Date(editData.due) : null}
                      onChange={date => setEditData({ ...editData, due: date })}
                      renderInput={(params) => <TextField {...params} fullWidth />}
@@ -598,21 +615,22 @@ const TableView = ({ projectId }) => {
                      style={{ marginBottom: 16 }}
                   />
                </>
-               <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                     label="Status"
-                     value={editData.status}
-                     onChange={e => setEditData({ ...editData, status: e.target.value })}
-                  >
-                     {STATUS_OPTIONS.map(option => (
-                        <MenuItem key={option} value={option}>{option}</MenuItem>
-                     ))}
-                  </Select>
-               </FormControl>
+               <Autocomplete
+                  disablePortal
+                  options={STATUS_OPTIONS}
+                  value={editData.status}
+                  onChange={(_, value) => setEditData({ ...editData, status: value || STATUS_OPTIONS[0] })}
+                  renderInput={(params) => (
+                     <TextField {...params} label={t('table.status')} fullWidth />
+                  )}
+                  sx={{ minWidth: 120 }}
+                  slotProps={{
+                     popper: { sx: { zIndex: 5001 } } // ให้ popper อยู่สูงกว่า popup
+                  }}
+               />
                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                  <Button onClick={handleEditClose} startIcon={<CloseIcon />}>Cancel</Button>
-                  <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>Save</Button>
+                  <Button onClick={handleEditClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                  <Button variant="contained" onClick={handleEditSubmit} startIcon={<EditIcon />}>{t('table.save')}</Button>
                </Box>
             </Box>
          </Box>
@@ -646,14 +664,14 @@ const TableView = ({ projectId }) => {
                }}
             >
                <Typography variant="subtitle1" mb={2} sx={{ fontSize: '20px', fontWeight: 'bold' }}>
-                  Confirm Delete
+                  {t('table.confirm_delete')}
                </Typography>
                <Typography mb={3}>
-                  Are you sure you want to delete <b>{selectedRow?.name}</b>?
+                  {t('table.confirm_delete_text', { name: selectedRow?.name })}
                </Typography>
                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                  <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>Cancel</Button>
-                  <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>Delete</Button>
+                  <Button onClick={handleDeleteClose} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                  <Button variant="contained" color="error" onClick={handleDeleteConfirm} startIcon={<DeleteIcon />}>{t('table.delete')}</Button>
                </Box>
             </Box>
          </Box>
@@ -736,7 +754,7 @@ const TableView = ({ projectId }) => {
                )}
 
                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={16} fontWeight={600}>Due Date: </Typography>
+                  <Typography fontSize={16} fontWeight={600}>{t('table.due_date')}: </Typography>
                   {fullTask.due && (
                      <Chip
                         label={(() => {
@@ -781,15 +799,9 @@ const TableView = ({ projectId }) => {
             onClick={handleAddOpen}
             startIcon={<AddIcon />}
             variant="contained"
-            sx={{
-               borderRadius: 2,
-               textTransform: 'none',
-               fontWeight: 600,
-               height: 40,
-               minWidth: 110
-            }}
+            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, height: 40, minWidth: 110 }}
          >
-            Add new
+            {t('table.add_new')}
          </Button>
          <Paper
             variant="outlined"
@@ -809,8 +821,8 @@ const TableView = ({ projectId }) => {
             </IconButton>
             <InputBase
                sx={{ ml: 1, flex: 1 }}
-               placeholder="Search tasks"
-               inputProps={{ 'aria-label': 'search tasks' }}
+               placeholder={t('table.search_tasks')}
+               inputProps={{ 'aria-label': t('table.search_tasks') }}
                value={search}
                onChange={e => setSearch(e.target.value)}
             />
@@ -824,14 +836,14 @@ const TableView = ({ projectId }) => {
                '.MuiInputBase-root': { height: 40, alignItems: 'center' }
             }}
          >
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('table.status')}</InputLabel>
             <Select
                label="Status"
                value={statusFilter}
                onChange={e => setStatusFilter(e.target.value)}
                sx={{ height: 40, display: 'flex', alignItems: 'center' }}
             >
-               <MenuItem value="">All</MenuItem>
+               <MenuItem value="">{t('table.all')}</MenuItem>
                {STATUS_OPTIONS.map(option => (
                   <MenuItem key={option} value={option}>{option}</MenuItem>
                ))}
@@ -853,7 +865,7 @@ const TableView = ({ projectId }) => {
                freeSolo
                clearOnEscape
                renderInput={(params) => (
-                  <TextField {...params} label="Responsible" size="small" />
+                  <TextField {...params} label={t('table.responsible')} size="small" />
                )}
                sx={{ minWidth: 140 }}
             />
@@ -890,7 +902,7 @@ const TableView = ({ projectId }) => {
                                  </Stack>
                                  <Stack direction="row" spacing={1} alignItems="center">
                                     <Chip
-                                       label={row.status}
+                                       label={`${getStatusTh(row.status, STATUS_OPTIONS, STATUS_OPTION_EN)}`}
                                        color="default"
                                        size="small"
                                        icon={
@@ -951,10 +963,10 @@ const TableView = ({ projectId }) => {
                onClose={handleMenuClose}
             >
                <MenuItem onClick={() => handleEditOpen(menuTask)}>
-                  <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+                  <EditIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.edit')}
                </MenuItem>
                <MenuItem onClick={() => handleDeleteOpen(menuTask)}>
-                  <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+                  <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.delete')}
                </MenuItem>
             </Menu>
             <Menu
@@ -1022,7 +1034,7 @@ const TableView = ({ projectId }) => {
                                  direction={sortBy === 'name' ? sortDirection : 'asc'}
                                  onClick={() => handleSort('name')}
                               >
-                                 <Typography fontWeight={700}>Task</Typography>
+                                 <Typography fontWeight={700}>{t('table.task')}</Typography>
                               </TableSortLabel>
                            </TableCell>
                            <TableCell
@@ -1034,7 +1046,7 @@ const TableView = ({ projectId }) => {
                                  direction={sortBy === 'status' ? sortDirection : 'asc'}
                                  onClick={() => handleSort('status')}
                               >
-                                 <Typography fontWeight={700}>Status</Typography>
+                                 <Typography fontWeight={700}>{t('table.status')}</Typography>
                               </TableSortLabel>
                            </TableCell>
                            <TableCell
@@ -1046,7 +1058,7 @@ const TableView = ({ projectId }) => {
                                  direction={sortBy === 'due' ? sortDirection : 'asc'}
                                  onClick={() => handleSort('due')}
                               >
-                                 <Typography fontWeight={700}>Due date</Typography>
+                                 <Typography fontWeight={700}>{t('table.due_date')}</Typography>
                               </TableSortLabel>
                            </TableCell>
                            <TableCell
@@ -1058,7 +1070,7 @@ const TableView = ({ projectId }) => {
                               direction={sortBy === 'assigneeFullName' ? sortDirection : 'asc'}
                               onClick={() => handleSort('assigneeFullName')}
                            >
-                              <Typography fontWeight={700}>Responsible</Typography>
+                              <Typography fontWeight={700}>{t('table.responsible')}</Typography>
                            </TableSortLabel>
                            </TableCell>
                            <TableCell sx={{ width: '5%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}`, backgroundColor: theme => theme.palette.grey[100] }}></TableCell>
@@ -1080,7 +1092,7 @@ const TableView = ({ projectId }) => {
                               </TableCell>
                               <TableCell sx={{ width: '15%', borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
                                  <Chip
-                                    label={row.status}
+                                    label={`${getStatusTh(row.status, STATUS_OPTIONS, STATUS_OPTION_EN)}`}
                                     size="small"
                                     icon={
                                        <span
@@ -1170,10 +1182,10 @@ const TableView = ({ projectId }) => {
             onClose={handleMenuClose}
          >
             <MenuItem onClick={() => handleEditOpen(menuTask)}>
-               <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+               <EditIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.edit')}
             </MenuItem>
             <MenuItem onClick={() => handleDeleteOpen(menuTask)}>
-               <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+               <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> {t('table.delete')}
             </MenuItem>
          </Menu>
          <Menu
@@ -1229,3 +1241,21 @@ function compressImage(file, quality = 0.7) {
       reader.readAsDataURL(file);
    });
 }
+
+// Map status UI (th/en) กลับเป็น en
+const STATUS_OPTION_EN = [
+  'New task',
+  'Scheduled',
+  'In progress',
+  'Completed'
+];
+const getStatusEn = (uiStatus, STATUS_OPTIONS) => {
+  const idx = STATUS_OPTIONS.indexOf(uiStatus);
+  return STATUS_OPTION_EN[idx] || uiStatus;
+};
+
+// เพิ่มฟังก์ชัน mapping ภาษาอังกฤษเป็นภาษาไทย
+const getStatusTh = (enStatus, STATUS_OPTIONS, STATUS_OPTION_EN) => {
+  const idx = STATUS_OPTION_EN.indexOf(enStatus);
+  return STATUS_OPTIONS[idx] || enStatus;
+};

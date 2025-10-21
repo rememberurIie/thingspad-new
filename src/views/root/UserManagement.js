@@ -17,6 +17,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { useTranslation } from 'react-i18next';
 
 import { useUserManagement } from 'src/contexts/UserManagementContext';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -25,6 +26,12 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { getCachedAvatarUrl } from 'src/utils/avatarCache';
 
 const ROLE_OPTIONS = ['root', 'admin', 'verified', 'unverified'];
+const ROLE_LABEL_KEYS = {
+  root: 'role.root',
+  admin: 'role.admin',
+  verified: 'role.verified',
+  unverified: 'role.unverified'
+};
 
 const ROLE_ICONS = {
   root: <AdminPanelSettingsIcon fontSize="small" sx={{ mr: 1, color: '#C2185B' }} />,
@@ -48,6 +55,7 @@ const ROLE_TEXT_COLORS = {
 };
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const {
     users,
     setUsers,
@@ -165,7 +173,7 @@ const Dashboard = () => {
   if (isMobile) {
     // แสดงแบบ Card list สำหรับ mobile/tablet
     return (
-      <PageContainer title="Dashboard" description="this is Dashboard">
+      <PageContainer title={t('user_management.title')} description={t('user_management.description')}>
         <Card variant="outlined" sx={{ height: '100%', minHeight: 400, overflowY: 'auto', borderRadius: '10px', width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
           <CardContent sx={{ height: '100%', p: 0, "&:last-child": { pb: 0 }, width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
             <Box sx={{ p: 2 }}>
@@ -185,8 +193,8 @@ const Dashboard = () => {
                 >
                   <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="Search users"
-                    inputProps={{ 'aria-label': 'search users' }}
+                    placeholder={t('user.search')}
+                    inputProps={{ 'aria-label': t('user.search') }}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                   />
@@ -198,8 +206,8 @@ const Dashboard = () => {
                   onClick={e => setRoleFilterAnchorEl(e.currentTarget)}
                 >
                   {roleFilter.length === 0
-                    ? 'All Roles'
-                    : roleFilter.map(r => r.charAt(0).toUpperCase() + r.slice(1)).join(', ')}
+                    ? t('role.all')
+                    : roleFilter.map(r => t(ROLE_LABEL_KEYS[r])).join(', ')}
                 </Button>
                 <Menu
                   anchorEl={roleFilterAnchorEl}
@@ -217,7 +225,7 @@ const Dashboard = () => {
                     <ListItemIcon>
                       <Checkbox checked={roleFilter.length === 0} />
                     </ListItemIcon>
-                    All Roles
+                    {t('role.all')}
                   </MenuItem>
                   {ROLE_OPTIONS.map(role => (
                     <MenuItem
@@ -233,7 +241,7 @@ const Dashboard = () => {
                       <ListItemIcon>
                         <Checkbox checked={roleFilter.includes(role)} />
                       </ListItemIcon>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                      {t(ROLE_LABEL_KEYS[role])}
                     </MenuItem>
                   ))}
                 </Menu>
@@ -263,6 +271,7 @@ const Dashboard = () => {
                               }}
                               autoFocus
                               sx={{ width: 180 }}
+                              placeholder={t('user.full_name')}
                             />
                             <IconButton size="small" color="success" onClick={() => handleSaveFullName(idx)}>
                               <CheckIcon />
@@ -298,6 +307,7 @@ const Dashboard = () => {
                             }}
                             autoFocus
                             sx={{ width: 180 }}
+                            placeholder={t('user.username')}
                           />
                           <IconButton size="small" color="success" onClick={() => handleSaveUsername(idx)}>
                             <CheckIcon />
@@ -343,7 +353,7 @@ const Dashboard = () => {
                               }}
                             >
                               {ROLE_ICONS[role]}
-                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                              {t(ROLE_LABEL_KEYS[role])}
                             </Box>
                           )}
                         >
@@ -365,7 +375,7 @@ const Dashboard = () => {
                                 }}
                               >
                                 {ROLE_ICONS[role]}
-                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                                {t(ROLE_LABEL_KEYS[role])}
                               </Box>
                             </MenuItem>
                           ))}
@@ -391,7 +401,7 @@ const Dashboard = () => {
                 }}
               >
                 <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                Delete User
+                {t('user.delete')}
               </MenuItem>
             </Menu>
             {/* Confirm Delete Popup */}
@@ -420,14 +430,14 @@ const Dashboard = () => {
                       gap: 2
                     }}
                   >
-                    <Typography variant="h6" mb={2}>Confirm Delete</Typography>
+                    <Typography variant="h6" mb={2}>{t('user.confirm_delete')}</Typography>
                     <Typography mb={3}>
-                      Are you sure you want to delete user <b>{users[confirmDeleteIdx]?.fullName}</b>?
+                      {t('user.confirm_delete_text', { name: users[confirmDeleteIdx]?.fullName })}
                     </Typography>
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
-                      <Button onClick={() => setConfirmDeleteIdx(null)}>Cancel</Button>
+                      <Button onClick={() => setConfirmDeleteIdx(null)}>{t('common.cancel')}</Button>
                       <Button variant="contained" color="error" onClick={() => handleDeleteUser(confirmDeleteIdx)}>
-                        Delete
+                        {t('user.delete')}
                       </Button>
                     </Stack>
                   </Box>
@@ -463,8 +473,8 @@ const Dashboard = () => {
               >
                 <InputBase
                   sx={{ ml: 1, flex: 1 }}
-                  placeholder="Search users"
-                  inputProps={{ 'aria-label': 'search users' }}
+                  placeholder={t('user.search')}
+                  inputProps={{ 'aria-label': t('user.search') }}
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
@@ -476,8 +486,8 @@ const Dashboard = () => {
                 onClick={e => setRoleFilterAnchorEl(e.currentTarget)}
               >
                 {roleFilter.length === 0
-                  ? 'All Roles'
-                  : roleFilter.map(r => r.charAt(0).toUpperCase() + r.slice(1)).join(', ')}
+                  ? t('role.all')
+                  : roleFilter.map(r => t(ROLE_LABEL_KEYS[r])).join(', ')}
               </Button>
               <Menu
                 anchorEl={roleFilterAnchorEl}
@@ -495,7 +505,7 @@ const Dashboard = () => {
                   <ListItemIcon>
                     <Checkbox checked={roleFilter.length === 0} />
                   </ListItemIcon>
-                  All Roles
+                  {t('role.all')}
                 </MenuItem>
                 {ROLE_OPTIONS.map(role => (
                   <MenuItem
@@ -511,7 +521,7 @@ const Dashboard = () => {
                     <ListItemIcon>
                       <Checkbox checked={roleFilter.includes(role)} />
                     </ListItemIcon>
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                    {t(ROLE_LABEL_KEYS[role])}
                   </MenuItem>
                 ))}
               </Menu>
@@ -542,7 +552,7 @@ const Dashboard = () => {
                       direction={sortBy === 'fullName' ? sortDir : 'asc'}
                       onClick={() => handleSort('fullName')}
                     >
-                      <Typography fontWeight={700}>Full Name</Typography>
+                      <Typography fontWeight={700}>{t('user.full_name')}</Typography>
                     </TableSortLabel>
                   </TableCell>
                   <TableCell
@@ -554,7 +564,7 @@ const Dashboard = () => {
                       direction={sortBy === 'email' ? sortDir : 'asc'}
                       onClick={() => handleSort('email')}
                     >
-                      <Typography fontWeight={700}>Email</Typography>
+                      <Typography fontWeight={700}>{t('user.email')}</Typography>
                     </TableSortLabel>
                   </TableCell>
                   <TableCell
@@ -566,7 +576,7 @@ const Dashboard = () => {
                       direction={sortBy === 'username' ? sortDir : 'asc'}
                       onClick={() => handleSort('username')}
                     >
-                      <Typography fontWeight={700}>Username</Typography>
+                      <Typography fontWeight={700}>{t('user.username')}</Typography>
                     </TableSortLabel>
                   </TableCell>
                   <TableCell
@@ -578,7 +588,7 @@ const Dashboard = () => {
                       direction={sortBy === 'role' ? sortDir : 'asc'}
                       onClick={() => handleSort('role')}
                     >
-                      <Typography fontWeight={700}>Role</Typography>
+                      <Typography fontWeight={700}>{t('user.role')}</Typography>
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ width: '5%', backgroundColor: theme.palette.grey[100] }} />
@@ -607,6 +617,7 @@ const Dashboard = () => {
                               }}
                               autoFocus
                               sx={{ width: 180 }}
+                              placeholder={t('user.full_name')}
                             />
                             <IconButton size="small" color="success" onClick={() => handleSaveFullName(idx)}>
                               <CheckIcon />
@@ -640,6 +651,7 @@ const Dashboard = () => {
                             }}
                             autoFocus
                             sx={{ width: 180 }}
+                            placeholder={t('user.username')}
                           />
                           <IconButton size="small" color="success" onClick={() => handleSaveUsername(idx)}>
                             <CheckIcon />
@@ -687,7 +699,7 @@ const Dashboard = () => {
                             }}
                           >
                             {ROLE_ICONS[role]}
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                            {t(ROLE_LABEL_KEYS[role])}
                           </Box>
                         )}
                       >
@@ -709,7 +721,7 @@ const Dashboard = () => {
                               }}
                             >
                               {ROLE_ICONS[role]}
-                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                              {t(ROLE_LABEL_KEYS[role])}
                             </Box>
                           </MenuItem>
                         ))}
@@ -746,7 +758,7 @@ const Dashboard = () => {
               }}
             >
               <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-              Delete User
+              {t('user.delete')}
             </MenuItem>
           </Menu>
           {/* Confirm Delete Popup */}
@@ -775,14 +787,14 @@ const Dashboard = () => {
                     gap: 2
                   }}
                 >
-                  <Typography variant="h6" mb={2}>Confirm Delete</Typography>
+                  <Typography variant="h6" mb={2}>{t('user.confirm_delete')}</Typography>
                   <Typography mb={3}>
-                    Are you sure you want to delete user <b>{users[confirmDeleteIdx]?.fullName}</b>?
+                    {t('user.confirm_delete_text', { name: users[confirmDeleteIdx]?.fullName })}
                   </Typography>
                   <Stack direction="row" spacing={2} justifyContent="flex-end">
-                    <Button onClick={() => setConfirmDeleteIdx(null)}>Cancel</Button>
+                    <Button onClick={() => setConfirmDeleteIdx(null)}>{t('common.cancel')}</Button>
                     <Button variant="contained" color="error" onClick={() => handleDeleteUser(confirmDeleteIdx)}>
-                      Delete
+                      {t('user.delete')}
                     </Button>
                   </Stack>
                 </Box>

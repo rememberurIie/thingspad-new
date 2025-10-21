@@ -18,18 +18,18 @@ export const useMenuItems = () => {
       ? [
         {
           navlabel: true,
-          subheader: 'Root',
+          subheader: 'menu.root',
         },
 
         {
           id: uniqueId(),
-          title: 'User Management',
+          title: 'menu.user_management',
           icon: IconUserEdit,
           href: '/user_management',
         },
         {
           id: uniqueId(),
-          title: 'Project Management',
+          title: 'menu.project_management',
           icon: IconTableOptions,
           href: '/project_management',
         },

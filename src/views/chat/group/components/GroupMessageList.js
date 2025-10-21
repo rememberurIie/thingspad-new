@@ -253,9 +253,7 @@ const GroupMessageList = ({ onSelect, userId }) => {
                     sx={{ mr: 1 }}
                   />
                 </Box>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  {t('project.select_members', 'Select members (min 3)')}
-                </Typography>
+
                 {loadingUsers ? (
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
                     <CircularProgress size={18} /> {t('Loading...')}

@@ -20,6 +20,7 @@ import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
 import Select from '@mui/material/Select';
 import { getCachedAvatarUrl } from 'src/utils/avatarCache';
 import { useProjectManagement } from 'src/contexts/ProjectManagementContext';
+import { useTranslation } from 'react-i18next';
 
 // API endpoints
 const API_ENDPOINTS = {
@@ -45,6 +46,7 @@ const INVITE_TEXT_COLORS = {
 };
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
   const user = useSelector(state => state.auth.user);
@@ -55,8 +57,6 @@ const Dashboard = () => {
   const [editProjectName, setEditProjectName] = useState('');
   const [memberDialog, setMemberDialog] = useState({ open: false, project: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, project: null });
-  const [newProjectDialog, setNewProjectDialog] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuProject, setMenuProject] = useState(null);
   const [showAddMember, setShowAddMember] = useState(false);
@@ -222,7 +222,7 @@ const Dashboard = () => {
   // ----------- Render -----------
   if (!isLgUp) {
     return (
-      <PageContainer title="Dashboard" description="this is Dashboard">
+      <PageContainer title={t('dashboard.title')} description={t('dashboard.description')}>
         <Card variant="outlined" sx={{ height: '100%', minHeight: 400, overflowY: 'auto', borderRadius: '10px', width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
           <CardContent sx={{ height: '100%', p: 0, "&:last-child": { pb: 0 }, width: '100%', maxWidth: 'none', boxSizing: 'border-box' }}>
             <Box sx={{ p: 2 }}>
@@ -242,8 +242,8 @@ const Dashboard = () => {
                 >
                   <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="Search projects"
-                    inputProps={{ 'aria-label': 'search projects' }}
+                    placeholder={t('project.search_projects')}
+                    inputProps={{ 'aria-label': t('project.search_projects') }}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                   />
@@ -284,7 +284,6 @@ const Dashboard = () => {
                           )}
                         </Typography>
                         <Box sx={{ flex: 1 }} />
-                        {/* MoreVertIcon for menu */}
                         <IconButton
                           size="small"
                           onClick={e => {
@@ -306,54 +305,19 @@ const Dashboard = () => {
                           }}
                           variant="standard"
                           disableUnderline
-                          sx={{
-                            minWidth: 140,
-                            fontWeight: 500,
-                            background: 'none',
-                            boxShadow: 'none',
-                            '& .MuiSelect-standard': { background: 'none' },
-                            '& fieldset': { border: 'none' },
-                          }}
+                          sx={{ minWidth: 140, fontWeight: 500, background: 'none', boxShadow: 'none', '& .MuiSelect-standard': { background: 'none' }, '& fieldset': { border: 'none' } }}
                           renderValue={invite => (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                bgcolor: INVITE_COLORS[invite],
-                                color: INVITE_TEXT_COLORS[invite],
-                                px: 1.5,
-                                py: 0.5,
-                                borderRadius: 2,
-                                fontWeight: 500,
-                                gap: 1,
-                                width: 110,
-                                justifyContent: 'flex-start',
-                              }}
-                            >
+                            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: INVITE_COLORS[invite], color: INVITE_TEXT_COLORS[invite], px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 500, gap: 1, width: 110, justifyContent: 'flex-start' }}>
                               {INVITE_ICONS[invite]}
-                              {invite.charAt(0).toUpperCase() + invite.slice(1)}
+                              {t(`project.invite_${invite.toLowerCase()}`)}
                             </Box>
                           )}
                         >
                           {INVITE_OPTIONS.map(invite => (
                             <MenuItem key={invite} value={invite}>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  bgcolor: INVITE_COLORS[invite],
-                                  color: INVITE_TEXT_COLORS[invite],
-                                  px: 1.5,
-                                  py: 0.5,
-                                  borderRadius: 2,
-                                  fontWeight: 500,
-                                  gap: 1,
-                                  width: 130,
-                                  justifyContent: 'flex-start',
-                                }}
-                              >
+                              <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: INVITE_COLORS[invite], color: INVITE_TEXT_COLORS[invite], px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 500, gap: 1, width: 130, justifyContent: 'flex-start' }}>
                                 {INVITE_ICONS[invite]}
-                                {invite.charAt(0).toUpperCase() + invite.slice(1)}
+                                {t(`project.invite_${invite.toLowerCase()}`)}
                               </Box>
                             </MenuItem>
                           ))}
@@ -371,22 +335,7 @@ const Dashboard = () => {
                           />
                         ))}
                         {project.members.length > 7 && (
-                          <Box
-                            sx={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: '50%',
-                              bgcolor: 'grey.500',
-                              color: 'white',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 500,
-                              fontSize: 14,
-                              cursor: 'pointer',
-                            }}
-                            onClick={() => handleOpenMember(project)}
-                          >
+                          <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: 'grey.500', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, fontSize: 14, cursor: 'pointer' }} onClick={() => handleOpenMember(project)}>
                             +{project.members.length - 7}
                           </Box>
                         )}
@@ -407,7 +356,7 @@ const Dashboard = () => {
             >
               <MenuItem onClick={handleMenuDelete}>
                 <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                Delete this project
+                {t('project.delete_this_project')}
               </MenuItem>
             </Menu>
             {/* Delete Dialog */}
@@ -441,19 +390,15 @@ const Dashboard = () => {
                     }}
                   >
                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      Delete Project
+                      {t('project.delete_project')}
                     </Typography>
                     <Typography>
-                      Are you sure you want to delete project <b>{deleteDialog.project?.projectName}</b>?
+                      {t('project.confirm_delete_project', { name: deleteDialog.project?.projectName })}
                     </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                      <Button onClick={() => setDeleteDialog({ open: false, project: null })} startIcon={<CloseIcon />}>Cancel</Button>
-                      <Button
-                        color="error"
-                        onClick={handleConfirmDelete}
-                        startIcon={<DeleteIcon />}
-                      >
-                        Delete
+                      <Button onClick={() => setDeleteDialog({ open: false, project: null })} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
+                      <Button color="error" onClick={handleConfirmDelete} startIcon={<DeleteIcon />}>
+                        {t('project.delete')}
                       </Button>
                     </Box>
                   </Box>
@@ -494,7 +439,7 @@ const Dashboard = () => {
                     }}
                   >
                     <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      Project Members
+                      {t('project.members')}
                     </Typography>
                     <List
                       sx={{
@@ -527,10 +472,10 @@ const Dashboard = () => {
                       onClick={() => handleOpenAddMember(memberDialog.project)}
                       sx={{ mt: 2 }}
                     >
-                      Add Member
+                      {t('project.add_member')}
                     </Button>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                      <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>Close</Button>
+                      <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>{t('common.close')}</Button>
                     </Box>
                   </Box>
                 </Box>,
@@ -567,22 +512,22 @@ const Dashboard = () => {
                     }}
                   >
                     <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      Add member
+                      {t('project.add_member')}
                     </Typography>
                     <TextField
                       fullWidth
                       size="small"
-                      placeholder="Search user"
+                      placeholder={t('project.search_user')}
                       value={addSearch}
                       onChange={e => setAddSearch(e.target.value)}
                       sx={{ mb: 2 }}
                     />
                     {addLoading ? (
                       <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <CircularProgress size={18} /> Loading...
+                        <CircularProgress size={18} /> {t('common.loading')}
                       </Box>
                     ) : addList.length === 0 ? (
-                      <Typography variant="body2" color="text.secondary">No users to add</Typography>
+                      <Typography variant="body2" color="text.secondary">{t('project.no_users_to_add')}</Typography>
                     ) : (
                       <List>
                         {addList
@@ -599,7 +544,7 @@ const Dashboard = () => {
                                 onClick={() => handleAddUserToProject(showAddMember.projectId, u.id)}
                                 disabled={addingUserId === u.id}
                               >
-                                {addingUserId === u.id ? 'Adding...' : 'Add'}
+                                {addingUserId === u.id ? t('project.adding') : t('project.add')}
                               </Button>
                             }>
                               <ListItemAvatar>
@@ -661,8 +606,8 @@ const Dashboard = () => {
                 >
                   <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="Search projects"
-                    inputProps={{ 'aria-label': 'search projects' }}
+                    placeholder={t('project.search_projects')}
+                    inputProps={{ 'aria-label': t('project.search_projects') }}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                   />
@@ -686,13 +631,13 @@ const Dashboard = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ width: '40%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                      <Typography fontWeight={700}>Project Name</Typography>
+                      <Typography fontWeight={700}>{t('project.project_name')}</Typography>
                     </TableCell>
                     <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                      <Typography fontWeight={700}>Is can invite</Typography>
+                      <Typography fontWeight={700}>{t('project.is_can_invite')}</Typography>
                     </TableCell>
                     <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }}>
-                      <Typography fontWeight={700}>Members</Typography>
+                      <Typography fontWeight={700}>{t('project.members')}</Typography>
                     </TableCell>
                     <TableCell sx={{ width: '20%', backgroundColor: theme.palette.grey[100], borderBottom: theme => `1px solid ${theme.palette.grey[300]}` }} align="right">
                       <Typography fontWeight={700}></Typography>
@@ -748,54 +693,19 @@ const Dashboard = () => {
                           }}
                           variant="standard"
                           disableUnderline
-                          sx={{
-                            minWidth: 140,
-                            fontWeight: 500,
-                            background: 'none',
-                            boxShadow: 'none',
-                            '& .MuiSelect-standard': { background: 'none' },
-                            '& fieldset': { border: 'none' },
-                          }}
+                          sx={{ minWidth: 140, fontWeight: 500, background: 'none', boxShadow: 'none', '& .MuiSelect-standard': { background: 'none' }, '& fieldset': { border: 'none' } }}
                           renderValue={invite => (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                bgcolor: INVITE_COLORS[invite],
-                                color: INVITE_TEXT_COLORS[invite],
-                                px: 1.5,
-                                py: 0.5,
-                                borderRadius: 2,
-                                fontWeight: 500,
-                                gap: 1,
-                                width: 110,
-                                justifyContent: 'flex-start',
-                              }}
-                            >
+                            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: INVITE_COLORS[invite], color: INVITE_TEXT_COLORS[invite], px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 500, gap: 1, width: 110, justifyContent: 'flex-start' }}>
                               {INVITE_ICONS[invite]}
-                              {invite.charAt(0).toUpperCase() + invite.slice(1)}
+                              {t(`project.invite_${invite.toLowerCase()}`)}
                             </Box>
                           )}
                         >
                           {INVITE_OPTIONS.map(invite => (
                             <MenuItem key={invite} value={invite}>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  bgcolor: INVITE_COLORS[invite],
-                                  color: INVITE_TEXT_COLORS[invite],
-                                  px: 1.5,
-                                  py: 0.5,
-                                  borderRadius: 2,
-                                  fontWeight: 500,
-                                  gap: 1,
-                                  width: 130,
-                                  justifyContent: 'flex-start',
-                                }}
-                              >
+                              <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: INVITE_COLORS[invite], color: INVITE_TEXT_COLORS[invite], px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 500, gap: 1, width: 130, justifyContent: 'flex-start' }}>
                                 {INVITE_ICONS[invite]}
-                                {invite.charAt(0).toUpperCase() + invite.slice(1)}
+                                {t(`project.invite_${invite.toLowerCase()}`)}
                               </Box>
                             </MenuItem>
                           ))}
@@ -898,7 +808,7 @@ const Dashboard = () => {
               }}
             >
               <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                Project Members
+                {t('project.members')}
               </Typography>
               <List
                 sx={{
@@ -931,10 +841,10 @@ const Dashboard = () => {
                 onClick={() => handleOpenAddMember(memberDialog.project)}
                 sx={{ mt: 2 }}
               >
-                Add Member
+                {t('project.add_member')}
               </Button>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>Close</Button>
+                <Button onClick={handleCloseMember} startIcon={<CloseIcon />}>{t('common.close')}</Button>
               </Box>
             </Box>
           </Box>,
@@ -972,19 +882,19 @@ const Dashboard = () => {
               }}
             >
               <Typography variant="subtitle1" sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                Delete Project
+                {t('project.delete_project')}
               </Typography>
               <Typography>
-                Are you sure you want to delete project <b>{deleteDialog.project?.projectName}</b>?
+                {t('project.confirm_delete_project', { name: deleteDialog.project?.projectName })}
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Button onClick={() => setDeleteDialog({ open: false, project: null })} startIcon={<CloseIcon />}>Cancel</Button>
+                <Button onClick={() => setDeleteDialog({ open: false, project: null })} startIcon={<CloseIcon />}>{t('common.cancel')}</Button>
                 <Button
                   color="error"
                   onClick={handleConfirmDelete}
                   startIcon={<DeleteIcon />}
                 >
-                  Delete
+                  {t('project.delete')}
                 </Button>
               </Box>
             </Box>
@@ -1023,22 +933,22 @@ const Dashboard = () => {
               }}
             >
               <Typography variant="subtitle1" mb={2} sx={{ fontSize: '24px', fontWeight: 'bold' }}>
-                Add member
+                {t('project.add_member')}
               </Typography>
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Search user"
+                placeholder={t('project.search_user')}
                 value={addSearch}
                 onChange={e => setAddSearch(e.target.value)}
                 sx={{ mb: 2 }}
               />
               {addLoading ? (
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <CircularProgress size={18} /> Loading...
+                  <CircularProgress size={18} /> {t('common.loading')}
                 </Box>
               ) : addList.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">No users to add</Typography>
+                <Typography variant="body2" color="text.secondary">{t('project.no_users_to_add')}</Typography>
               ) : (
                 <List>
                   {addList
@@ -1055,7 +965,7 @@ const Dashboard = () => {
                           onClick={() => handleAddUserToProject(showAddMember.projectId, u.id)}
                           disabled={addingUserId === u.id}
                         >
-                          {addingUserId === u.id ? 'Adding...' : 'Add'}
+                          {addingUserId === u.id ? t('project.adding') : t('project.add')}
                         </Button>
                       }>
                         <ListItemAvatar>
@@ -1096,7 +1006,7 @@ const Dashboard = () => {
       >
         <MenuItem onClick={handleMenuDelete}>
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-          Delete this project
+          {t('project.delete_this_project')}
         </MenuItem>
       </Menu>
     </PageContainer>
