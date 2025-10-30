@@ -1,8 +1,8 @@
 import React from 'react';
-import Sidebar from './Sidebar';
+import Sidebar from '../../layouts/full/sidebar/Sidebar';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../../language/i18n';
+import i18n from '../../language/i18n';
 import ProjectListContext from 'src/contexts/ProjectListContext';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';

@@ -1,11 +1,11 @@
 import React from 'react';
-import Header from './Header';
+import Header from '../../layouts/full/header/Header';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../../language/i18n';
-import { ColorModeContext } from '../../../theme/ColorModeContext';
+import i18n from '../../language/i18n';
+import { ColorModeContext } from '../../theme/ColorModeContext';
 import { MemoryRouter } from 'react-router-dom';
 
 const MOCK_USER = {
